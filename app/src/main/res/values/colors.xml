@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorDefine">#111111</color>
+    <color name="colorExample">#444444</color>
+    <color name="colorBlockHeaderBg">#495A80</color>
+    <color name="colorPron">#495A80</color>
+    <color name="colorRegion">#B31800</color>
+    <color name="colorGrammar">#444444</color>
+    <color name="colorPos">#DDF0ED</color>
+    <color name="colorPharseTitle">#495A80</color>
+</resources>
