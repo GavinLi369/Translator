@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.text.Spanned;
-import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,7 +29,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         setContentView(R.layout.activity_main);
 
         mDefineTextView = (TextView) findViewById(R.id.tv_define);
-        mDefineTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
     }
 
     @Override
