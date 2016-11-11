@@ -1,13 +1,10 @@
 package gavinli.translator;
 
-import android.app.SearchManager;
 import android.os.AsyncTask;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.text.Spanned;
-import android.view.Menu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,16 +26,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         setContentView(R.layout.activity_main);
 
         mDefineTextView = (TextView) findViewById(R.id.tv_define);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
+        mSearchView = (SearchView) findViewById(R.id.search);
         mSearchView.setOnQueryTextListener(this);
-        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        return true;
     }
 
     @Override
