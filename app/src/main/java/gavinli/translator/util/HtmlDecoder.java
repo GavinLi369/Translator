@@ -3,13 +3,13 @@ package gavinli.translator.util;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.LeadingMarginSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
@@ -118,29 +118,25 @@ public class HtmlDecoder {
         if(blockHeader.size() != 0)
             mSpanneds.add(buildBlockHeader(blockHeader.get(0)));
 
-        buildSenseBody(senseBlock.getElementsByClass("sense-body").get(0));
-    }
-
-    private void buildSenseBody(Element senseBody) {
-        Elements defines = senseBody.select("> div");
-        for(int i = 0; i < defines.size(); i++) {
-            if(defines.get(i).className().equals("def-block pad-indent")) {
-                buildDefineBlock(defines.get(i));
-            } else if(defines.get(i).className().equals("phrase-block pad-indent")) {
-                buildPhraseBlock(defines.get(i));
+        Elements senseBodies = senseBlock.getElementsByClass("sense-body").get(0).select("> div");
+        for(int i = 0; i < senseBodies.size(); i++) {
+            if(senseBodies.get(i).className().equals("def-block pad-indent")) {
+                buildDefineBlock(senseBodies.get(i));
+            } else if(senseBodies.get(i).className().equals("phrase-block pad-indent")) {
+                buildPhraseBlock(senseBodies.get(i));
             }
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void buildDefineBlock(Element defineBlock) {
         //解释
-        mSpanneds.add(buildDefine(defineBlock.getElementsByClass("def-block pad-indent").get(0)));
+        Element define = defineBlock.getElementsByClass("def-block pad-indent").get(0);
+        mSpanneds.add(buildDefine(define));
 
         //例句
         for(Element example : defineBlock.getElementsByClass("eg")) {
-            Spanned exampleSpanned = Html.fromHtml("<font color='#444444' face='italic'><i>"
-                    + example.text() + "</i></font>");
-            mSpanneds.add(exampleSpanned);
+            mSpanneds.add(buildExample(example));
         }
     }
 
@@ -162,33 +158,56 @@ public class HtmlDecoder {
 
         //解释
         Element define = phraseBlock.getElementsByClass("def-block pad-indent").get(0);
-        SpannableStringBuilder defineBuilder = new SpannableStringBuilder();
-        if(define.getElementsByClass("gram").size() != 0) {
-            String grammer = define.getElementsByClass("gram").get(0).text();
-            SpannableString grammerSpanned = new SpannableString("     " + grammer + " ");
-            grammerSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorGrammar)),
-                    0, grammer.length() + 6,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            defineBuilder.append(grammerSpanned);
-        } else {
-            defineBuilder.append(new SpannableString("     "));
-        }
-        Spanned defineSpanned = Html.fromHtml("<font color='#111111'><b>"
-                + define.getElementsByClass("def").get(0).text() + "</b></font>");
-        defineBuilder.append(defineSpanned);
+        SpannableStringBuilder defineBuilder = buildDefine(define);
+        defineBuilder.setSpan(new LeadingMarginSpan.Standard(40),
+                0, defineBuilder.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mSpanneds.add(defineBuilder);
 
         //例句
         for(Element example : phraseBlock.getElementsByClass("eg")) {
-            SpannableString exampleSpanned = new SpannableString("     " + example.text());
-            exampleSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorExample)),
-                    0, example.text().length() + 5,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            exampleSpanned.setSpan(new StyleSpan(Typeface.ITALIC),
-                    0, example.text().length() + 5,
+            SpannableString exampleSpanned = buildExample(example);
+            exampleSpanned.setSpan(new LeadingMarginSpan.Standard(40),
+                    0, example.text().length(),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             mSpanneds.add(exampleSpanned);
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private SpannableStringBuilder buildDefine(Element define) {
+        SpannableStringBuilder defineBuilder = new SpannableStringBuilder();
+
+        if(define.getElementsByClass("gram").size() != 0) {
+            String grammer = define.getElementsByClass("gram").get(0).text();
+            SpannableString grammerSpanned = new SpannableString(grammer + " ");
+            grammerSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorGrammar)),
+                    0, grammer.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            defineBuilder.append(grammerSpanned);
+        }
+
+        String defineText = define.getElementsByClass("def").get(0).text();
+        SpannableString defineSpanned = new SpannableString(defineText);
+        defineSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorDefine)),
+                0, defineText.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        defineSpanned.setSpan(new StyleSpan(Typeface.BOLD),
+                0, defineText.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return defineBuilder.append(defineSpanned);
+    }
+
+    @SuppressWarnings("deprecation")
+    private SpannableString buildExample(Element example) {
+        SpannableString exampleSpanned = new SpannableString(example.text());
+        exampleSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorExample)),
+                0, example.text().length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        exampleSpanned.setSpan(new StyleSpan(Typeface.ITALIC),
+                0, example.text().length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return exampleSpanned;
     }
 
     @SuppressWarnings("deprecation")
@@ -214,22 +233,5 @@ public class HtmlDecoder {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         return blockHeaderSpanned;
-    }
-
-    @SuppressWarnings("deprecation")
-    private Spanned buildDefine(Element define) {
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        if(define.getElementsByClass("gram").size() != 0) {
-            String grammer = define.getElementsByClass("gram").get(0).text();
-            SpannableString grammerSpanned = new SpannableString(grammer + " ");
-            grammerSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorGrammar)),
-                    0, grammer.length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            builder.append(grammerSpanned);
-        }
-
-        Spanned defineSpanned = Html.fromHtml("<font color='#111111'><b>"
-                + define.getElementsByClass("def").get(0).text() + "</b></font>");
-        return builder.append(defineSpanned);
     }
 }
