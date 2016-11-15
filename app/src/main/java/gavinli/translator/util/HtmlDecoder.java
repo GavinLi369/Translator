@@ -45,11 +45,14 @@ public class HtmlDecoder {
         Element britishEntry = document.getElementsByClass("entry-body").get(0);
         Elements positions = britishEntry.getElementsByClass("entry-body__el clrd js-share-holder");
         for(Element position : positions) {
-            Element posHeader = position.getElementsByClass("pos-header").get(0);
-            buildPositionHeader(posHeader);
+            buildPositionHeader(position);
 
             for(Element senseBlock : position.getElementsByClass("sense-block")) {
                 buildSenseBlock(senseBlock);
+            }
+
+            for(Element senseBlock : position.getElementsByClass("idiom-block")) {
+                buildIdiomBlock(senseBlock);
             }
         }
 
@@ -74,18 +77,21 @@ public class HtmlDecoder {
         SpannableStringBuilder regionBuilder = new SpannableStringBuilder();
 
         //词性
-        String pos = posHeader.getElementsByClass("pos").get(0).text();
-        SpannableString posSpanned = new SpannableString(pos + " " + "●" + " ");
-        posSpanned.setSpan(new StyleSpan(Typeface.ITALIC),
-                0, pos.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        posSpanned.setSpan(new RelativeSizeSpan(1.1f),
-                0, pos.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        posSpanned.setSpan(new ForegroundColorSpan(Color.GRAY),
-                0, pos.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        regionBuilder.append(posSpanned);
+        Elements posElements = posHeader.getElementsByClass("pos");
+        if(posElements.size() != 0) {
+            String pos = posElements.get(0).text();
+            SpannableString posSpanned = new SpannableString(pos + " " + "●" + " ");
+            posSpanned.setSpan(new StyleSpan(Typeface.ITALIC),
+                    0, pos.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            posSpanned.setSpan(new RelativeSizeSpan(1.1f),
+                    0, pos.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            posSpanned.setSpan(new ForegroundColorSpan(Color.GRAY),
+                    0, pos.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            regionBuilder.append(posSpanned);
+        }
 
         //发音
         Elements pronInfoes = posHeader.getElementsByClass("pron-info");
@@ -93,7 +99,10 @@ public class HtmlDecoder {
             regionBuilder.append(buildPronInfo(pronInfo));
         }
 
-        mSpanneds.add(regionBuilder);
+        //词性和发音有可能为空
+        if(regionBuilder.length() != 0) {
+            mSpanneds.add(regionBuilder);
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -137,6 +146,22 @@ public class HtmlDecoder {
             mSpanneds.add(buildBlockHeader(blockHeader.get(0)));
 
         Elements senseBodies = senseBlock.getElementsByClass("sense-body").get(0).select("> div");
+        for(int i = 0; i < senseBodies.size(); i++) {
+            if(senseBodies.get(i).className().equals("def-block pad-indent")) {
+                buildDefineBlock(senseBodies.get(i));
+            } else if(senseBodies.get(i).className().equals("phrase-block pad-indent")) {
+                buildPhraseBlock(senseBodies.get(i));
+            }
+        }
+    }
+
+    private void buildIdiomBlock(Element idiomBlock) {
+        Elements blockHeader = idiomBlock.getElementsByClass("txt-block txt-block--alt2");
+        //block header有可能为空
+        if(blockHeader.size() != 0)
+            mSpanneds.add(buildBlockHeader(blockHeader.get(0)));
+
+        Elements senseBodies = idiomBlock.getElementsByClass("idiom-body").get(0).select("> div");
         for(int i = 0; i < senseBodies.size(); i++) {
             if(senseBodies.get(i).className().equals("def-block pad-indent")) {
                 buildDefineBlock(senseBodies.get(i));

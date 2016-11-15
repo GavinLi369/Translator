@@ -33,7 +33,7 @@ public class SearchPresenter implements SearchContract.Presenter {
             @Override
             public void call(Subscriber<? super ArrayList<Spanned>> subscriber) {
                 try {
-                    subscriber.onNext(mModel.getExplain(word));
+                    subscriber.onNext(mModel.getExplain(word.replace(" ", "-")));
                 } catch (IOException | IndexOutOfBoundsException e) {
                     e.printStackTrace();
                     subscriber.onError(e);
