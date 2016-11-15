@@ -88,8 +88,21 @@ public class HtmlDecoder {
         regionBuilder.append(posSpanned);
 
         //发音
-        for(int i = 0; i < 2; i++) {
-            String region = posHeader.getElementsByClass("region").get(i).text();
+        Elements pronInfoes = posHeader.getElementsByClass("pron-info");
+        for(Element pronInfo : pronInfoes) {
+            regionBuilder.append(buildPronInfo(pronInfo));
+        }
+
+        mSpanneds.add(regionBuilder);
+    }
+
+    @SuppressWarnings("deprecation")
+    private SpannableStringBuilder buildPronInfo(Element pronInfo) {
+        SpannableStringBuilder resultBuilder = new SpannableStringBuilder();
+        //有可能有多个音标，此时region为空
+        Elements regionElements = pronInfo.getElementsByClass("region");
+        if(regionElements.size() != 0) {
+            String region = regionElements.get(0).text();
             SpannableString regionSpanned = new SpannableString(region.toUpperCase() + "  ");
             regionSpanned.setSpan(new RelativeSizeSpan(1.1f),
                     0, region.length(),
@@ -100,16 +113,21 @@ public class HtmlDecoder {
             regionSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorRegion)),
                     0, region.length(),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            regionBuilder.append(regionSpanned);
+            resultBuilder.append(regionSpanned);
+        }
 
-            String pron = posHeader.getElementsByClass("pron").get(i).text();
+        //音标有可能为空
+        Elements pronElements = pronInfo.getElementsByClass("pron");
+        if(pronElements.size() != 0) {
+            String pron = pronElements.get(0).text();
             SpannableString pronSpanned = new SpannableString(pron + "  ");
             pronSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorPron)),
                     0, pron.length(),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            regionBuilder.append(pronSpanned);
+            resultBuilder.append(pronSpanned);
         }
-        mSpanneds.add(regionBuilder);
+
+        return resultBuilder;
     }
 
     private void buildSenseBlock(Element senseBlock) {
