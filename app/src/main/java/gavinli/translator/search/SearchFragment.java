@@ -1,10 +1,14 @@
 package gavinli.translator.search;
 
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.res.ResourcesCompat;
 import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -18,36 +22,40 @@ import java.util.ArrayList;
 
 import gavinli.translator.R;
 
-public class SearchActivity extends AppCompatActivity implements SearchContract.View, FloatingSearchView.OnSearchListener,
+/**
+ * Created by GavinLi
+ * on 16-11-16.
+ */
+
+public class SearchFragment extends Fragment implements SearchContract.View, FloatingSearchView.OnSearchListener,
         FloatingSearchView.OnQueryChangeListener, SearchSuggestionsAdapter.OnBindSuggestionCallback {
-    private TextView mDefineTextView;
+    private TextView mExplainView;
     private FloatingSearchView mSearchBar;
     private ScrollView mScrollView;
 
     private SearchContract.Presenter mPresenter;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        mScrollView = (ScrollView) findViewById(R.id.scroll_view);
-        mDefineTextView = (TextView) findViewById(R.id.tv_define);
-        mSearchBar = (FloatingSearchView) findViewById(R.id.search_view);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_search, container, false);
+        mScrollView = (ScrollView) root.findViewById(R.id.scroll_view);
+        mExplainView = (TextView) root.findViewById(R.id.tv_define);
+        mExplainView.setMovementMethod(LinkMovementMethod.getInstance());
+        mSearchBar = (FloatingSearchView) root.findViewById(R.id.search_view);
         mSearchBar.setOnSearchListener(this);
         mSearchBar.setOnQueryChangeListener(this);
         mSearchBar.setOnBindSuggestionCallback(this);
-
-        new SearchPresenter(this, new SearchModel(this));
+        return root;
     }
 
     @Override
     public void showExplain(ArrayList<Spanned> explains) {
-        mDefineTextView.setText("");
+        mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
         for (Spanned spanned : explains) {
-            mDefineTextView.append(spanned);
-            mDefineTextView.append("\n\n");
+            mExplainView.append(spanned);
+            mExplainView.append("\n\n");
         }
     }
 
@@ -68,12 +76,17 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
 
     @Override
     public void showNetworkError() {
-        Toast.makeText(SearchActivity.this, "网络连接失败", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), "网络连接失败", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void showNotFoundWordError() {
-        Toast.makeText(SearchActivity.this, "无该单词", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), "无该单词", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showWordInfo(String info) {
+        Toast.makeText(getContext(), info, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -106,7 +119,7 @@ public class SearchActivity extends AppCompatActivity implements SearchContract.
     }
 
     @Override
-    public void setPresent(SearchContract.Presenter presenter) {
+    public void setPresenter(SearchContract.Presenter presenter) {
         mPresenter = presenter;
     }
 }

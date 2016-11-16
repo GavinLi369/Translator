@@ -1,4 +1,4 @@
-package gavinli.translator.util;
+package gavinli.translator.search.util;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -8,10 +8,13 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
+import android.view.View;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -30,12 +33,18 @@ import gavinli.translator.R;
 public class HtmlDecoder {
     private String mHtml;
     private Context mContext;
+    private OnStaredLisenter mOnStaredLisenter;
 
     private ArrayList<Spanned> mSpanneds = new ArrayList<>();
+    private String mWord;
 
     public HtmlDecoder(String html, Context context) {
         mHtml = html;
         mContext = context;
+    }
+
+    public void setOnStaredListener(OnStaredLisenter onStaredListener) {
+        mOnStaredLisenter = onStaredListener;
     }
 
     @SuppressWarnings("deprecation")
@@ -59,6 +68,7 @@ public class HtmlDecoder {
         return mSpanneds;
     }
 
+    //TODO 添加发音功能
     @SuppressWarnings("deprecation")
     private void buildPositionHeader(Element posHeader) {
         String positionHeader = posHeader.getElementsByClass("headword").get(0).text();
@@ -73,6 +83,8 @@ public class HtmlDecoder {
                 0, positionHeader.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mSpanneds.add(posHeaderSpanned);
+
+        mWord = positionHeader;
 
         SpannableStringBuilder regionBuilder = new SpannableStringBuilder();
 
@@ -221,6 +233,20 @@ public class HtmlDecoder {
     private SpannableStringBuilder buildDefine(Element define) {
         SpannableStringBuilder defineBuilder = new SpannableStringBuilder();
 
+        //加入单词本
+        SpannableString starSpanned = new SpannableString("star ");
+        ImageSpan star = new ImageSpan(mContext, R.drawable.star);
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View view) {
+                if(mOnStaredLisenter != null)
+                    mOnStaredLisenter.onStared(mWord);
+            }
+        };
+        starSpanned.setSpan(star, 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        starSpanned.setSpan(clickableSpan, 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        defineBuilder.append(starSpanned);
+
         if(define.getElementsByClass("gram").size() != 0) {
             String grammer = define.getElementsByClass("gram").get(0).text();
             SpannableString grammerSpanned = new SpannableString(grammer + " ");
@@ -276,5 +302,9 @@ public class HtmlDecoder {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         return blockHeaderSpanned;
+    }
+
+    public interface OnStaredLisenter {
+        void onStared(String word);
     }
 }

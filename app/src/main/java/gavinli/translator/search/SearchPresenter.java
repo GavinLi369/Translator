@@ -1,5 +1,6 @@
 package gavinli.translator.search;
 
+import android.os.AsyncTask;
 import android.text.Spanned;
 
 import org.json.JSONException;
@@ -24,7 +25,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     public SearchPresenter(SearchContract.View view, SearchContract.Model model) {
         mView = view;
         mModel = model;
-        mView.setPresent(this);
+        mView.setPresenter(this);
     }
 
     @Override
@@ -33,7 +34,8 @@ public class SearchPresenter implements SearchContract.Presenter {
             @Override
             public void call(Subscriber<? super ArrayList<Spanned>> subscriber) {
                 try {
-                    subscriber.onNext(mModel.getExplain(word.replace(" ", "-")));
+                    subscriber.onNext(mModel.getExplain(word.replace(" ", "-"),
+                            word -> new SaveWordTask().execute(word)));
                 } catch (IOException | IndexOutOfBoundsException e) {
                     e.printStackTrace();
                     subscriber.onError(e);
@@ -94,5 +96,22 @@ public class SearchPresenter implements SearchContract.Presenter {
                 mView.showSuggestion(words);
             }
         });
+    }
+
+    class SaveWordTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            if(!mModel.wordExisted(strings[0])) {
+                mModel.saveWord(strings[0]);
+                return "单词保存至Wordbook";
+            } else {
+                return "单词已存在";
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String info) {
+            mView.showWordInfo(info);
+        }
     }
 }

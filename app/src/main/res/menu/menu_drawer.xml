@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/drawer_search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/drawer_search" />
+    <item
+        android:id="@+id/drawer_wordbook"
+        android:icon="@drawable/ic_wordbook"
+        android:title="@string/drawer_wordbook" />
+</menu>
