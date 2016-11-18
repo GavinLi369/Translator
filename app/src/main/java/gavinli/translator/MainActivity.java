@@ -19,6 +19,8 @@ public class MainActivity extends AppCompatActivity implements
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
 
+    private SearchFragment mSearchFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,26 +31,30 @@ public class MainActivity extends AppCompatActivity implements
         mNavigationView.setNavigationItemSelectedListener(this);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        SearchFragment searchFragment = new SearchFragment();
-        transaction.replace(R.id.include_layout, searchFragment);
+        mSearchFragment = new SearchFragment();
+        mSearchFragment.attachNavigationDrawerToMenuButton(mDrawerLayout);
+        transaction.replace(R.id.include_layout, mSearchFragment);
         transaction.commit();
-        new SearchPresenter(searchFragment, new SearchModel(this));
+        new SearchPresenter(mSearchFragment, new SearchModel(this), this);
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.drawer_search) {
             if(!(getSupportFragmentManager().getFragments().get(0) instanceof SearchFragment)) {
-                SearchFragment searchFragment = new SearchFragment();
+                mSearchFragment = new SearchFragment();
+                mSearchFragment.attachNavigationDrawerToMenuButton(mDrawerLayout);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.include_layout, searchFragment);
+                transaction.replace(R.id.include_layout, mSearchFragment);
                 transaction.commit();
-                new SearchPresenter(searchFragment, new SearchModel(this));
+                new SearchPresenter(mSearchFragment, new SearchModel(this), this);
             }
             mDrawerLayout.closeDrawer(mNavigationView);
         } else if(item.getItemId() == R.id.drawer_wordbook) {
             if(!(getSupportFragmentManager().getFragments().get(0) instanceof WordbookFragment)) {
+                mSearchFragment = null;
                 WordbookFragment wordbookFragment = new WordbookFragment();
+                wordbookFragment.attachNavigationDrawerToToolbar(mDrawerLayout);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.include_layout, wordbookFragment);
                 transaction.commit();

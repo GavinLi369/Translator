@@ -3,8 +3,11 @@ package gavinli.translator.wordbook;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,13 +25,22 @@ import gavinli.translator.R;
 public class WordbookFragment extends Fragment implements WordbookContract.View {
     private RecyclerView mWordListView;
     private WordListAdapter mAdapter;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     private WordbookContract.Presenter mPresenter;
 
+    //// TODO: 16-11-18 打开应用时,背景显示提示
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_wordbook, container, false);
+        Toolbar mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
+        mToolbar.setTitle(getResources().getString(R.string.drawer_wordbook));
+        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, mToolbar,
+                R.string.app_name, R.string.app_name);
+        mDrawerToggle.syncState();
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
         mWordListView = (RecyclerView) root.findViewById(R.id.word_list);
         mWordListView.setLayoutManager(new LinearLayoutManager(getContext()));
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchCallBack());
@@ -64,5 +76,15 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
             mPresenter.removeWord(word);
             mAdapter.removeItem(viewHolder.getAdapterPosition());
         }
+    }
+
+    public void attachNavigationDrawerToToolbar(DrawerLayout drawerLayout) {
+        mDrawerLayout = drawerLayout;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mDrawerLayout.removeDrawerListener(mDrawerToggle);
     }
 }

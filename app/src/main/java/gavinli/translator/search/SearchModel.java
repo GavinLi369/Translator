@@ -38,13 +38,16 @@ public class SearchModel implements SearchContract.Model {
     }
 
     @Override
-    public ArrayList<Spanned> getExplain(String word, HtmlDecoder.OnStaredLisenter lisenter) throws IOException, IndexOutOfBoundsException {
+    public ArrayList<Spanned> getExplain(String word, HtmlDecoder.OnStaredLisenter onStaredLisenter,
+                                         HtmlDecoder.OnSpeakedLisenter onSpeakedLisenter)
+            throws IOException, IndexOutOfBoundsException {
         Request request = new Request.Builder()
                 .url(DICTIONARY_URL + word)
                 .build();
         Response response = new OkHttpClient().newCall(request).execute();
         HtmlDecoder htmlDecoder = new HtmlDecoder(response.body().string(), mContext);
-        htmlDecoder.setOnStaredListener(lisenter);
+        htmlDecoder.setOnStaredListener(onStaredLisenter);
+        htmlDecoder.setOnSpeakedLisenter(onSpeakedLisenter);
         return htmlDecoder.decode();
     }
 

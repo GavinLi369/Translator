@@ -1,5 +1,8 @@
 package gavinli.translator.search;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.Spanned;
 
@@ -21,10 +24,13 @@ import rx.schedulers.Schedulers;
 public class SearchPresenter implements SearchContract.Presenter {
     private SearchContract.View mView;
     private SearchContract.Model mModel;
+    private Context mContext;
 
-    public SearchPresenter(SearchContract.View view, SearchContract.Model model) {
+    public SearchPresenter(SearchContract.View view, SearchContract.Model model,
+                           Context context) {
         mView = view;
         mModel = model;
+        mContext = context;
         mView.setPresenter(this);
     }
 
@@ -35,7 +41,8 @@ public class SearchPresenter implements SearchContract.Presenter {
             public void call(Subscriber<? super ArrayList<Spanned>> subscriber) {
                 try {
                     subscriber.onNext(mModel.getExplain(word.replace(" ", "-"),
-                            word -> new SaveWordTask().execute(word)));
+                            word -> new SaveWordTask().execute(word),
+                            url -> onSpeaked(url)));
                 } catch (IOException | IndexOutOfBoundsException e) {
                     e.printStackTrace();
                     subscriber.onError(e);
@@ -61,6 +68,12 @@ public class SearchPresenter implements SearchContract.Presenter {
                 mView.showExplain(spanneds);
             }
         });
+    }
+
+    private void onSpeaked(String url) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(mContext, Uri.parse(url));
+        mediaPlayer.setLooping(false);
+        mediaPlayer.start();
     }
 
     @Override

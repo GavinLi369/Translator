@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -28,10 +29,11 @@ import gavinli.translator.R;
  */
 
 public class SearchFragment extends Fragment implements SearchContract.View, FloatingSearchView.OnSearchListener,
-        FloatingSearchView.OnQueryChangeListener, SearchSuggestionsAdapter.OnBindSuggestionCallback {
+        FloatingSearchView.OnQueryChangeListener, SearchSuggestionsAdapter.OnBindSuggestionCallback{
     private TextView mExplainView;
     private FloatingSearchView mSearchBar;
     private ScrollView mScrollView;
+    private DrawerLayout mDrawerLayout;
 
     private SearchContract.Presenter mPresenter;
 
@@ -46,6 +48,9 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         mSearchBar.setOnSearchListener(this);
         mSearchBar.setOnQueryChangeListener(this);
         mSearchBar.setOnBindSuggestionCallback(this);
+        if(mDrawerLayout != null) {
+            mSearchBar.attachNavigationDrawerToMenuButton(mDrawerLayout);
+        }
         return root;
     }
 
@@ -116,6 +121,10 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         leftIcon.setImageDrawable(ResourcesCompat.getDrawable(getResources(),
                 R.drawable.ic_arrow_right, null));
         textView.setText(item.getBody());
+    }
+
+    public void attachNavigationDrawerToMenuButton(DrawerLayout drawerLayout) {
+        mDrawerLayout = drawerLayout;
     }
 
     @Override

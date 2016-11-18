@@ -34,6 +34,7 @@ public class HtmlDecoder {
     private String mHtml;
     private Context mContext;
     private OnStaredLisenter mOnStaredLisenter;
+    private OnSpeakedLisenter mOnSpeakedLisenter;
 
     private ArrayList<Spanned> mSpanneds = new ArrayList<>();
     private String mWord;
@@ -45,6 +46,10 @@ public class HtmlDecoder {
 
     public void setOnStaredListener(OnStaredLisenter onStaredListener) {
         mOnStaredLisenter = onStaredListener;
+    }
+
+    public void setOnSpeakedLisenter(OnSpeakedLisenter onSpeakedLisenter) {
+        mOnSpeakedLisenter = onSpeakedLisenter;
     }
 
     @SuppressWarnings("deprecation")
@@ -68,7 +73,6 @@ public class HtmlDecoder {
         return mSpanneds;
     }
 
-    //TODO 添加发音功能
     @SuppressWarnings("deprecation")
     private void buildPositionHeader(Element posHeader) {
         String positionHeader = posHeader.getElementsByClass("headword").get(0).text();
@@ -105,7 +109,9 @@ public class HtmlDecoder {
             regionBuilder.append(posSpanned);
         }
 
-        //发音
+
+
+        //音标
         Elements pronInfoes = posHeader.getElementsByClass("pron-info");
         for(Element pronInfo : pronInfoes) {
             regionBuilder.append(buildPronInfo(pronInfo));
@@ -135,6 +141,27 @@ public class HtmlDecoder {
                     0, region.length(),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             resultBuilder.append(regionSpanned);
+        }
+
+        //发音
+        Elements speakerElements = pronInfo.getElementsByAttribute("data-src-mp3");
+        if(speakerElements.size() != 0) {
+            ImageSpan speakerSpan = new ImageSpan(mContext, R.drawable.speaker);
+            ClickableSpan clickableSpan = new ClickableSpan() {
+                @Override
+                public void onClick(View view) {
+                    if(mOnSpeakedLisenter != null) {
+                        String url = speakerElements.get(0).attr("data-src-mp3");
+                        mOnSpeakedLisenter.onSpeaked(url);
+                    }
+                }
+            };
+            SpannableString speakerSpanned = new SpannableString("speaker");
+            speakerSpanned.setSpan(speakerSpan,
+                    0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            speakerSpanned.setSpan(clickableSpan,
+                    0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            resultBuilder.append(speakerSpanned);
         }
 
         //音标有可能为空
@@ -306,5 +333,9 @@ public class HtmlDecoder {
 
     public interface OnStaredLisenter {
         void onStared(String word);
+    }
+
+    public interface OnSpeakedLisenter {
+        void onSpeaked(String url);
     }
 }

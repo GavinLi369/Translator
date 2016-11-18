@@ -18,7 +18,10 @@ import gavinli.translator.search.util.HtmlDecoder;
 
 public class SearchContract {
     interface Model {
-        ArrayList<Spanned> getExplain(String word, HtmlDecoder.OnStaredLisenter lisenter) throws IOException, IndexOutOfBoundsException;
+        ArrayList<Spanned> getExplain(String word,
+                                      HtmlDecoder.OnStaredLisenter lisenter,
+                                      HtmlDecoder.OnSpeakedLisenter onSpeakedLisenter)
+                throws IOException, IndexOutOfBoundsException;
 
         ArrayList<String> getComplete(String key) throws IOException, JSONException;
 

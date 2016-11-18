@@ -35,7 +35,7 @@
         app:floatingSearch_showSearchKey="true"
         app:floatingSearch_dismissOnOutsideTouch="true"
         app:floatingSearch_dimBackground="true"
-        app:floatingSearch_leftActionMode="showSearch"
+        app:floatingSearch_leftActionMode="showHamburger"
         app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
 
 </RelativeLayout>
