@@ -32,7 +32,12 @@ public class WordbookPresenter implements WordbookContract.Presenter {
 
         @Override
         protected void onPostExecute(ArrayList<String> words) {
-            mView.showWords(words);
+            if(words.size() == 0) {
+                mView.showBackground();
+            } else {
+                mView.hideBackground();
+                mView.showWords(words);
+            }
         }
     }
 

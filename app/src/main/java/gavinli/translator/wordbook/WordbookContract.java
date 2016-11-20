@@ -19,6 +19,10 @@ public class WordbookContract {
 
     interface View extends BaseView<Presenter> {
         void showWords(ArrayList<String> words);
+
+        void showBackground();
+
+        void hideBackground();
     }
 
     interface Model {

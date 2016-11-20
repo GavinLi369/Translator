@@ -65,6 +65,7 @@ public class SearchPresenter implements SearchContract.Presenter {
 
             @Override
             public void onNext(ArrayList<Spanned> spanneds) {
+                mView.hideBackground();
                 mView.showExplain(spanneds);
             }
         });

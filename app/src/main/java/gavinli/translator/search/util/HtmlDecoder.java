@@ -146,7 +146,7 @@ public class HtmlDecoder {
         //发音
         Elements speakerElements = pronInfo.getElementsByAttribute("data-src-mp3");
         if(speakerElements.size() != 0) {
-            ImageSpan speakerSpan = new ImageSpan(mContext, R.drawable.speaker);
+            ImageSpan speakerSpan = new ImageSpan(mContext, R.drawable.ic_speaker);
             ClickableSpan clickableSpan = new ClickableSpan() {
                 @Override
                 public void onClick(View view) {
@@ -156,7 +156,7 @@ public class HtmlDecoder {
                     }
                 }
             };
-            SpannableString speakerSpanned = new SpannableString("speaker");
+            SpannableString speakerSpanned = new SpannableString("ic_speaker");
             speakerSpanned.setSpan(speakerSpan,
                     0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             speakerSpanned.setSpan(clickableSpan,
@@ -261,8 +261,8 @@ public class HtmlDecoder {
         SpannableStringBuilder defineBuilder = new SpannableStringBuilder();
 
         //加入单词本
-        SpannableString starSpanned = new SpannableString("star ");
-        ImageSpan star = new ImageSpan(mContext, R.drawable.star);
+        SpannableString starSpanned = new SpannableString("ic_star ");
+        ImageSpan star = new ImageSpan(mContext, R.drawable.ic_star);
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View view) {

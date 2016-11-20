@@ -51,6 +51,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         if(mDrawerLayout != null) {
             mSearchBar.attachNavigationDrawerToMenuButton(mDrawerLayout);
         }
+        showBackground();
         return root;
     }
 
@@ -92,6 +93,17 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     @Override
     public void showWordInfo(String info) {
         Toast.makeText(getContext(), info, Toast.LENGTH_SHORT).show();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void showBackground() {
+        mScrollView.setBackgroundResource(R.drawable.bg_search);
+    }
+
+    @Override
+    public void hideBackground() {
+        mScrollView.setBackground(null);
     }
 
     @Override

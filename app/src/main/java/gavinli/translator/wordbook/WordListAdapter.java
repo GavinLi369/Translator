@@ -38,9 +38,10 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHo
         return mWords.size();
     }
 
-    public void removeItem(int postion) {
+    public int removeItem(int postion) {
         mWords.remove(postion);
         notifyItemRemoved(postion);
+        return mWords.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

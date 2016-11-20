@@ -30,7 +30,6 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
 
     private WordbookContract.Presenter mPresenter;
 
-    //// TODO: 16-11-18 打开应用时,背景显示提示
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -60,6 +59,16 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
         mWordListView.setAdapter(mAdapter);
     }
 
+    @Override
+    public void showBackground() {
+        mWordListView.setBackgroundResource(R.drawable.bg_wordbook);
+    }
+
+    @Override
+    public void hideBackground() {
+        mWordListView.setBackground(null);
+    }
+
     class ItemTouchCallBack extends ItemTouchHelper.SimpleCallback {
         public ItemTouchCallBack() {
             super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
@@ -74,7 +83,9 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             String word = ((WordListAdapter.ViewHolder) viewHolder).mTextView.getText().toString();
             mPresenter.removeWord(word);
-            mAdapter.removeItem(viewHolder.getAdapterPosition());
+            if(mAdapter.removeItem(viewHolder.getAdapterPosition()) == 0) {
+                showBackground();
+            }
         }
     }
 

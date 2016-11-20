@@ -40,6 +40,10 @@ public class SearchContract {
         void showNotFoundWordError();
 
         void showWordInfo(String info);
+
+        void showBackground();
+
+        void hideBackground();
     }
 
     interface Presenter extends BasePresenter {
