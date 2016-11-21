@@ -57,6 +57,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showExplain(ArrayList<Spanned> explains) {
+        mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
         for (Spanned spanned : explains) {
@@ -108,11 +109,13 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void onSuggestionClicked(SearchSuggestion searchSuggestion) {
+        mSearchBar.showProgress();
         mPresenter.loadExplain(searchSuggestion.getBody());
     }
 
     @Override
     public void onSearchAction(String currentQuery) {
+        mSearchBar.showProgress();
         mPresenter.loadExplain(currentQuery);
     }
 

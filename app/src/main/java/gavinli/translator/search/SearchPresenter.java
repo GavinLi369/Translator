@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -25,6 +26,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     private SearchContract.View mView;
     private SearchContract.Model mModel;
     private Context mContext;
+    private Subscription mAutoComplete;
 
     public SearchPresenter(SearchContract.View view, SearchContract.Model model,
                            Context context) {
@@ -36,6 +38,10 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void loadExplain(String word) {
+        if (mAutoComplete != null) {
+            mAutoComplete.unsubscribe();
+            mAutoComplete = null;
+        }
         Observable<ArrayList<Spanned>> observable = Observable.create(new Observable.OnSubscribe<ArrayList<Spanned>>() {
             @Override
             public void call(Subscriber<? super ArrayList<Spanned>> subscriber) {
@@ -79,6 +85,10 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void loadAutoComplete(String key) {
+        if (mAutoComplete != null) {
+            mAutoComplete.unsubscribe();
+            mAutoComplete = null;
+        }
         Observable<ArrayList<String>> observable = Observable.create(new Observable.OnSubscribe<ArrayList<String>>() {
             @Override
             public void call(Subscriber<? super ArrayList<String>> subscriber) {
@@ -90,9 +100,10 @@ public class SearchPresenter implements SearchContract.Presenter {
                 }
             }
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-        observable.subscribe(new Subscriber<ArrayList<String>>() {
+        mAutoComplete = observable.subscribe(new Subscriber<ArrayList<String>>() {
             @Override
             public void onCompleted() {
+                mAutoComplete = null;
             }
 
             @Override
@@ -103,6 +114,7 @@ public class SearchPresenter implements SearchContract.Presenter {
                     //不应该出现JSONException
                     throw new RuntimeException(e);
                 }
+                mAutoComplete = null;
             }
 
             @Override
