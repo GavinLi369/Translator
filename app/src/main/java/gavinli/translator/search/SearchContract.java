@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
-import gavinli.translator.search.util.HtmlDecoder;
+import gavinli.translator.util.HtmlDecoder;
 
 /**
  * Created by GavinLi

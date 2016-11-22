@@ -1,4 +1,4 @@
-package gavinli.translator.search.util;
+package gavinli.translator.util;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -117,6 +117,19 @@ public class HtmlDecoder {
             regionBuilder.append(buildPronInfo(pronInfo));
         }
 
+        //不规则动词转换
+        Elements irregInfls = posHeader.getElementsByClass("irreg-infls");
+        if(irregInfls.size() != 0) {
+            SpannableString irregInflsSpan = new SpannableString(irregInfls.get(0).text());
+            irregInflsSpan.setSpan(new StyleSpan(Typeface.BOLD),
+                    0, irregInflsSpan.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            irregInflsSpan.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorDefine)),
+                    0, irregInflsSpan.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            regionBuilder.append(irregInflsSpan);
+        }
+
         //词性和发音有可能为空
         if(regionBuilder.length() != 0) {
             mSpanneds.add(regionBuilder);
@@ -158,9 +171,9 @@ public class HtmlDecoder {
             };
             SpannableString speakerSpanned = new SpannableString("ic_speaker");
             speakerSpanned.setSpan(speakerSpan,
-                    0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    0, speakerSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             speakerSpanned.setSpan(clickableSpan,
-                    0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    0, speakerSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             resultBuilder.append(speakerSpanned);
         }
 
@@ -270,8 +283,8 @@ public class HtmlDecoder {
                     mOnStaredLisenter.onStared(mWord);
             }
         };
-        starSpanned.setSpan(star, 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        starSpanned.setSpan(clickableSpan, 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        starSpanned.setSpan(star, 0, starSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        starSpanned.setSpan(clickableSpan, 0, starSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         defineBuilder.append(starSpanned);
 
         if(define.getElementsByClass("gram").size() != 0) {

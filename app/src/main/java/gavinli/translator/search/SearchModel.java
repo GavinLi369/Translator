@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 import gavinli.translator.datebase.WordbookDbHelper;
 import gavinli.translator.datebase.WordbookEntry;
-import gavinli.translator.search.util.HtmlDecoder;
+import gavinli.translator.util.HtmlDecoder;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
