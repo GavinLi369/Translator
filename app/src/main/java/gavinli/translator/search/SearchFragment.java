@@ -36,6 +36,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     private DrawerLayout mDrawerLayout;
 
     private SearchContract.Presenter mPresenter;
+    private String mInitWord;
 
     @Nullable
     @Override
@@ -51,8 +52,18 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         if(mDrawerLayout != null) {
             mSearchBar.attachNavigationDrawerToMenuButton(mDrawerLayout);
         }
-        showBackground();
+        if(mInitWord != null && !mInitWord.equals("")) {
+            mSearchBar.showProgress();
+            mSearchBar.setSearchText(mInitWord);
+            mPresenter.loadExplain(mInitWord);
+        } else {
+            showBackground();
+        }
         return root;
+    }
+
+    public void init(String word) {
+        mInitWord = word;
     }
 
     @Override
@@ -83,11 +94,13 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showNetworkError() {
+        mSearchBar.hideProgress();
         Toast.makeText(getContext(), "网络连接失败", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void showNotFoundWordError() {
+        mSearchBar.hideProgress();
         Toast.makeText(getContext(), "无该单词", Toast.LENGTH_SHORT).show();
     }
 

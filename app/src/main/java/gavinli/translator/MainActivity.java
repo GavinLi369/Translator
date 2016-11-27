@@ -1,5 +1,6 @@
 package gavinli.translator;
 
+import android.content.Intent;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -7,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import gavinli.translator.clipboard.ClipboardMonitor;
 import gavinli.translator.search.SearchFragment;
 import gavinli.translator.search.SearchModel;
 import gavinli.translator.search.SearchPresenter;
@@ -36,6 +38,14 @@ public class MainActivity extends AppCompatActivity implements
         transaction.replace(R.id.include_layout, mSearchFragment);
         transaction.commit();
         new SearchPresenter(mSearchFragment, new SearchModel(this), this);
+
+        Intent intent = getIntent();
+        if(intent != null) {
+            String word = intent.getStringExtra(ClipboardMonitor.INTENT_WORD);
+            mSearchFragment.init(word);
+        }
+
+        startService(new Intent(this, ClipboardMonitor.class));
     }
 
     @Override
