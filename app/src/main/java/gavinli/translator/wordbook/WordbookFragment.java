@@ -36,7 +36,7 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_wordbook, container, false);
         Toolbar mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
-        mToolbar.setTitle(getResources().getString(R.string.drawer_wordbook));
+//        mToolbar.setTitle(getResources().getString(R.string.wordbook));
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, mToolbar,
                 R.string.app_name, R.string.app_name);
         mDrawerToggle.syncState();

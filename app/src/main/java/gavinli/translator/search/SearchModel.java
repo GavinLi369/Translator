@@ -26,7 +26,7 @@ import okhttp3.Response;
  */
 
 public class SearchModel implements SearchContract.Model {
-    private static final String DICTIONARY_URL = "http://dictionary.cambridge.org/dictionary/english/";
+    private static final String DICTIONARY_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
     private static final String AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
 
     private Context mContext;

@@ -1,6 +1,7 @@
 package gavinli.translator;
 
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -12,6 +13,7 @@ import gavinli.translator.clipboard.ClipboardMonitor;
 import gavinli.translator.search.SearchFragment;
 import gavinli.translator.search.SearchModel;
 import gavinli.translator.search.SearchPresenter;
+import gavinli.translator.setting.SettingsActivity;
 import gavinli.translator.wordbook.WordbookFragment;
 import gavinli.translator.wordbook.WordbookModel;
 import gavinli.translator.wordbook.WordbookPresenter;
@@ -45,7 +47,9 @@ public class MainActivity extends AppCompatActivity implements
             mSearchFragment.init(word);
         }
 
-        startService(new Intent(this, ClipboardMonitor.class));
+        if(PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(getString(R.string.key_clipboard), false))
+            startService(new Intent(this, ClipboardMonitor.class));
     }
 
     @Override
@@ -70,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements
                 transaction.commit();
                 new WordbookPresenter(wordbookFragment, new WordbookModel(this));
             }
+            mDrawerLayout.closeDrawer(mNavigationView);
+        } else if(item.getItemId() == R.id.drawer_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
             mDrawerLayout.closeDrawer(mNavigationView);
         }
         return true;

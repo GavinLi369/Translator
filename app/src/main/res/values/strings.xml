@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Translator</string>
-    <string name="search_title">Search</string>
-    <string name="drawer_search">Search</string>
-    <string name="drawer_wordbook">Wordbook</string>
+    <string name="search">Search</string>
+    <string name="wordbook">Wordbook</string>
+    <string name="settings">Settings</string>
+    <string name="setting_clipboard">Tap to Translate</string>
+    <string name="key_clipboard">clipboard</string>
 </resources>

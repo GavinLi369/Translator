@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/drawer_search"
-        android:icon="@drawable/ic_search"
-        android:title="@string/drawer_search" />
-    <item
-        android:id="@+id/drawer_wordbook"
-        android:icon="@drawable/ic_wordbook"
-        android:title="@string/drawer_wordbook" />
+
+
+    <group
+        android:id="@+id/feature"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/drawer_search"
+            android:icon="@drawable/ic_search"
+            android:checked="true"
+            android:title="@string/search" />
+        <item
+            android:id="@+id/drawer_wordbook"
+            android:icon="@drawable/ic_wordbook"
+            android:title="@string/wordbook" />
+    </group>
+
+    <group
+        android:id="@+id/other"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/drawer_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settings"/>
+    </group>
+
 </menu>

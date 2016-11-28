@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -25,28 +26,40 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
  * on 16-11-27.
  */
 
-public class ClipboardMonitor extends Service {
+public class ClipboardMonitor extends Service
+        implements ClipboardManager.OnPrimaryClipChangedListener {
     public static final String INTENT_WORD = "word";
     private static final int FLOAT_WINDOW_TIME = 4000;
 
     private ClipboardManager mClipboardManager;
-    private ClipboardManager.OnPrimaryClipChangedListener mPrimaryClipChangedListener;
     private WindowManager mWindowManager;
     private View mFloatWindow;
-    private Timer mTimer;
     private String mPreviousText = "";
 
     @Override
     public void onCreate() {
         super.onCreate();
         mClipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        mPrimaryClipChangedListener = () -> {
+        mClipboardManager.addPrimaryClipChangedListener(this);
+        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mClipboardManager.removePrimaryClipChangedListener(this);
+    }
+
+    @Override
+    public void onPrimaryClipChanged() {
+        if(PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(getString(R.string.key_clipboard), false)) {
             CharSequence charSequence = mClipboardManager.getPrimaryClip().getItemAt(0).getText();
             //TODO 内容有可能为空，待解决
-            if(charSequence == null) return;
+            if (charSequence == null) return;
             String text = charSequence.toString();
             //必须是英语单词
-            if(!text.matches("[a-zA-Z]+\\s*") ||
+            if (!text.matches("[a-zA-Z]+\\s*") ||
                     (text.equals(mPreviousText) && mFloatWindow != null)) return;
             showFloatWindow(text.trim());
             TimerTask hideFloatWindowTask = new TimerTask() {
@@ -55,18 +68,9 @@ public class ClipboardMonitor extends Service {
                     hideFloatWindow();
                 }
             };
-            mTimer = new Timer();
-            mTimer.schedule(hideFloatWindowTask, FLOAT_WINDOW_TIME);
+            new Timer().schedule(hideFloatWindowTask, FLOAT_WINDOW_TIME);
             mPreviousText = text;
-        };
-        mClipboardManager.addPrimaryClipChangedListener(mPrimaryClipChangedListener);
-        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mClipboardManager.removePrimaryClipChangedListener(mPrimaryClipChangedListener);
+        }
     }
 
     @SuppressLint("InflateParams")
