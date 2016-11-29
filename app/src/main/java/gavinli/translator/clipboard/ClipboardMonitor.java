@@ -9,7 +9,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -80,8 +79,7 @@ public class ClipboardMonitor extends Service
         }
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
-        //TODO 加入动画
-        mFloatWindow = LayoutInflater.from(this).inflate(R.layout.floatview, null);
+        mFloatWindow = new FloatView(this);
         mFloatWindow.setOnClickListener(view -> {
             hideFloatWindow();
             //TODO 悬浮框显示解释
@@ -96,9 +94,9 @@ public class ClipboardMonitor extends Service
         params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         params.gravity = Gravity.START | Gravity.TOP;
-        params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.x = screenWidth;
+        params.width = 120;
+        params.height = 120;
+        params.x = screenWidth + 100;
         params.y = screenHeight / 5;
         mWindowManager.addView(mFloatWindow, params);
     }
