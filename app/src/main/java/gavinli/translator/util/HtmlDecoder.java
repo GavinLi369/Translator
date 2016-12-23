@@ -112,7 +112,9 @@ public class HtmlDecoder {
 
 
         //音标
-        Elements pronInfoes = posHeader.getElementsByClass("pron-info");
+        //存在该单词其他形式的音标，这里避免错误显示
+        Element realPosHeader = posHeader.getElementsByClass("pos-header").get(0);
+        Elements pronInfoes = realPosHeader.getElementsByClass("pron-info");
         for(Element pronInfo : pronInfoes) {
             regionBuilder.append(buildPronInfo(pronInfo));
         }
