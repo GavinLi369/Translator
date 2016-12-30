@@ -1,6 +1,7 @@
 package gavinli.translator.clipboard;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.Service;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class ClipboardMonitor extends Service
         implements ClipboardManager.OnPrimaryClipChangedListener {
+    private static int GRAY_SERVICE_ID = 1001;
     public static final String INTENT_WORD = "word";
     private static final int FLOAT_WINDOW_TIME = 4000;
 
@@ -47,6 +49,15 @@ public class ClipboardMonitor extends Service
     public void onDestroy() {
         super.onDestroy();
         mClipboardManager.removePrimaryClipChangedListener(this);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        //利用Android漏洞进程保活
+        Intent innerInent = new Intent(this, InnerClass.class);
+        startService(innerInent);
+        startForeground(GRAY_SERVICE_ID, new Notification());
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -105,6 +116,22 @@ public class ClipboardMonitor extends Service
         if(mFloatWindow != null) {
             mWindowManager.removeView(mFloatWindow);
             mFloatWindow = null;
+        }
+    }
+
+    public static class InnerClass extends Service {
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            startForeground(GRAY_SERVICE_ID, new Notification());
+            stopForeground(true);
+            stopSelf();
+            return super.onStartCommand(intent, flags, startId);
+        }
+
+        @Nullable
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
         }
     }
 
