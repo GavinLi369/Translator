@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 import gavinli.translator.R;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
+
 /**
  * Created by GavinLi
  * on 16-11-16.
@@ -17,6 +19,7 @@ import gavinli.translator.R;
 
 public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHolder> {
     private ArrayList<String> mWords;
+    private OnItemClickListener mItemClickListener;
 
     public WordListAdapter(ArrayList<String> words) {
         mWords = words;
@@ -50,6 +53,15 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHo
         public ViewHolder(View itemView) {
             super(itemView);
             mTextView = (TextView) itemView.findViewById(R.id.tv_word);
+            itemView.setOnClickListener(view -> mItemClickListener.onItemClick(itemView));
         }
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mItemClickListener = listener;
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View view);
     }
 }

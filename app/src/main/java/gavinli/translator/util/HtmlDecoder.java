@@ -275,19 +275,20 @@ public class HtmlDecoder {
     private SpannableStringBuilder buildDefine(Element define) {
         SpannableStringBuilder defineBuilder = new SpannableStringBuilder();
 
-        //加入单词本
-        SpannableString starSpanned = new SpannableString("ic_star ");
-        ImageSpan star = new ImageSpan(mContext, R.drawable.ic_star);
-        ClickableSpan clickableSpan = new ClickableSpan() {
-            @Override
-            public void onClick(View view) {
-                if(mOnStaredLisenter != null)
+        if(mOnStaredLisenter != null) {
+            //加入单词本
+            SpannableString starSpanned = new SpannableString("ic_star ");
+            ImageSpan star = new ImageSpan(mContext, R.drawable.ic_star);
+            ClickableSpan clickableSpan = new ClickableSpan() {
+                @Override
+                public void onClick(View view) {
                     mOnStaredLisenter.onStared(mWord);
-            }
-        };
-        starSpanned.setSpan(star, 0, starSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        starSpanned.setSpan(clickableSpan, 0, starSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        defineBuilder.append(starSpanned);
+                }
+            };
+            starSpanned.setSpan(star, 0, starSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            starSpanned.setSpan(clickableSpan, 0, starSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            defineBuilder.append(starSpanned);
+        }
 
         if(define.getElementsByClass("gram").size() != 0) {
             String grammer = define.getElementsByClass("gram").get(0).text();

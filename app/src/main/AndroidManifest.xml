@@ -22,6 +22,8 @@
 
         <activity android:name=".setting.SettingsActivity"/>
 
+        <activity android:name=".worddetail.WordDetailActivity"/>
+
         <receiver android:name=".clipboard.ClipboardMonitorStarter">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

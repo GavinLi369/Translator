@@ -1,5 +1,6 @@
 package gavinli.translator.wordbook;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,10 +13,12 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import gavinli.translator.R;
+import gavinli.translator.worddetail.WordDetailActivity;
 
 /**
  * Created by GavinLi
@@ -36,7 +39,6 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_wordbook, container, false);
         Toolbar mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
-//        mToolbar.setTitle(getResources().getString(R.string.wordbook));
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, mToolbar,
                 R.string.app_name, R.string.app_name);
         mDrawerToggle.syncState();
@@ -57,6 +59,12 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
     @Override
     public void showWords(ArrayList<String> words) {
         mAdapter = new WordListAdapter(words);
+        mAdapter.setOnItemClickListener(view -> {
+            TextView textView = (TextView) view.findViewById(R.id.tv_word);
+            Intent intent = new Intent(getActivity(), WordDetailActivity.class);
+            intent.putExtra(WordDetailActivity.INTENT_WORD_KEY, textView.getText());
+            startActivity(intent);
+        });
         mWordListView.setAdapter(mAdapter);
     }
 
