@@ -14,6 +14,13 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:title="@string/worddetail"/>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        style="@style/Widget.AppCompat.Spinner"/>
+
     <ScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"

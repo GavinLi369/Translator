@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +25,7 @@ public class WordDetailActivity extends AppCompatActivity implements WordDetailC
     public static final String INTENT_WORD_KEY = "word";
 
     private TextView mWordDefine;
+    private ProgressBar mProgressBar;
     private WordDetailContract.Presenter mPresenter;
 
     @Override
@@ -35,6 +38,8 @@ public class WordDetailActivity extends AppCompatActivity implements WordDetailC
 
         mWordDefine = (TextView) findViewById(R.id.tv_define);
         mWordDefine.setMovementMethod(LinkMovementMethod.getInstance());
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(View.VISIBLE);
 
         new WordDetailPresenter(this, new WordDetailModel(this), this);
         Intent intent = getIntent();
@@ -48,6 +53,7 @@ public class WordDetailActivity extends AppCompatActivity implements WordDetailC
 
     @Override
     public void showWordExplain(List<Spanned> spanneds) {
+        mProgressBar.setVisibility(View.GONE);
         for(Spanned spanned : spanneds) {
             mWordDefine.append(spanned);
             mWordDefine.append("\n\n");
@@ -56,6 +62,7 @@ public class WordDetailActivity extends AppCompatActivity implements WordDetailC
 
     @Override
     public void showNetworkError() {
+        mProgressBar.setVisibility(View.GONE);
         Toast.makeText(this, "网络连接失败", Toast.LENGTH_SHORT).show();
     }
 
