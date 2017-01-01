@@ -12,9 +12,11 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import gavinli.translator.datebase.WordbookDbHelper;
 import gavinli.translator.datebase.WordbookEntry;
+import gavinli.translator.util.CambirdgeApi;
 import gavinli.translator.util.HtmlDecoder;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,9 +28,6 @@ import okhttp3.Response;
  */
 
 public class SearchModel implements SearchContract.Model {
-    private static final String DICTIONARY_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
-    private static final String AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
-
     private Context mContext;
     private WordbookDbHelper mDbHelper;
 
@@ -38,32 +37,14 @@ public class SearchModel implements SearchContract.Model {
     }
 
     @Override
-    public ArrayList<Spanned> getExplain(String word, HtmlDecoder.OnStaredLisenter onStaredLisenter,
-                                         HtmlDecoder.OnSpeakedLisenter onSpeakedLisenter)
+    public List<Spanned> getExplain(String word, HtmlDecoder.OnStaredLisenter onStaredLisenter)
             throws IOException, IndexOutOfBoundsException {
-        Request request = new Request.Builder()
-                .url(DICTIONARY_URL + word)
-                .build();
-        Response response = new OkHttpClient().newCall(request).execute();
-        HtmlDecoder htmlDecoder = new HtmlDecoder(response.body().string(), mContext);
-        htmlDecoder.setOnStaredListener(onStaredLisenter);
-        htmlDecoder.setOnSpeakedLisenter(onSpeakedLisenter);
-        return htmlDecoder.decode();
+        return CambirdgeApi.getExplain(mContext, word, onStaredLisenter);
     }
 
     @Override
-    public ArrayList<String> getComplete(String key) throws IOException, JSONException {
-        ArrayList<String> results = new ArrayList<>();
-        Request request = new Request.Builder()
-                .url(AUTO_COMPLETE_URL + key)
-                .build();
-
-        Response response = new OkHttpClient().newCall(request).execute();
-        JSONArray words = new JSONObject(response.body().string()).getJSONArray("results");
-        for(int i = 0; i < words.length(); i++) {
-            results.add(words.getJSONObject(i).getString("searchtext"));
-        }
-        return results;
+    public List<String> getComplete(String key, int num) throws IOException {
+        return CambirdgeApi.getComplete(key, num);
     }
 
     @Override

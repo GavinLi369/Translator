@@ -1,8 +1,5 @@
 package gavinli.translator.worddetail;
 
-import android.content.Context;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.text.Spanned;
 
 import java.io.IOException;
@@ -21,14 +18,11 @@ import rx.schedulers.Schedulers;
 public class WordDetailPresenter implements WordDetailContract.Presenter {
     private WordDetailContract.View mView;
     private WordDetailContract.Model mModel;
-    private Context mContext;
 
-    public WordDetailPresenter(WordDetailContract.View view, WordDetailContract.Model model,
-                               Context context) {
+    public WordDetailPresenter(WordDetailContract.View view, WordDetailContract.Model model) {
         mView = view;
         mModel = model;
         mView.setPresenter(this);
-        mContext = context;
     }
 
     @Override
@@ -37,7 +31,7 @@ public class WordDetailPresenter implements WordDetailContract.Presenter {
             @Override
             public void call(Subscriber<? super List<Spanned>> subscriber) {
                 try {
-                    List<Spanned> spanneds = mModel.getExplain(word.replace(" ", "-"), url -> onSpeaked(url));
+                    List<Spanned> spanneds = mModel.getExplain(word.replace(" ", "-"));
                     subscriber.onNext(spanneds);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -62,11 +56,5 @@ public class WordDetailPresenter implements WordDetailContract.Presenter {
                 mView.showWordExplain(spanneds);
             }
         });
-    }
-
-    private void onSpeaked(String url) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(mContext, Uri.parse(url));
-        mediaPlayer.setLooping(false);
-        mediaPlayer.start();
     }
 }

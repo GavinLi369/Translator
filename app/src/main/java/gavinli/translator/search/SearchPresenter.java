@@ -1,15 +1,10 @@
 package gavinli.translator.search;
 
-import android.content.Context;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.Spanned;
 
-import org.json.JSONException;
-
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -25,14 +20,11 @@ import rx.schedulers.Schedulers;
 public class SearchPresenter implements SearchContract.Presenter {
     private SearchContract.View mView;
     private SearchContract.Model mModel;
-    private Context mContext;
     private Subscription mAutoComplete;
 
-    public SearchPresenter(SearchContract.View view, SearchContract.Model model,
-                           Context context) {
+    public SearchPresenter(SearchContract.View view, SearchContract.Model model) {
         mView = view;
         mModel = model;
-        mContext = context;
         mView.setPresenter(this);
     }
 
@@ -42,20 +34,19 @@ public class SearchPresenter implements SearchContract.Presenter {
             mAutoComplete.unsubscribe();
             mAutoComplete = null;
         }
-        Observable<ArrayList<Spanned>> observable = Observable.create(new Observable.OnSubscribe<ArrayList<Spanned>>() {
+        Observable<List<Spanned>> observable = Observable.create(new Observable.OnSubscribe<List<Spanned>>() {
             @Override
-            public void call(Subscriber<? super ArrayList<Spanned>> subscriber) {
+            public void call(Subscriber<? super List<Spanned>> subscriber) {
                 try {
                     subscriber.onNext(mModel.getExplain(word.replace(" ", "-"),
-                            word -> new SaveWordTask().execute(word),
-                            url -> onSpeaked(url)));
+                            word -> new SaveWordTask().execute(word)));
                 } catch (IOException | IndexOutOfBoundsException e) {
                     e.printStackTrace();
                     subscriber.onError(e);
                 }
             }
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-        observable.subscribe(new Subscriber<ArrayList<Spanned>>() {
+        observable.subscribe(new Subscriber<List<Spanned>>() {
             @Override
             public void onCompleted() {
             }
@@ -70,37 +61,31 @@ public class SearchPresenter implements SearchContract.Presenter {
             }
 
             @Override
-            public void onNext(ArrayList<Spanned> spanneds) {
+            public void onNext(List<Spanned> spanneds) {
                 mView.hideBackground();
                 mView.showExplain(spanneds);
             }
         });
     }
 
-    private void onSpeaked(String url) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(mContext, Uri.parse(url));
-        mediaPlayer.setLooping(false);
-        mediaPlayer.start();
-    }
-
     @Override
-    public void loadAutoComplete(String key) {
+    public void loadAutoComplete(String key, int num) {
         if (mAutoComplete != null) {
             mAutoComplete.unsubscribe();
             mAutoComplete = null;
         }
-        Observable<ArrayList<String>> observable = Observable.create(new Observable.OnSubscribe<ArrayList<String>>() {
+        Observable<List<String>> observable = Observable.create(new Observable.OnSubscribe<List<String>>() {
             @Override
-            public void call(Subscriber<? super ArrayList<String>> subscriber) {
+            public void call(Subscriber<? super List<String>> subscriber) {
                 try {
-                    subscriber.onNext(mModel.getComplete(key));
-                } catch (IOException | JSONException e) {
+                    subscriber.onNext(mModel.getComplete(key, num));
+                } catch (IOException e) {
                     e.printStackTrace();
                     subscriber.onError(e);
                 }
             }
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-        mAutoComplete = observable.subscribe(new Subscriber<ArrayList<String>>() {
+        mAutoComplete = observable.subscribe(new Subscriber<List<String>>() {
             @Override
             public void onCompleted() {
                 mAutoComplete = null;
@@ -110,15 +95,12 @@ public class SearchPresenter implements SearchContract.Presenter {
             public void onError(Throwable e) {
                 if(e instanceof IOException) {
                     mView.showNetworkError();
-                } else if(e instanceof JSONException) {
-                    //不应该出现JSONException
-                    throw new RuntimeException(e);
                 }
                 mAutoComplete = null;
             }
 
             @Override
-            public void onNext(ArrayList<String> words) {
+            public void onNext(List<String> words) {
                 mView.showSuggestion(words);
             }
         });

@@ -12,4 +12,6 @@
     <color name="colorPos">#DDF0ED</color>
     <color name="colorPharseTitle">#495A80</color>
     <color name="colorToobarText">#222222</color>
+    <color name="colorCloseBg">#0000</color>
+    <color name="colorFloatWindowContain">#5000</color>
 </resources>

@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements
         mSearchFragment.attachNavigationDrawerToMenuButton(mDrawerLayout);
         transaction.replace(R.id.include_layout, mSearchFragment);
         transaction.commit();
-        new SearchPresenter(mSearchFragment, new SearchModel(this), this);
+        new SearchPresenter(mSearchFragment, new SearchModel(this));
 
         Intent intent = getIntent();
         if(intent != null) {
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.include_layout, mSearchFragment);
                 transaction.commit();
-                new SearchPresenter(mSearchFragment, new SearchModel(this), this);
+                new SearchPresenter(mSearchFragment, new SearchModel(this));
             }
             mDrawerLayout.closeDrawer(mNavigationView);
         } else if(item.getItemId() == R.id.drawer_wordbook) {

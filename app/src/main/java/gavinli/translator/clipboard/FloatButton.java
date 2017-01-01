@@ -16,13 +16,13 @@ import gavinli.translator.R;
  * on 16-11-29.
  */
 
-public class FloatView extends RelativeLayout {
-    public FloatView(Context context) {
+public class FloatButton extends RelativeLayout {
+    public FloatButton(Context context) {
         super(context);
         init();
     }
 
-    public FloatView(Context context, AttributeSet attrs) {
+    public FloatButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }

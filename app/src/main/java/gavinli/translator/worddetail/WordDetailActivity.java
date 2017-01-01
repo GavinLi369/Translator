@@ -41,7 +41,7 @@ public class WordDetailActivity extends AppCompatActivity implements WordDetailC
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         mProgressBar.setVisibility(View.VISIBLE);
 
-        new WordDetailPresenter(this, new WordDetailModel(this), this);
+        new WordDetailPresenter(this, new WordDetailModel(this));
         Intent intent = getIntent();
         if(intent != null) {
             String word = intent.getStringExtra(INTENT_WORD_KEY);

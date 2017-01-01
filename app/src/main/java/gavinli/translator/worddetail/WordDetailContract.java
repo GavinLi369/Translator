@@ -17,7 +17,7 @@ import gavinli.translator.util.HtmlDecoder;
 
 public class WordDetailContract {
     interface Model {
-        ArrayList<Spanned> getExplain(String word, HtmlDecoder.OnSpeakedLisenter onSpeakedLisenter)
+        List<Spanned> getExplain(String word)
                 throws IOException, IndexOutOfBoundsException ;
     }
 

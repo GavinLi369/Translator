@@ -3,6 +3,8 @@ package gavinli.translator.util;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -34,7 +36,6 @@ public class HtmlDecoder {
     private String mHtml;
     private Context mContext;
     private OnStaredLisenter mOnStaredLisenter;
-    private OnSpeakedLisenter mOnSpeakedLisenter;
 
     private ArrayList<Spanned> mSpanneds = new ArrayList<>();
     private String mWord;
@@ -46,10 +47,6 @@ public class HtmlDecoder {
 
     public void setOnStaredListener(OnStaredLisenter onStaredListener) {
         mOnStaredLisenter = onStaredListener;
-    }
-
-    public void setOnSpeakedLisenter(OnSpeakedLisenter onSpeakedLisenter) {
-        mOnSpeakedLisenter = onSpeakedLisenter;
     }
 
     @SuppressWarnings("deprecation")
@@ -165,10 +162,10 @@ public class HtmlDecoder {
             ClickableSpan clickableSpan = new ClickableSpan() {
                 @Override
                 public void onClick(View view) {
-                    if(mOnSpeakedLisenter != null) {
-                        String url = speakerElements.get(0).attr("data-src-mp3");
-                        mOnSpeakedLisenter.onSpeaked(url);
-                    }
+                    String url = speakerElements.get(0).attr("data-src-mp3");
+                    MediaPlayer mediaPlayer = MediaPlayer.create(mContext, Uri.parse(url));
+                    mediaPlayer.setLooping(false);
+                    mediaPlayer.start();
                 }
             };
             SpannableString speakerSpanned = new SpannableString("ic_speaker");
@@ -349,9 +346,5 @@ public class HtmlDecoder {
 
     public interface OnStaredLisenter {
         void onStared(String word);
-    }
-
-    public interface OnSpeakedLisenter {
-        void onSpeaked(String url);
     }
 }

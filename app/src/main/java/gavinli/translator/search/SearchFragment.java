@@ -20,6 +20,7 @@ import com.arlib.floatingsearchview.suggestions.SearchSuggestionsAdapter;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import gavinli.translator.R;
 
@@ -67,7 +68,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     }
 
     @Override
-    public void showExplain(ArrayList<Spanned> explains) {
+    public void showExplain(List<Spanned> explains) {
         mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
@@ -78,12 +79,11 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     }
 
     @Override
-    public void showSuggestion(ArrayList<String> suggestions) {
+    public void showSuggestion(List<String> suggestions) {
         if(suggestions != null && suggestions.size() != 0) {
             ArrayList<WordSuggestion> wordSuggestions = new ArrayList<>();
-            int num = Math.min(5, suggestions.size());
-            for(int i = 0; i < num; i++) {
-                wordSuggestions.add(new WordSuggestion(suggestions.get(i)));
+            for(String suggestion : suggestions) {
+                wordSuggestions.add(new WordSuggestion(suggestion));
             }
             mSearchBar.swapSuggestions(wordSuggestions);
         } else {
@@ -140,7 +140,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         }
         mSearchBar.showProgress();
 
-        mPresenter.loadAutoComplete(newQuery);
+        mPresenter.loadAutoComplete(newQuery, 5);
     }
 
     @Override

@@ -5,7 +5,9 @@ import android.text.Spanned;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import gavinli.translator.util.CambirdgeApi;
 import gavinli.translator.util.HtmlDecoder;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,8 +19,6 @@ import okhttp3.Response;
  */
 
 public class WordDetailModel implements WordDetailContract.Model {
-    private static final String DICTIONARY_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
-
     private Context mContext;
 
     public WordDetailModel(Context context) {
@@ -26,14 +26,8 @@ public class WordDetailModel implements WordDetailContract.Model {
     }
 
     @Override
-    public ArrayList<Spanned> getExplain(String word, HtmlDecoder.OnSpeakedLisenter onSpeakedLisenter)
+    public List<Spanned> getExplain(String word)
             throws IOException, IndexOutOfBoundsException {
-        Request request = new Request.Builder()
-                .url(DICTIONARY_URL + word)
-                .build();
-        Response response = new OkHttpClient().newCall(request).execute();
-        HtmlDecoder htmlDecoder = new HtmlDecoder(response.body().string(), mContext);
-        htmlDecoder.setOnSpeakedLisenter(onSpeakedLisenter);
-        return htmlDecoder.decode();
+        return CambirdgeApi.getExplain(mContext, word, null);
     }
 }

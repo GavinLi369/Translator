@@ -6,20 +6,31 @@ import android.app.Service;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.text.Spanned;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import com.orhanobut.logger.Logger;
+
+import java.io.IOException;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import gavinli.translator.MainActivity;
 import gavinli.translator.R;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import gavinli.translator.util.CambirdgeApi;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by GavinLi
@@ -34,7 +45,8 @@ public class ClipboardMonitor extends Service
 
     private ClipboardManager mClipboardManager;
     private WindowManager mWindowManager;
-    private View mFloatWindow;
+    private View mFloatButton;
+    private FloatWindow mFloatWindow;
     private String mPreviousText = "";
 
     @Override
@@ -70,7 +82,7 @@ public class ClipboardMonitor extends Service
             String text = charSequence.toString();
             //必须是英语单词
             if (!text.matches("[a-zA-Z]+\\s*") ||
-                    (text.equals(mPreviousText) && mFloatWindow != null)) return;
+                    (text.equals(mPreviousText) && mFloatButton != null)) return;
             showFloatWindow(text.trim());
             TimerTask hideFloatWindowTask = new TimerTask() {
                 @Override
@@ -85,19 +97,78 @@ public class ClipboardMonitor extends Service
 
     @SuppressLint("InflateParams")
     private void showFloatWindow(String word) {
-        if(mFloatWindow != null) {
+        if(mFloatButton != null) {
             hideFloatWindow();
         }
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
-        mFloatWindow = new FloatView(this);
-        mFloatWindow.setOnClickListener(view -> {
+        mFloatButton = new FloatButton(this);
+        mFloatButton.setOnClickListener(view -> {
             hideFloatWindow();
-            //TODO 悬浮框显示解释
-            Intent intent = new Intent(ClipboardMonitor.this, MainActivity.class);
-            intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(INTENT_WORD, word);
-            startActivity(intent);
+
+            LinearLayout containLayout = new LinearLayout(this);
+            containLayout.setBackgroundResource(R.color.colorFloatWindowContain);
+            //单击解释区域外部，则关闭悬浮框
+            containLayout.setOnTouchListener((v, event) -> {
+                Rect rect = new Rect();
+                mFloatWindow.getGlobalVisibleRect(rect);
+                if(!rect.contains((int) event.getX(), (int) event.getY())) {
+                    mWindowManager.removeView(containLayout);
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+
+            mFloatWindow = new FloatWindow(ClipboardMonitor.this);
+            mFloatWindow.setOnCloseListener(() -> mWindowManager.removeView(containLayout));
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(450, 400);
+            layoutParams.setMargins((screenWidth - 450) / 2, 100, 0, 0);
+            mFloatWindow.setLayoutParams(layoutParams);
+            containLayout.addView(mFloatWindow);
+
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+            params.type = WindowManager.LayoutParams.TYPE_PHONE;
+            params.format = PixelFormat.RGBA_8888;
+            params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            params.gravity = Gravity.START | Gravity.TOP;
+            params.width = screenWidth;
+            params.height = screenHeight;
+            params.x = 0;
+            params.y = 0;
+            mWindowManager.addView(containLayout, params);
+            Observable<List<Spanned>> observable = Observable.create(new Observable.OnSubscribe<List<Spanned>>() {
+                @Override
+                public void call(Subscriber<? super List<Spanned>> subscriber) {
+                    Logger.d("call");
+                    try {
+                        subscriber.onNext(CambirdgeApi.getExplain(ClipboardMonitor.this, word, null));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        subscriber.onError(e);
+                    }
+                }
+            }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+            observable.subscribe(new Observer<List<Spanned>>() {
+                @Override
+                public void onCompleted() {
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Logger.d("onError");
+                    if(e instanceof IOException) {
+                        Toast.makeText(ClipboardMonitor.this, "网络连接失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onNext(List<Spanned> spanneds) {
+                    Logger.d("OnNext");
+                    mFloatWindow.setExplain(spanneds);
+                }
+            });
         });
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_PHONE;
@@ -109,13 +180,13 @@ public class ClipboardMonitor extends Service
         params.height = 120;
         params.x = screenWidth + 100;
         params.y = screenHeight / 5;
-        mWindowManager.addView(mFloatWindow, params);
+        mWindowManager.addView(mFloatButton, params);
     }
 
     private void hideFloatWindow() {
-        if(mFloatWindow != null) {
-            mWindowManager.removeView(mFloatWindow);
-            mFloatWindow = null;
+        if(mFloatButton != null) {
+            mWindowManager.removeView(mFloatButton);
+            mFloatButton = null;
         }
     }
 

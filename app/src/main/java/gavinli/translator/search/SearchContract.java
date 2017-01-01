@@ -2,10 +2,8 @@ package gavinli.translator.search;
 
 import android.text.Spanned;
 
-import org.json.JSONException;
-
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
@@ -18,12 +16,11 @@ import gavinli.translator.util.HtmlDecoder;
 
 public class SearchContract {
     interface Model {
-        ArrayList<Spanned> getExplain(String word,
-                                      HtmlDecoder.OnStaredLisenter lisenter,
-                                      HtmlDecoder.OnSpeakedLisenter onSpeakedLisenter)
+        List<Spanned> getExplain(String word,
+                                 HtmlDecoder.OnStaredLisenter lisenter)
                 throws IOException, IndexOutOfBoundsException;
 
-        ArrayList<String> getComplete(String key) throws IOException, JSONException;
+        List<String> getComplete(String key, int num) throws IOException;
 
         boolean wordExisted(String word);
 
@@ -31,9 +28,9 @@ public class SearchContract {
     }
 
     interface View extends BaseView<Presenter> {
-        void showExplain(ArrayList<Spanned> explains);
+        void showExplain(List<Spanned> explains);
 
-        void showSuggestion(ArrayList<String> suggestions);
+        void showSuggestion(List<String> suggestions);
 
         void showNetworkError();
 
@@ -49,6 +46,6 @@ public class SearchContract {
     interface Presenter extends BasePresenter {
         void loadExplain(String word);
 
-        void loadAutoComplete(String key);
+        void loadAutoComplete(String key, int num);
     }
 }

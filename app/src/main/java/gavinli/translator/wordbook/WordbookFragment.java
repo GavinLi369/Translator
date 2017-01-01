@@ -25,7 +25,6 @@ import gavinli.translator.worddetail.WordDetailActivity;
  * on 16-11-16.
  */
 
-//TODO 点击进入单词解释界面
 public class WordbookFragment extends Fragment implements WordbookContract.View {
     private RecyclerView mWordListView;
     private WordListAdapter mAdapter;
