@@ -24,6 +24,7 @@ import gavinli.translator.R;
 
 public class FloatWindow extends RelativeLayout {
     private OnCloseListener mOnCloseListener;
+    private OnStarListener mOnStarListener;
     private TextView mTextView;
     private ProgressBar mProgressBar;
 
@@ -41,7 +42,7 @@ public class FloatWindow extends RelativeLayout {
         setBackgroundColor(Color.WHITE);
 
         LinearLayout topLayout = new LinearLayout(getContext());
-        LayoutParams topLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 80);
+        LayoutParams topLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 70);
         topLayout.setLayoutParams(topLayoutParams);
         topLayout.setBackgroundResource(R.color.colorPrimary);
         addView(topLayout);
@@ -57,11 +58,23 @@ public class FloatWindow extends RelativeLayout {
         title.setTextSize(20);
         topLayout.addView(title);
 
+        ImageButton star = new ImageButton(getContext());
+        LinearLayout.LayoutParams starParams = new LinearLayout.LayoutParams
+                (LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+        starParams.setMargins(150, 0, 0, 0);
+        star.setLayoutParams(starParams);
+        star.setBackgroundResource(R.color.colorStarBg);
+        star.setImageResource(R.drawable.ic_star);
+        star.setOnClickListener(view -> mOnStarListener.onStar());
+        topLayout.addView(star);
+
+
         ImageButton close = new ImageButton(getContext());
         LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams
                 (LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT);
-        closeParams.setMargins(230, 0, 0, 0);
+        closeParams.setMargins(3, 1, 0, 0);
         close.setLayoutParams(closeParams);
         close.setBackgroundResource(R.color.colorCloseBg);
         close.setImageResource(R.drawable.ic_close);
@@ -85,7 +98,7 @@ public class FloatWindow extends RelativeLayout {
         ScrollView scrollView = new ScrollView(getContext());
         LayoutParams scrollParams = new LayoutParams
                 (LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        scrollParams.setMargins(0, 80, 0, 0);
+        scrollParams.setMargins(0, 70, 0, 0);
         scrollView.setLayoutParams(scrollParams);
         scrollView.addView(mTextView);
         addView(scrollView);
@@ -97,6 +110,14 @@ public class FloatWindow extends RelativeLayout {
             mTextView.append(spanned);
             mTextView.append("\n\n");
         }
+    }
+
+    public void setOnStarListener(OnStarListener listener) {
+        mOnStarListener = listener;
+    }
+
+    public interface OnStarListener {
+        void onStar();
     }
 
     public void setOnCloseListener(OnCloseListener listener) {

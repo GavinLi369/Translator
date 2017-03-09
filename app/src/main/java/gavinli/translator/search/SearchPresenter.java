@@ -111,7 +111,7 @@ public class SearchPresenter implements SearchContract.Presenter {
         protected String doInBackground(String... strings) {
             if(!mModel.wordExisted(strings[0])) {
                 mModel.saveWord(strings[0]);
-                return "单词保存至Wordbook";
+                return "单词已保存至单词本";
             } else {
                 return "单词已存在";
             }

@@ -228,6 +228,16 @@ public class HtmlDecoder {
         Element define = defineBlock.getElementsByClass("def-block pad-indent").get(0);
         mSpanneds.add(buildDefine(define));
 
+        String translation = defineBlock.getElementsByClass("trans").get(0).text();
+        SpannableString translationSpanned = new SpannableString(translation);
+        translationSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorTranslation)),
+                0, translation.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        translationSpanned.setSpan(new RelativeSizeSpan(1.2f),
+                0, translation.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        mSpanneds.add(translationSpanned);
+
         //例句
         for(Element example : defineBlock.getElementsByClass("eg")) {
             mSpanneds.add(buildExample(example));
@@ -258,6 +268,16 @@ public class HtmlDecoder {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mSpanneds.add(defineBuilder);
 
+        String translation = phraseBlock.getElementsByClass("trans").get(0).text();
+        SpannableString translationSpanned = new SpannableString(translation);
+        translationSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorTranslation)),
+                0, translation.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        translationSpanned.setSpan(new RelativeSizeSpan(1.2f),
+                0, translation.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        mSpanneds.add(translationSpanned);
+
         //例句
         for(Element example : phraseBlock.getElementsByClass("eg")) {
             SpannableString exampleSpanned = buildExample(example);
@@ -274,8 +294,8 @@ public class HtmlDecoder {
 
         if(mOnStaredLisenter != null) {
             //加入单词本
-            SpannableString starSpanned = new SpannableString("ic_star ");
-            ImageSpan star = new ImageSpan(mContext, R.drawable.ic_star);
+            SpannableString starSpanned = new SpannableString("ic_star_1 ");
+            ImageSpan star = new ImageSpan(mContext, R.drawable.ic_star_1);
             ClickableSpan clickableSpan = new ClickableSpan() {
                 @Override
                 public void onClick(View view) {

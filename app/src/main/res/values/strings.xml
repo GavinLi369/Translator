@@ -4,6 +4,8 @@
     <string name="wordbook">Wordbook</string>
     <string name="settings">Settings</string>
     <string name="setting_clipboard">Tap to Translate</string>
-    <string name="key_clipboard">clipboard</string>
+    <string name="setting_dictionary">Dictionary</string>
+    <string name="key_clipboard">perference_clipboard</string>
     <string name="worddetail">Explain</string>
+    <string name="key_dictionary">perference_dictionary</string>
 </resources>

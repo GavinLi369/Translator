@@ -5,4 +5,12 @@
         android:key="@string/key_clipboard"
         android:title="@string/setting_clipboard"
         android:defaultValue="false"/>
+
+    <ListPreference
+        android:key="@string/key_dictionary"
+        android:title="@string/setting_dictionary"
+        android:entries="@array/explain_languages"
+        android:entryValues="@array/explain_language_values"
+        android:defaultValue="0"/>
+
 </PreferenceScreen>

@@ -1,26 +1,16 @@
 package gavinli.translator.search;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 import android.text.Spanned;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import gavinli.translator.datebase.WordbookDbHelper;
-import gavinli.translator.datebase.WordbookEntry;
+import gavinli.translator.R;
+import gavinli.translator.datebase.WordbookUtil;
 import gavinli.translator.util.CambirdgeApi;
 import gavinli.translator.util.HtmlDecoder;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Created by GavinLi
@@ -29,17 +19,18 @@ import okhttp3.Response;
 
 public class SearchModel implements SearchContract.Model {
     private Context mContext;
-    private WordbookDbHelper mDbHelper;
+    private WordbookUtil mWordbookUtil;
 
     public SearchModel(Context context) {
         mContext = context;
-        mDbHelper = new WordbookDbHelper(context);
+        mWordbookUtil = new WordbookUtil(context);
     }
 
     @Override
     public List<Spanned> getExplain(String word, HtmlDecoder.OnStaredLisenter onStaredLisenter)
             throws IOException, IndexOutOfBoundsException {
-        return CambirdgeApi.getExplain(mContext, word, onStaredLisenter);
+        return CambirdgeApi.getExplain(mContext, word, onStaredLisenter,
+                PreferenceManager.getDefaultSharedPreferences(mContext).getString(mContext.getString(R.string.key_dictionary), "null"));
     }
 
     @Override
@@ -49,30 +40,11 @@ public class SearchModel implements SearchContract.Model {
 
     @Override
     public boolean wordExisted(String word) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        String[] projection = {
-                WordbookEntry._ID,
-                WordbookEntry.COLUMN_NAME_WORD
-        };
-        String selection = WordbookEntry.COLUMN_NAME_WORD + " = ?";
-        String[] selectionArg = { word };
-        Cursor cursor = db.query(WordbookEntry.TABLE_NAME,
-                projection,
-                selection,
-                selectionArg,
-                null,
-                null,
-                null);
-        boolean existed = cursor.moveToFirst();
-        cursor.close();
-        return existed;
+        return mWordbookUtil.wordExisted(word);
     }
 
     @Override
     public void saveWord(String word) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(WordbookEntry.COLUMN_NAME_WORD, word);
-        db.insert(WordbookEntry.TABLE_NAME, null, values);
+        mWordbookUtil.saveWord(word);
     }
 }

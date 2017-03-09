@@ -17,14 +17,13 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.orhanobut.logger.Logger;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import gavinli.translator.R;
+import gavinli.translator.datebase.WordbookUtil;
 import gavinli.translator.util.CambirdgeApi;
 import rx.Observable;
 import rx.Observer;
@@ -87,7 +86,7 @@ public class ClipboardMonitor extends Service
             TimerTask hideFloatWindowTask = new TimerTask() {
                 @Override
                 public void run() {
-                    hideFloatWindow();
+                    hideFloatButton();
                 }
             };
             new Timer().schedule(hideFloatWindowTask, FLOAT_WINDOW_TIME);
@@ -98,13 +97,13 @@ public class ClipboardMonitor extends Service
     @SuppressLint("InflateParams")
     private void showFloatWindow(String word) {
         if(mFloatButton != null) {
-            hideFloatWindow();
+            hideFloatButton();
         }
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         mFloatButton = new FloatButton(this);
         mFloatButton.setOnClickListener(view -> {
-            hideFloatWindow();
+            hideFloatButton();
 
             LinearLayout containLayout = new LinearLayout(this);
             containLayout.setBackgroundResource(R.color.colorFloatWindowContain);
@@ -122,7 +121,17 @@ public class ClipboardMonitor extends Service
 
             mFloatWindow = new FloatWindow(ClipboardMonitor.this);
             mFloatWindow.setOnCloseListener(() -> mWindowManager.removeView(containLayout));
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(450, 400);
+            mFloatWindow.setOnStarListener(() -> {
+                WordbookUtil wordbookUtil = new WordbookUtil(ClipboardMonitor.this);
+                if(wordbookUtil.wordExisted(word)) {
+                    Toast.makeText(this, "单词已存在", Toast.LENGTH_SHORT).show();
+                } else {
+                    wordbookUtil.saveWord(word);
+                    Toast.makeText(this, "单词已保存至单词本", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(450, 600);
             layoutParams.setMargins((screenWidth - 450) / 2, 100, 0, 0);
             mFloatWindow.setLayoutParams(layoutParams);
             containLayout.addView(mFloatWindow);
@@ -141,10 +150,10 @@ public class ClipboardMonitor extends Service
             Observable<List<Spanned>> observable = Observable.create(new Observable.OnSubscribe<List<Spanned>>() {
                 @Override
                 public void call(Subscriber<? super List<Spanned>> subscriber) {
-                    Logger.d("call");
                     try {
-                        subscriber.onNext(CambirdgeApi.getExplain(ClipboardMonitor.this, word, null));
-                    } catch (IOException e) {
+                        subscriber.onNext(CambirdgeApi.getExplain(ClipboardMonitor.this, word, null,
+                                PreferenceManager.getDefaultSharedPreferences(ClipboardMonitor.this).getString(ClipboardMonitor.this.getString(R.string.key_dictionary), "null")));
+                    } catch (IOException | IndexOutOfBoundsException e) {
                         e.printStackTrace();
                         subscriber.onError(e);
                     }
@@ -157,15 +166,16 @@ public class ClipboardMonitor extends Service
 
                 @Override
                 public void onError(Throwable e) {
-                    Logger.d("onError");
                     if(e instanceof IOException) {
                         Toast.makeText(ClipboardMonitor.this, "网络连接失败", Toast.LENGTH_SHORT).show();
+                    } else if(e instanceof IndexOutOfBoundsException) {
+                        Toast.makeText(ClipboardMonitor.this, "无该单词", Toast.LENGTH_SHORT).show();
+                        mWindowManager.removeView(containLayout);
                     }
                 }
 
                 @Override
                 public void onNext(List<Spanned> spanneds) {
-                    Logger.d("OnNext");
                     mFloatWindow.setExplain(spanneds);
                 }
             });
@@ -183,7 +193,7 @@ public class ClipboardMonitor extends Service
         mWindowManager.addView(mFloatButton, params);
     }
 
-    private void hideFloatWindow() {
+    private void hideFloatButton() {
         if(mFloatButton != null) {
             mWindowManager.removeView(mFloatButton);
             mFloatButton = null;

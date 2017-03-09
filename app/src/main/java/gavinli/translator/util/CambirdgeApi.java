@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import gavinli.translator.R;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -21,19 +22,30 @@ import okhttp3.Response;
  */
 
 public class CambirdgeApi {
-    private static final String DICTIONARY_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
+    private static final String DICTIONARY_ENGLISH_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
+    private static final String DICTIONARY_CHINESE_URL = "http://dictionary.cambridge.org/search/english-chinese-simplified/direct/?q=";
     private static final String AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
 
-    public static List<Spanned> getExplain(Context context, String word, HtmlDecoder.OnStaredLisenter lisenter)
+    public static List<Spanned> getExplain(Context context, String word, HtmlDecoder.OnStaredLisenter lisenter,
+                                           String dictionary)
                     throws IOException{
+        String url;
+        if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[0])) {
+            url = DICTIONARY_ENGLISH_URL;
+        } else if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[1])){
+            url = DICTIONARY_CHINESE_URL;
+        } else {
+            url = null;
+        }
         Request request = new Request.Builder()
-                .url(DICTIONARY_URL + word)
+                .url(url + word)
                 .build();
         Response response = new OkHttpClient().newCall(request).execute();
         HtmlDecoder htmlDecoder = new HtmlDecoder(response.body().string(), context);
         if(lisenter != null) {
             htmlDecoder.setOnStaredListener(lisenter);
         }
+
         return htmlDecoder.decode();
     }
 
