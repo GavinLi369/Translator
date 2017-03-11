@@ -27,7 +27,6 @@ import gavinli.translator.datebase.WordbookUtil;
 import gavinli.translator.util.CambirdgeApi;
 import rx.Observable;
 import rx.Observer;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -149,8 +148,7 @@ public class ClipboardMonitor extends Service
             mWindowManager.addView(containLayout, params);
             Observable<List<Spanned>> observable = Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
                 try {
-                    subscriber.onNext(CambirdgeApi.getExplain(ClipboardMonitor.this, word,
-                            PreferenceManager.getDefaultSharedPreferences(ClipboardMonitor.this).getString(ClipboardMonitor.this.getString(R.string.key_dictionary), "null")));
+                    subscriber.onNext(CambirdgeApi.getExplain(ClipboardMonitor.this, word));
                 } catch (IOException | IndexOutOfBoundsException e) {
                     e.printStackTrace();
                     subscriber.onError(e);

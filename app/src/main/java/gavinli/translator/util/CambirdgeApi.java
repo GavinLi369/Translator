@@ -1,7 +1,10 @@
 package gavinli.translator.util;
 
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.text.Spanned;
+
+import com.orhanobut.logger.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,18 +27,21 @@ import okhttp3.Response;
 public class CambirdgeApi {
     private static final String DICTIONARY_ENGLISH_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
     private static final String DICTIONARY_CHINESE_URL = "http://dictionary.cambridge.org/search/english-chinese-simplified/direct/?q=";
-    private static final String AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
+    private static final String EN_AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
+    private static final String CH_AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english-chinese-simplified/?q=";
 
-    public static List<Spanned> getExplain(Context context, String word,
-                                           String dictionary)
+    public static List<Spanned> getExplain(Context context, String word)
                     throws IOException{
-        String url;
+        String dictionary = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.key_dictionary), null);
+        if(dictionary == null) throw new RuntimeException("设置不应为空");
+        String url = null;
         if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[0])) {
             url = DICTIONARY_ENGLISH_URL;
+            Logger.d("en");
         } else if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[1])){
             url = DICTIONARY_CHINESE_URL;
-        } else {
-            url = null;
+            Logger.d("cn");
         }
         Request request = new Request.Builder()
                 .url(url + word)
@@ -46,11 +52,21 @@ public class CambirdgeApi {
         return htmlDecoder.decode();
     }
 
-    public static List<String> getComplete(String key, int num) throws IOException {
+    public static List<String> getComplete(Context context, String key, int num)
+            throws IOException {
+        String dictionary = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.key_dictionary), null);
+        if(dictionary == null) throw new RuntimeException("设置不应为空");
+        String url = null;
+        if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[0])) {
+            url = EN_AUTO_COMPLETE_URL;
+        } else if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[1])){
+            url = CH_AUTO_COMPLETE_URL;
+        }
         try {
             List<String> results = new ArrayList<>();
             Request request = new Request.Builder()
-                    .url(AUTO_COMPLETE_URL + key)
+                    .url(url + key)
                     .build();
 
             Response response = new OkHttpClient().newCall(request).execute();

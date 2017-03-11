@@ -220,15 +220,18 @@ public class HtmlDecoder {
         Element define = defineBlock.getElementsByClass("def-block pad-indent").get(0);
         mSpanneds.add(buildDefine(define));
 
-        String translation = defineBlock.getElementsByClass("trans").get(0).text();
-        SpannableString translationSpanned = new SpannableString(translation);
-        translationSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorTranslation)),
-                0, translation.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        translationSpanned.setSpan(new RelativeSizeSpan(1.2f),
-                0, translation.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        mSpanneds.add(translationSpanned);
+        Elements trans = defineBlock.getElementsByClass("trans");
+        if(trans.size() != 0) {
+            String translation = trans.get(0).text();
+            SpannableString translationSpanned = new SpannableString(translation);
+            translationSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorTranslation)),
+                    0, translation.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            translationSpanned.setSpan(new RelativeSizeSpan(1.2f),
+                    0, translation.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mSpanneds.add(translationSpanned);
+        }
 
         //例句
         for(Element example : defineBlock.getElementsByClass("eg")) {
@@ -260,15 +263,18 @@ public class HtmlDecoder {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mSpanneds.add(defineBuilder);
 
-        String translation = phraseBlock.getElementsByClass("trans").get(0).text();
-        SpannableString translationSpanned = new SpannableString(translation);
-        translationSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorTranslation)),
-                0, translation.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        translationSpanned.setSpan(new RelativeSizeSpan(1.2f),
-                0, translation.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        mSpanneds.add(translationSpanned);
+        Elements trans = phraseBlock.getElementsByClass("trans");
+        if(trans.size() != 0) {
+            String translation = trans.get(0).text();
+            SpannableString translationSpanned = new SpannableString(translation);
+            translationSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorTranslation)),
+                    0, translation.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            translationSpanned.setSpan(new RelativeSizeSpan(1.2f),
+                    0, translation.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mSpanneds.add(translationSpanned);
+        }
 
         //例句
         for(Element example : phraseBlock.getElementsByClass("eg")) {

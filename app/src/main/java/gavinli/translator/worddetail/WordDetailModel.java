@@ -1,13 +1,11 @@
 package gavinli.translator.worddetail;
 
 import android.content.Context;
-import android.preference.PreferenceManager;
 import android.text.Spanned;
 
 import java.io.IOException;
 import java.util.List;
 
-import gavinli.translator.R;
 import gavinli.translator.util.CambirdgeApi;
 
 /**
@@ -25,7 +23,6 @@ public class WordDetailModel implements WordDetailContract.Model {
     @Override
     public List<Spanned> getExplain(String word)
             throws IOException, IndexOutOfBoundsException {
-        return CambirdgeApi.getExplain(mContext, word,
-                PreferenceManager.getDefaultSharedPreferences(mContext).getString(mContext.getString(R.string.key_dictionary), "null"));
+        return CambirdgeApi.getExplain(mContext, word);
     }
 }
