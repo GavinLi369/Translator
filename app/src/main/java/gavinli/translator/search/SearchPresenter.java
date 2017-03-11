@@ -3,6 +3,8 @@ package gavinli.translator.search;
 import android.os.AsyncTask;
 import android.text.Spanned;
 
+import com.orhanobut.logger.Logger;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -21,6 +23,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     private SearchContract.View mView;
     private SearchContract.Model mModel;
     private Subscription mAutoComplete;
+    private String mCurrentWord = "";
 
     public SearchPresenter(SearchContract.View view, SearchContract.Model model) {
         mView = view;
@@ -34,16 +37,12 @@ public class SearchPresenter implements SearchContract.Presenter {
             mAutoComplete.unsubscribe();
             mAutoComplete = null;
         }
-        Observable<List<Spanned>> observable = Observable.create(new Observable.OnSubscribe<List<Spanned>>() {
-            @Override
-            public void call(Subscriber<? super List<Spanned>> subscriber) {
-                try {
-                    subscriber.onNext(mModel.getExplain(word.replace(" ", "-"),
-                            word -> new SaveWordTask().execute(word)));
-                } catch (IOException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
-                    subscriber.onError(e);
-                }
+        Observable<List<Spanned>> observable = Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+            try {
+                subscriber.onNext(mModel.getExplain(word.replace(" ", "-")));
+            } catch (IOException | IndexOutOfBoundsException e) {
+                e.printStackTrace();
+                subscriber.onError(e);
             }
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
         observable.subscribe(new Subscriber<List<Spanned>>() {
@@ -57,6 +56,7 @@ public class SearchPresenter implements SearchContract.Presenter {
                     mView.showNetworkError();
                 } else if (e instanceof IndexOutOfBoundsException) {
                     mView.showNotFoundWordError();
+                    mCurrentWord = "";
                 }
             }
 
@@ -64,6 +64,7 @@ public class SearchPresenter implements SearchContract.Presenter {
             public void onNext(List<Spanned> spanneds) {
                 mView.hideBackground();
                 mView.showExplain(spanneds);
+                mCurrentWord = spanneds.get(0).toString();
             }
         });
     }
@@ -74,15 +75,12 @@ public class SearchPresenter implements SearchContract.Presenter {
             mAutoComplete.unsubscribe();
             mAutoComplete = null;
         }
-        Observable<List<String>> observable = Observable.create(new Observable.OnSubscribe<List<String>>() {
-            @Override
-            public void call(Subscriber<? super List<String>> subscriber) {
-                try {
-                    subscriber.onNext(mModel.getComplete(key, num));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    subscriber.onError(e);
-                }
+        Observable<List<String>> observable = Observable.create((Observable.OnSubscribe<List<String>>) subscriber -> {
+            try {
+                subscriber.onNext(mModel.getComplete(key, num));
+            } catch (IOException e) {
+                e.printStackTrace();
+                subscriber.onError(e);
             }
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
         mAutoComplete = observable.subscribe(new Subscriber<List<String>>() {
@@ -104,6 +102,12 @@ public class SearchPresenter implements SearchContract.Presenter {
                 mView.showSuggestion(words);
             }
         });
+    }
+
+    @Override
+    public void saveWord() {
+        Logger.d("clicked");
+        if(!mCurrentWord.equals("")) new SaveWordTask().execute(mCurrentWord);
     }
 
     class SaveWordTask extends AsyncTask<String, Void, String> {

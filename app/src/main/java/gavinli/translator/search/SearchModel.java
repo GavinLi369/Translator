@@ -27,9 +27,9 @@ public class SearchModel implements SearchContract.Model {
     }
 
     @Override
-    public List<Spanned> getExplain(String word, HtmlDecoder.OnStaredLisenter onStaredLisenter)
+    public List<Spanned> getExplain(String word)
             throws IOException, IndexOutOfBoundsException {
-        return CambirdgeApi.getExplain(mContext, word, onStaredLisenter,
+        return CambirdgeApi.getExplain(mContext, word,
                 PreferenceManager.getDefaultSharedPreferences(mContext).getString(mContext.getString(R.string.key_dictionary), "null"));
     }
 

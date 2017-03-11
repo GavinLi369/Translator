@@ -16,8 +16,7 @@ import gavinli.translator.util.HtmlDecoder;
 
 public class SearchContract {
     interface Model {
-        List<Spanned> getExplain(String word,
-                                 HtmlDecoder.OnStaredLisenter lisenter)
+        List<Spanned> getExplain(String word)
                 throws IOException, IndexOutOfBoundsException;
 
         List<String> getComplete(String key, int num) throws IOException;
@@ -47,5 +46,7 @@ public class SearchContract {
         void loadExplain(String word);
 
         void loadAutoComplete(String key, int num);
+
+        void saveWord();
     }
 }

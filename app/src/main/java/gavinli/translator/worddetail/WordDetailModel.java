@@ -25,7 +25,7 @@ public class WordDetailModel implements WordDetailContract.Model {
     @Override
     public List<Spanned> getExplain(String word)
             throws IOException, IndexOutOfBoundsException {
-        return CambirdgeApi.getExplain(mContext, word, null,
+        return CambirdgeApi.getExplain(mContext, word,
                 PreferenceManager.getDefaultSharedPreferences(mContext).getString(mContext.getString(R.string.key_dictionary), "null"));
     }
 }

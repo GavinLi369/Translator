@@ -18,6 +18,8 @@ import android.widget.Toast;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.SearchSuggestionsAdapter;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
+import com.github.clans.fab.FloatingActionMenu;
+import com.github.clans.fab.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +37,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     private FloatingSearchView mSearchBar;
     private ScrollView mScrollView;
     private DrawerLayout mDrawerLayout;
+    private FloatingActionMenu mMenuFab;
 
     private SearchContract.Presenter mPresenter;
     private String mInitWord;
@@ -46,6 +49,11 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         mScrollView = (ScrollView) root.findViewById(R.id.scroll_view);
         mExplainView = (TextView) root.findViewById(R.id.tv_define);
         mExplainView.setMovementMethod(LinkMovementMethod.getInstance());
+        mMenuFab = (FloatingActionMenu) root.findViewById(R.id.fab_menu);
+        mMenuFab.setClosedOnTouchOutside(true);
+        mMenuFab.hideMenu(false);
+        FloatingActionButton starFab = (FloatingActionButton) root.findViewById(R.id.fab_star);
+        starFab.setOnClickListener(view -> mPresenter.saveWord());
         mSearchBar = (FloatingSearchView) root.findViewById(R.id.search_view);
         mSearchBar.setOnSearchListener(this);
         mSearchBar.setOnQueryChangeListener(this);
@@ -76,6 +84,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
             mExplainView.append(spanned);
             mExplainView.append("\n\n");
         }
+        mMenuFab.showMenu(true);
     }
 
     @Override
@@ -100,8 +109,11 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showNotFoundWordError() {
+        mMenuFab.hideMenu(true);
         mSearchBar.hideProgress();
         Toast.makeText(getContext(), "无该单词", Toast.LENGTH_SHORT).show();
+        mExplainView.setText("");
+        showBackground();
     }
 
     @Override

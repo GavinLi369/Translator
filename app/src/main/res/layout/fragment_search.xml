@@ -23,6 +23,28 @@
 
     </ScrollView>
 
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fab_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:menu_animationDelayPerItem="0"
+        app:menu_shadowColor="@color/colorFabShadow"
+        app:menu_colorNormal="@color/colorFabPlusBg"
+        app:menu_colorPressed="@color/colorFabPlusPressed">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_star"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_star_full"
+            style="@style/MenuButtonsStyle"/>
+
+    </com.github.clans.fab.FloatingActionMenu>
+
     <com.arlib.floatingsearchview.FloatingSearchView
         android:id="@+id/search_view"
         android:layout_width="match_parent"

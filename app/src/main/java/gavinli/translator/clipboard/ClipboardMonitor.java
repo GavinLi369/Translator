@@ -147,16 +147,13 @@ public class ClipboardMonitor extends Service
             params.x = 0;
             params.y = 0;
             mWindowManager.addView(containLayout, params);
-            Observable<List<Spanned>> observable = Observable.create(new Observable.OnSubscribe<List<Spanned>>() {
-                @Override
-                public void call(Subscriber<? super List<Spanned>> subscriber) {
-                    try {
-                        subscriber.onNext(CambirdgeApi.getExplain(ClipboardMonitor.this, word, null,
-                                PreferenceManager.getDefaultSharedPreferences(ClipboardMonitor.this).getString(ClipboardMonitor.this.getString(R.string.key_dictionary), "null")));
-                    } catch (IOException | IndexOutOfBoundsException e) {
-                        e.printStackTrace();
-                        subscriber.onError(e);
-                    }
+            Observable<List<Spanned>> observable = Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+                try {
+                    subscriber.onNext(CambirdgeApi.getExplain(ClipboardMonitor.this, word,
+                            PreferenceManager.getDefaultSharedPreferences(ClipboardMonitor.this).getString(ClipboardMonitor.this.getString(R.string.key_dictionary), "null")));
+                } catch (IOException | IndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                    subscriber.onError(e);
                 }
             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
             observable.subscribe(new Observer<List<Spanned>>() {

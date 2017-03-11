@@ -35,18 +35,12 @@ import gavinli.translator.R;
 public class HtmlDecoder {
     private String mHtml;
     private Context mContext;
-    private OnStaredLisenter mOnStaredLisenter;
 
     private ArrayList<Spanned> mSpanneds = new ArrayList<>();
-    private String mWord;
 
     public HtmlDecoder(String html, Context context) {
         mHtml = html;
         mContext = context;
-    }
-
-    public void setOnStaredListener(OnStaredLisenter onStaredListener) {
-        mOnStaredLisenter = onStaredListener;
     }
 
     @SuppressWarnings("deprecation")
@@ -84,8 +78,6 @@ public class HtmlDecoder {
                 0, positionHeader.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mSpanneds.add(posHeaderSpanned);
-
-        mWord = positionHeader;
 
         SpannableStringBuilder regionBuilder = new SpannableStringBuilder();
 
@@ -291,22 +283,6 @@ public class HtmlDecoder {
     @SuppressWarnings("deprecation")
     private SpannableStringBuilder buildDefine(Element define) {
         SpannableStringBuilder defineBuilder = new SpannableStringBuilder();
-
-        if(mOnStaredLisenter != null) {
-            //加入单词本
-            SpannableString starSpanned = new SpannableString("ic_star_1 ");
-            ImageSpan star = new ImageSpan(mContext, R.drawable.ic_star_1);
-            ClickableSpan clickableSpan = new ClickableSpan() {
-                @Override
-                public void onClick(View view) {
-                    mOnStaredLisenter.onStared(mWord);
-                }
-            };
-            starSpanned.setSpan(star, 0, starSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            starSpanned.setSpan(clickableSpan, 0, starSpanned.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            defineBuilder.append(starSpanned);
-        }
-
         if(define.getElementsByClass("gram").size() != 0) {
             String grammer = define.getElementsByClass("gram").get(0).text();
             SpannableString grammerSpanned = new SpannableString(grammer + " ");
@@ -362,9 +338,5 @@ public class HtmlDecoder {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         return blockHeaderSpanned;
-    }
-
-    public interface OnStaredLisenter {
-        void onStared(String word);
     }
 }

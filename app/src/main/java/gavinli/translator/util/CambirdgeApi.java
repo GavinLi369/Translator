@@ -26,7 +26,7 @@ public class CambirdgeApi {
     private static final String DICTIONARY_CHINESE_URL = "http://dictionary.cambridge.org/search/english-chinese-simplified/direct/?q=";
     private static final String AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
 
-    public static List<Spanned> getExplain(Context context, String word, HtmlDecoder.OnStaredLisenter lisenter,
+    public static List<Spanned> getExplain(Context context, String word,
                                            String dictionary)
                     throws IOException{
         String url;
@@ -42,9 +42,6 @@ public class CambirdgeApi {
                 .build();
         Response response = new OkHttpClient().newCall(request).execute();
         HtmlDecoder htmlDecoder = new HtmlDecoder(response.body().string(), context);
-        if(lisenter != null) {
-            htmlDecoder.setOnStaredListener(lisenter);
-        }
 
         return htmlDecoder.decode();
     }
