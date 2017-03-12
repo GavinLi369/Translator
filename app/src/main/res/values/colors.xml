@@ -28,4 +28,6 @@
     <color name="colorFabPlus">#FFFFFF</color>
     <color name="colorFabStarBg">#E08031</color>
     <color name="colorFabStarPressed">#D77728</color>
+    <color name="colorFabImageBg">#C7CEB2</color>
+    <color name="colorFabImagePressed">#BEB5A9</color>
 </resources>

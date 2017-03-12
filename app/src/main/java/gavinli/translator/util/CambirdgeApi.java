@@ -38,10 +38,8 @@ public class CambirdgeApi {
         String url = null;
         if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[0])) {
             url = DICTIONARY_ENGLISH_URL;
-            Logger.d("en");
         } else if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[1])){
             url = DICTIONARY_CHINESE_URL;
-            Logger.d("cn");
         }
         Request request = new Request.Builder()
                 .url(url + word)

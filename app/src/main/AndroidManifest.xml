@@ -24,6 +24,8 @@
 
         <activity android:name=".worddetail.WordDetailActivity"/>
 
+        <activity android:name=".imagexplain.ImageActivity"/>
+
         <receiver android:name=".clipboard.ClipboardMonitorStarter">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

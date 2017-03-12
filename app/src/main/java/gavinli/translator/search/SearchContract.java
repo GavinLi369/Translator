@@ -48,5 +48,7 @@ public class SearchContract {
         void loadAutoComplete(String key, int num);
 
         void saveWord();
+
+        String getCurrentWord();
     }
 }

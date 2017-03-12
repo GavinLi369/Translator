@@ -41,12 +41,6 @@ public class MainActivity extends AppCompatActivity implements
         transaction.commit();
         new SearchPresenter(mSearchFragment, new SearchModel(this));
 
-        Intent intent = getIntent();
-        if(intent != null) {
-            String word = intent.getStringExtra(ClipboardMonitor.INTENT_WORD);
-            mSearchFragment.init(word);
-        }
-
         if(PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean(getString(R.string.key_clipboard), false))
             startService(new Intent(this, ClipboardMonitor.class));

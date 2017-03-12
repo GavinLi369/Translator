@@ -38,7 +38,6 @@ import rx.schedulers.Schedulers;
 public class ClipboardMonitor extends Service
         implements ClipboardManager.OnPrimaryClipChangedListener {
     private static int GRAY_SERVICE_ID = 1001;
-    public static final String INTENT_WORD = "word";
     private static final int FLOAT_WINDOW_TIME = 4000;
 
     private ClipboardManager mClipboardManager;

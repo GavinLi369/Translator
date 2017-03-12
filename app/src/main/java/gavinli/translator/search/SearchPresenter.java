@@ -126,4 +126,9 @@ public class SearchPresenter implements SearchContract.Presenter {
             mView.showWordInfo(info);
         }
     }
+
+    @Override
+    public String getCurrentWord() {
+        return mCurrentWord;
+    }
 }

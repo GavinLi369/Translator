@@ -10,8 +10,6 @@ import java.util.ArrayList;
 
 import gavinli.translator.R;
 
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
-
 /**
  * Created by GavinLi
  * on 16-11-16.
@@ -28,7 +26,7 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHo
     @Override
     public WordListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.wordbook_item, parent, false));
+                .inflate(R.layout.item_wordbook, parent, false));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package gavinli.translator.search;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.imagexplain.ImageActivity;
 
 /**
  * Created by GavinLi
@@ -38,9 +40,9 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     private ScrollView mScrollView;
     private DrawerLayout mDrawerLayout;
     private FloatingActionMenu mMenuFab;
-
     private SearchContract.Presenter mPresenter;
-    private String mInitWord;
+
+    public static final String INTENT_KEY = "key";
 
     @Nullable
     @Override
@@ -54,6 +56,12 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         mMenuFab.hideMenu(false);
         FloatingActionButton starFab = (FloatingActionButton) root.findViewById(R.id.fab_star);
         starFab.setOnClickListener(view -> mPresenter.saveWord());
+        FloatingActionButton imageFab = (FloatingActionButton) root.findViewById(R.id.fab_image);
+        imageFab.setOnClickListener(view -> {
+            Intent intent = new Intent(getContext(), ImageActivity.class);
+            intent.putExtra(INTENT_KEY, mPresenter.getCurrentWord());
+            startActivity(intent);
+        });
         mSearchBar = (FloatingSearchView) root.findViewById(R.id.search_view);
         mSearchBar.setOnSearchListener(this);
         mSearchBar.setOnQueryChangeListener(this);
@@ -61,18 +69,8 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         if(mDrawerLayout != null) {
             mSearchBar.attachNavigationDrawerToMenuButton(mDrawerLayout);
         }
-        if(mInitWord != null && !mInitWord.equals("")) {
-            mSearchBar.showProgress();
-            mSearchBar.setSearchText(mInitWord);
-            mPresenter.loadExplain(mInitWord);
-        } else {
-            showBackground();
-        }
+        showBackground();
         return root;
-    }
-
-    public void init(String word) {
-        mInitWord = word;
     }
 
     @Override
