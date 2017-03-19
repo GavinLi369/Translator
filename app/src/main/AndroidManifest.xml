@@ -24,7 +24,7 @@
 
         <activity android:name=".worddetail.WordDetailActivity"/>
 
-        <activity android:name=".imagexplain.ImageActivity"/>
+        <activity android:name=".imageexplain.ImageActivity"/>
 
         <receiver android:name=".clipboard.ClipboardMonitorStarter">
             <intent-filter>

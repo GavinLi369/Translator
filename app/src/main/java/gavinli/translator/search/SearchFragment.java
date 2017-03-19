@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gavinli.translator.R;
-import gavinli.translator.imagexplain.ImageActivity;
+import gavinli.translator.imageexplain.ImageActivity;
 
 /**
  * Created by GavinLi

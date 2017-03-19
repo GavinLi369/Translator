@@ -1,4 +1,4 @@
-package gavinli.translator.imagexplain;
+package gavinli.translator.imageexplain;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -7,7 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import java.util.List;
 
 import gavinli.translator.R;
 import gavinli.translator.search.SearchFragment;
@@ -20,28 +24,27 @@ import gavinli.translator.search.SearchFragment;
 public class ImageActivity extends AppCompatActivity implements ImageContract.View {
     private ImageContract.Presenter mPresenter;
 
-    private Toolbar mToolbar;
-    private RecyclerView mImageRecyclerView;
     private ImageRecyclerAdapter mAdapter;
     private StaggeredGridLayoutManager mLayoutManager;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         String key = getIntent().getExtras().getString(SearchFragment.INTENT_KEY);
-        mToolbar.setTitle(key);
+        toolbar.setTitle(key);
 
-        mImageRecyclerView = (RecyclerView) findViewById(R.id.rv_imagelist);
+        RecyclerView imageRecyclerView = (RecyclerView) findViewById(R.id.rv_imagelist);
         mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        mImageRecyclerView.setLayoutManager(mLayoutManager);
+        imageRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new ImageRecyclerAdapter(this);
-        mImageRecyclerView.setAdapter(mAdapter);
-        mImageRecyclerView.addOnScrollListener(new ScrollRefreshListener());
-
+        imageRecyclerView.setAdapter(mAdapter);
+        imageRecyclerView.addOnScrollListener(new ScrollRefreshListener());
         new ImagePresenter(this, new ImageModel(key));
         mPresenter.loadMoreImages();
+        mProgressBar = (ProgressBar) findViewById(R.id.bar_loading);
     }
 
     class ScrollRefreshListener extends RecyclerView.OnScrollListener {
@@ -65,8 +68,16 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
     }
 
     @Override
-    public void showMoreImage(Bitmap image) {
-        mAdapter.addImageExplain(image);
+    public void showMoreImages(List<String> urls) {
+//        mAdapter.addImageUrls(urls);
+//        mAdapter.notifyItemRangeInserted(0, urls.size());
+    }
+
+    @Override
+    public void showMoreImage(Bitmap bitmap) {
+        if(mProgressBar.getVisibility() == View.VISIBLE)
+            mProgressBar.setVisibility(View.GONE);
+        mAdapter.addImage(bitmap);
         mAdapter.notifyItemInserted(mAdapter.getItemCount() + 1);
     }
 

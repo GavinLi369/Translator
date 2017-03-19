@@ -1,4 +1,4 @@
-package gavinli.translator.imagexplain;
+package gavinli.translator.imageexplain;
 
 import android.graphics.Bitmap;
 
@@ -15,7 +15,9 @@ import gavinli.translator.BaseView;
 
 public class ImageContract {
     interface View extends BaseView<Presenter> {
-        void showMoreImage(Bitmap image);
+        void showMoreImages(List<String> urls);
+
+        void showMoreImage(Bitmap bitmap);
 
         void showNetworkError();
     }
@@ -25,6 +27,7 @@ public class ImageContract {
     }
 
     interface Model {
+        List<String> getImageUrls(int num, int offset) throws IOException;
         List<Bitmap> getImages(int num, int offset) throws IOException;
     }
 }

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.text.Spanned;
 
-import com.orhanobut.logger.Logger;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
