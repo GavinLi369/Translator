@@ -1,5 +1,7 @@
 package gavinli.translator.util;
 
+import android.graphics.Bitmap;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,8 @@ public abstract class NetworkImageUtil {
         }
         return mImageUrls;
     }
+
+    public abstract List<Bitmap> getImages(int num, int offset) throws IOException;
 
     protected abstract void buildImageUrl() throws IOException;
 }

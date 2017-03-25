@@ -30,4 +30,12 @@
     <color name="colorFabStarPressed">#D77728</color>
     <color name="colorFabImageBg">#C7CEB2</color>
     <color name="colorFabImagePressed">#BEB5A9</color>
+
+    <!--图片占位-->
+    <color name="colorPlaceHold1">#E08031</color>
+    <color name="colorPlaceHold2">#C7CEB2</color>
+    <color name="colorPlaceHold3">#199475</color>
+    <color name="colorPlaceHold4">#0B6E48</color>
+    <color name="colorPlaceHold5">#044D22</color>
+
 </resources>

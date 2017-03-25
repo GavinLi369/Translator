@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import gavinli.translator.util.BaiduImageUtil;
+import gavinli.translator.util.BingImageUtil;
 import gavinli.translator.util.GoogleImageUtil;
 import gavinli.translator.util.NetworkImageUtil;
 
@@ -19,7 +20,7 @@ public class ImageModel implements ImageContract.Model {
     private List<String> mImageUrls = null;
 
     public ImageModel(String key) {
-        mNetworkImageUtil = new GoogleImageUtil(key);
+        mNetworkImageUtil = new BingImageUtil(key);
     }
 
     @Override
@@ -28,10 +29,8 @@ public class ImageModel implements ImageContract.Model {
         return mImageUrls.subList(offset, offset + num);
     }
 
+    @Override
     public List<Bitmap> getImages(int num, int offset) throws IOException {
-        if(mNetworkImageUtil instanceof GoogleImageUtil)
-            return ((GoogleImageUtil) mNetworkImageUtil).getImages()
-                    .subList(offset, offset + num);
-        return null;
+        return mNetworkImageUtil.getImages(num, offset);
     }
 }

@@ -15,9 +15,9 @@ import gavinli.translator.BaseView;
 
 public class ImageContract {
     interface View extends BaseView<Presenter> {
-        void showMoreImages(List<String> urls);
+        void showMoreImage(Bitmap bitmap, int postion);
 
-        void showMoreImage(Bitmap bitmap);
+        void showPlaceHolds(List<Bitmap> bitmaps);
 
         void showNetworkError();
     }

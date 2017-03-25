@@ -6,14 +6,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
+import com.google.android.flexbox.FlexboxLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import gavinli.translator.R;
 
@@ -23,15 +21,12 @@ import gavinli.translator.R;
  */
 
 public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageRecyclerAdapter.ImageViewHolder> {
-//    private List<String> mImageUrls = new ArrayList<>();
     private List<Bitmap> mImages = new ArrayList<>();
     private Context mContext;
-    private double mWindowWidth;
-//    private int mLeftTranslation = 0;
+    private OnItemClickLinstener mLinstener;
 
     public ImageRecyclerAdapter(Context context) {
         mContext = context;
-        mWindowWidth = mContext.getResources().getDisplayMetrics().widthPixels;
     }
 
     @Override
@@ -42,20 +37,15 @@ public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageRecyclerAdap
 
     @Override
     public void onBindViewHolder(ImageViewHolder holder, int position) {
-//        int translation;
-//        if((position & 1) == 0) {
-//            mLeftTranslation = (int) (Math.random() * 100);
-//            translation = mLeftTranslation;
-//        } else {
-//            translation = - mLeftTranslation;
-//        }
-//
-//        Glide.with(mContext)
-//                .load(mImageUrls.get(position))
-//                .fitCenter()
-//                .into(holder.mExplainView);
-
         holder.mExplainView.setImageBitmap(mImages.get(position));
+        ViewGroup.LayoutParams params = holder.mExplainView.getLayoutParams();
+        if(params instanceof FlexboxLayoutManager.LayoutParams) {
+            FlexboxLayoutManager.LayoutParams layoutParams = (FlexboxLayoutManager.LayoutParams) params;
+            layoutParams.setFlexGrow(1.0f);
+        }
+        holder.mExplainView.setOnClickListener(view -> {
+            if (mLinstener != null) mLinstener.onClick(holder.mExplainView, position);
+        });
     }
 
     @Override
@@ -63,15 +53,16 @@ public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageRecyclerAdap
         return mImages.size();
     }
 
-//    public void addImageUrls(List<String> imageUrls) {
-//        mImageUrls.addAll(imageUrls);
-//    }
+    public void setImage(Bitmap image, int postion) {
+        mImages.set(postion, image);
+    }
 
-    public void addImage(Bitmap image) {
-        double scale = (mWindowWidth / 2) / image.getWidth();
-        Bitmap resizedImage = Bitmap.createScaledBitmap(image,
-                (int) (image.getWidth() * scale), (int) (image.getHeight() * scale), false);
-        mImages.add(resizedImage);
+    public void addImages(List<Bitmap> images) {
+        mImages.addAll(images);
+    }
+
+    public List<Bitmap> getImages() {
+        return mImages;
     }
 
     class ImageViewHolder extends RecyclerView.ViewHolder {
@@ -81,5 +72,13 @@ public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageRecyclerAdap
             super(itemView);
             mExplainView = (ImageView) itemView.findViewById(R.id.iv_explain);
         }
+    }
+
+    public void setOnItemClickLinstener(OnItemClickLinstener linstener) {
+        mLinstener = linstener;
+    }
+
+    public interface OnItemClickLinstener {
+        void onClick(View view, int postion);
     }
 }

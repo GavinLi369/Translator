@@ -12,36 +12,39 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.net.ssl.SSLHandshakeException;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 /**
  * Created by GavinLi
- * on 17-3-12.
+ * on 17-3-23.
  */
 
-public class BaiduImageUtil extends NetworkImageUtil {
-    private static final String BAIDU_IMAGE_SEARCH_URL = "http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word=";
+public class BingImageUtil extends NetworkImageUtil {
+    private static final String BING_IMAGE_URL = "http://cn.bing.com/images/search?FORM=RESTAB&q=";
 
     private String mKey;
 
-    public BaiduImageUtil(String key) {
+    public BingImageUtil(String key) {
         mKey = key;
     }
 
     @Override
     protected void buildImageUrl() throws IOException {
         Request request = new Request.Builder()
-                .url(BAIDU_IMAGE_SEARCH_URL + mKey)
+                .url(BING_IMAGE_URL + mKey)
                 .build();
         Response response = new OkHttpClient().newCall(request).execute();
         if(!response.isSuccessful())
-            throw new IOException("网络连接错误(" + response.code() + ")");
-        Pattern pattern = Pattern.compile("\"thumbURL\":\"(.+?)\"");
+            throw new IOException("网络连接失败");
+//        Pattern pattern = Pattern.compile("href=\"(http[s]*://[^\":]+?\\.jpg[^\"]*?)\"");
+        Pattern pattern = Pattern.compile("src=\"(http.+?)\"");
         Matcher matcher = pattern.matcher(response.body().string());
         while(matcher.find()) {
-            mImageUrls.add(matcher.group(1).replaceAll("\\\\", ""));
+            mImageUrls.add(matcher.group(1));
         }
     }
 
@@ -55,9 +58,18 @@ public class BaiduImageUtil extends NetworkImageUtil {
             try {
                 URL url = new URL(mImageUrls.get(i));
                 connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(3000);
+                connection.setReadTimeout(3000);
+                connection.connect();
+//                if (connection.getResponseCode() != 200)
+//                    throw new IOException("网络连接失败(" + connection.getResponseCode() + ")");
                 in = connection.getInputStream();
-                images.add(BitmapFactory.decodeStream(in));
-            } finally {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 4;
+                images.add(BitmapFactory.decodeStream(in, null, options));
+            } catch (SSLHandshakeException e) {
+                e.printStackTrace();
+            }finally {
                 if(in != null) in.close();
                 if(connection != null) connection.disconnect();
             }

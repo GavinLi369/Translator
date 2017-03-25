@@ -56,7 +56,8 @@ public class GoogleImageUtil extends NetworkImageUtil {
         }
     }
 
-    public List<Bitmap> getImages() throws IOException {
+    @Override
+    public List<Bitmap> getImages(int num, int offset) throws IOException {
         if(mImages.isEmpty()) {
             Request request = new Request.Builder()
                     .url(GOOGLE_IMAGE_SEARCH_URL + mKey)
