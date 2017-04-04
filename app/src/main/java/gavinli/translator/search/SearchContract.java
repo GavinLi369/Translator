@@ -7,7 +7,6 @@ import java.util.List;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
-import gavinli.translator.util.HtmlDecoder;
 
 /**
  * Created by GavinLi
@@ -17,6 +16,9 @@ import gavinli.translator.util.HtmlDecoder;
 public class SearchContract {
     interface Model {
         List<Spanned> getExplain(String word)
+                throws IOException, IndexOutOfBoundsException;
+
+        List<Spanned> getChineseExplain(String word)
                 throws IOException, IndexOutOfBoundsException;
 
         List<String> getComplete(String key, int num) throws IOException;
@@ -29,11 +31,15 @@ public class SearchContract {
     interface View extends BaseView<Presenter> {
         void showExplain(List<Spanned> explains);
 
+        void showChineseExplain(List<Spanned> explains);
+
         void showSuggestion(List<String> suggestions);
 
         void showNetworkError();
 
         void showNotFoundWordError();
+
+        void showChineseExplainNotFoundError();
 
         void showWordInfo(String info);
 
@@ -44,6 +50,8 @@ public class SearchContract {
 
     interface Presenter extends BasePresenter {
         void loadExplain(String word);
+
+        void loadChineseExplain(String word);
 
         void loadAutoComplete(String key, int num);
 

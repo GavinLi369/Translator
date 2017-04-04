@@ -70,6 +70,38 @@ public class SearchPresenter implements SearchContract.Presenter {
     }
 
     @Override
+    public void loadChineseExplain(String word) {
+        Observable<List<Spanned>> observable = Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+            try {
+                subscriber.onNext(mModel.getChineseExplain(word.replace(" ", "-")));
+            } catch (IOException | IndexOutOfBoundsException e) {
+                e.printStackTrace();
+                subscriber.onError(e);
+            }
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+        observable.subscribe(new Subscriber<List<Spanned>>() {
+            @Override
+            public void onCompleted() {
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                if(e instanceof IOException) {
+                    mView.showNetworkError();
+                } else if (e instanceof IndexOutOfBoundsException) {
+                    mView.showChineseExplainNotFoundError();
+                }
+            }
+
+            @Override
+            public void onNext(List<Spanned> spanneds) {
+                mView.showChineseExplain(spanneds);
+                mCurrentWord = spanneds.get(0).toString();
+            }
+        });
+    }
+
+    @Override
     public void loadAutoComplete(String key, int num) {
         if (mAutoComplete != null) {
             mAutoComplete.unsubscribe();

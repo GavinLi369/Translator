@@ -74,7 +74,7 @@ public class FloatWindow extends RelativeLayout {
         LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams
                 (LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT);
-        closeParams.setMargins(3, 1, 0, 0);
+        closeParams.setMargins(30, 1, 0, 0);
         close.setLayoutParams(closeParams);
         close.setBackgroundResource(R.color.colorCloseBg);
         close.setImageResource(R.drawable.ic_close);

@@ -2,6 +2,7 @@ package gavinli.translator.clipboard;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import gavinli.translator.MainActivity;
 import gavinli.translator.R;
 import gavinli.translator.datebase.WordbookUtil;
 import gavinli.translator.util.CambirdgeApi;
@@ -30,6 +32,8 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
+import static android.os.Build.VERSION.SDK_INT;
+
 /**
  * Created by GavinLi
  * on 16-11-27.
@@ -37,7 +41,6 @@ import rx.schedulers.Schedulers;
 
 public class ClipboardMonitor extends Service
         implements ClipboardManager.OnPrimaryClipChangedListener {
-    private static int GRAY_SERVICE_ID = 1001;
     private static final int FLOAT_WINDOW_TIME = 4000;
 
     private ClipboardManager mClipboardManager;
@@ -62,10 +65,16 @@ public class ClipboardMonitor extends Service
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //利用Android漏洞进程保活
-        Intent innerInent = new Intent(this, InnerClass.class);
-        startService(innerInent);
-        startForeground(GRAY_SERVICE_ID, new Notification());
+        Notification.Builder notificationBuilder = new Notification.Builder(this)
+                .setContentIntent(PendingIntent.getActivity(
+                        this, 0,
+                        new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentTitle("Tap to Translate")
+                .setContentText("Tap to translate is running");
+        if(SDK_INT >= 19) notificationBuilder.setSmallIcon(R.drawable.ic_launcher_alpha);
+        else notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
+        startForeground(1001, notificationBuilder.build());
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -191,22 +200,6 @@ public class ClipboardMonitor extends Service
         if(mFloatButton != null) {
             mWindowManager.removeView(mFloatButton);
             mFloatButton = null;
-        }
-    }
-
-    public static class InnerClass extends Service {
-        @Override
-        public int onStartCommand(Intent intent, int flags, int startId) {
-            startForeground(GRAY_SERVICE_ID, new Notification());
-            stopForeground(true);
-            stopSelf();
-            return super.onStartCommand(intent, flags, startId);
-        }
-
-        @Nullable
-        @Override
-        public IBinder onBind(Intent intent) {
-            return null;
         }
     }
 

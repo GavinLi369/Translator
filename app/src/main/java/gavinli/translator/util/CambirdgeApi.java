@@ -23,13 +23,13 @@ import okhttp3.Response;
  */
 
 public class CambirdgeApi {
-    private static final String DICTIONARY_ENGLISH_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
-    private static final String DICTIONARY_CHINESE_URL = "http://dictionary.cambridge.org/search/english-chinese-simplified/direct/?q=";
+    public static final String DICTIONARY_ENGLISH_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
+    public static final String DICTIONARY_CHINESE_URL = "http://dictionary.cambridge.org/search/english-chinese-simplified/direct/?q=";
     private static final String EN_AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
     private static final String CH_AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english-chinese-simplified/?q=";
 
     public static List<Spanned> getExplain(Context context, String word)
-                    throws IOException{
+            throws IOException{
         String dictionary = PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(context.getString(R.string.key_dictionary), null);
         if(dictionary == null) throw new RuntimeException("设置不应为空");
@@ -39,6 +39,11 @@ public class CambirdgeApi {
         } else if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[1])){
             url = DICTIONARY_CHINESE_URL;
         }
+        return getExplain(context, word, url);
+    }
+
+    public static List<Spanned> getExplain(Context context, String word, String url)
+            throws IOException{
         Request request = new Request.Builder()
                 .url(url + word)
                 .build();

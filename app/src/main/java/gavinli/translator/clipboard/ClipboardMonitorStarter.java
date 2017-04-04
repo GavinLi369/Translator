@@ -4,9 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
-
-import com.orhanobut.logger.Logger;
 
 import gavinli.translator.R;
 

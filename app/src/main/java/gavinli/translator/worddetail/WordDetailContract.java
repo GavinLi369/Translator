@@ -3,12 +3,10 @@ package gavinli.translator.worddetail;
 import android.text.Spanned;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
-import gavinli.translator.util.HtmlDecoder;
 
 /**
  * Created by GavinLi

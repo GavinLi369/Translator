@@ -40,6 +40,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     private ScrollView mScrollView;
     private DrawerLayout mDrawerLayout;
     private FloatingActionMenu mMenuFab;
+    private FloatingActionButton mChineseFab;
     private SearchContract.Presenter mPresenter;
 
     public static final String INTENT_KEY = "key";
@@ -55,12 +56,22 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         mMenuFab.setClosedOnTouchOutside(true);
         mMenuFab.hideMenu(false);
         FloatingActionButton starFab = (FloatingActionButton) root.findViewById(R.id.fab_star);
-        starFab.setOnClickListener(view -> mPresenter.saveWord());
+        starFab.setOnClickListener(view -> {
+            mMenuFab.close(true);
+            mPresenter.saveWord();
+        });
         FloatingActionButton imageFab = (FloatingActionButton) root.findViewById(R.id.fab_image);
         imageFab.setOnClickListener(view -> {
+            mMenuFab.close(true);
             Intent intent = new Intent(getContext(), ImageActivity.class);
             intent.putExtra(INTENT_KEY, mPresenter.getCurrentWord());
             startActivity(intent);
+        });
+        mChineseFab = (FloatingActionButton) root.findViewById(R.id.fab_chinese);
+        mChineseFab.setOnClickListener(view -> {
+            mSearchBar.showProgress();
+            mPresenter.loadChineseExplain(mPresenter.getCurrentWord());
+            mMenuFab.close(true);
         });
         mSearchBar = (FloatingSearchView) root.findViewById(R.id.search_view);
         mSearchBar.setOnSearchListener(this);
@@ -75,6 +86,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showExplain(List<Spanned> explains) {
+        mChineseFab.setVisibility(View.VISIBLE);
         mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
@@ -83,6 +95,18 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
             mExplainView.append("\n\n");
         }
         mMenuFab.showMenu(true);
+    }
+
+    @Override
+    public void showChineseExplain(List<Spanned> explains) {
+        mChineseFab.setVisibility(View.GONE);
+        mSearchBar.hideProgress();
+        mExplainView.setText("");
+        mScrollView.scrollTo(0, 0);
+        for (Spanned spanned : explains) {
+            mExplainView.append(spanned);
+            mExplainView.append("\n\n");
+        }
     }
 
     @Override
@@ -112,6 +136,12 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         Toast.makeText(getContext(), "无该单词", Toast.LENGTH_SHORT).show();
         mExplainView.setText("");
         showBackground();
+    }
+
+    @Override
+    public void showChineseExplainNotFoundError() {
+        mSearchBar.hideProgress();
+        Toast.makeText(getContext(), "该单词无汉语解释", Toast.LENGTH_SHORT).show();
     }
 
     @Override
