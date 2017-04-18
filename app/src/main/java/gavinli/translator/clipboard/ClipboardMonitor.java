@@ -28,7 +28,6 @@ import gavinli.translator.R;
 import gavinli.translator.datebase.WordbookUtil;
 import gavinli.translator.util.CambirdgeApi;
 import rx.Observable;
-import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -47,7 +46,11 @@ public class ClipboardMonitor extends Service
     private WindowManager mWindowManager;
     private View mFloatButton;
     private FloatWindow mFloatWindow;
+    private LinearLayout mContainLayout;
+
     private String mPreviousText = "";
+    private int mScreenWidth;
+    private int mScreenHeight;
 
     @Override
     public void onCreate() {
@@ -89,7 +92,7 @@ public class ClipboardMonitor extends Service
             //必须是英语单词
             if (!text.matches("[a-zA-Z]+\\s*") ||
                     (text.equals(mPreviousText) && mFloatButton != null)) return;
-            showFloatWindow(text.trim());
+            showFloatButton(text.trim());
             TimerTask hideFloatWindowTask = new TimerTask() {
                 @Override
                 public void run() {
@@ -102,87 +105,15 @@ public class ClipboardMonitor extends Service
     }
 
     @SuppressLint("InflateParams")
-    private void showFloatWindow(String word) {
+    private void showFloatButton(String word) {
         if(mFloatButton != null) {
             hideFloatButton();
         }
-        int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        int screenHeight = getResources().getDisplayMetrics().heightPixels;
+        mScreenWidth = getResources().getDisplayMetrics().widthPixels;
+        mScreenHeight = getResources().getDisplayMetrics().heightPixels;
         mFloatButton = new FloatButton(this);
-        mFloatButton.setOnClickListener(view -> {
-            hideFloatButton();
-
-            LinearLayout containLayout = new LinearLayout(this);
-            containLayout.setBackgroundResource(R.color.colorFloatWindowContain);
-            //单击解释区域外部，则关闭悬浮框
-            containLayout.setOnTouchListener((v, event) -> {
-                Rect rect = new Rect();
-                mFloatWindow.getGlobalVisibleRect(rect);
-                if(!rect.contains((int) event.getX(), (int) event.getY())) {
-                    mWindowManager.removeView(containLayout);
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-
-            mFloatWindow = new FloatWindow(ClipboardMonitor.this);
-            mFloatWindow.setOnCloseListener(() -> mWindowManager.removeView(containLayout));
-            mFloatWindow.setOnStarListener(() -> {
-                WordbookUtil wordbookUtil = new WordbookUtil(ClipboardMonitor.this);
-                if(wordbookUtil.wordExisted(word)) {
-                    Toast.makeText(this, "单词已存在", Toast.LENGTH_SHORT).show();
-                } else {
-                    wordbookUtil.saveWord(word);
-                    Toast.makeText(this, "单词已保存至单词本", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(450, 600);
-            layoutParams.setMargins((screenWidth - 450) / 2, 100, 0, 0);
-            mFloatWindow.setLayoutParams(layoutParams);
-            containLayout.addView(mFloatWindow);
-
-            WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-            params.type = WindowManager.LayoutParams.TYPE_PHONE;
-            params.format = PixelFormat.RGBA_8888;
-            params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            params.gravity = Gravity.START | Gravity.TOP;
-            params.width = screenWidth;
-            params.height = screenHeight;
-            params.x = 0;
-            params.y = 0;
-            mWindowManager.addView(containLayout, params);
-            Observable<List<Spanned>> observable = Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
-                try {
-                    subscriber.onNext(CambirdgeApi.getExplain(ClipboardMonitor.this, word));
-                } catch (IOException | IndexOutOfBoundsException e) {
-                    e.printStackTrace();
-                    subscriber.onError(e);
-                }
-            }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-            observable.subscribe(new Observer<List<Spanned>>() {
-                @Override
-                public void onCompleted() {
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    if(e instanceof IOException) {
-                        Toast.makeText(ClipboardMonitor.this, "网络连接失败", Toast.LENGTH_SHORT).show();
-                    } else if(e instanceof IndexOutOfBoundsException) {
-                        Toast.makeText(ClipboardMonitor.this, "无该单词", Toast.LENGTH_SHORT).show();
-                        mWindowManager.removeView(containLayout);
-                    }
-                }
-
-                @Override
-                public void onNext(List<Spanned> spanneds) {
-                    mFloatWindow.setExplain(spanneds);
-                }
-            });
-        });
+        //点击悬浮球显示解释
+        mFloatButton.setOnClickListener(view -> showFloatWindow(word));
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_PHONE;
         params.format = PixelFormat.RGBA_8888;
@@ -191,15 +122,117 @@ public class ClipboardMonitor extends Service
         params.gravity = Gravity.START | Gravity.TOP;
         params.width = 120;
         params.height = 120;
-        params.x = screenWidth + 100;
-        params.y = screenHeight / 5;
+        params.x = mScreenWidth + 100;
+        params.y = mScreenHeight / 5;
         mWindowManager.addView(mFloatButton, params);
+    }
+
+    private void showFloatWindow(String word) {
+        hideFloatButton();
+
+        mContainLayout = new LinearLayout(this);
+        mContainLayout.setBackgroundResource(R.color.colorFloatWindowContain);
+        //单击解释区域外部，则关闭悬浮框
+        mContainLayout.setOnTouchListener((v, event) -> {
+            Rect rect = new Rect();
+            mFloatWindow.getGlobalVisibleRect(rect);
+            if(!rect.contains((int) event.getX(), (int) event.getY())) {
+                mWindowManager.removeView(mContainLayout);
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        mFloatWindow = new FloatWindow(ClipboardMonitor.this);
+        mFloatWindow.setFloatWindowListener(new FloatWindowListenerImpl(word));
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(450, 600);
+        layoutParams.setMargins((mScreenWidth - 450) / 2, 100, 0, 0);
+        mFloatWindow.setLayoutParams(layoutParams);
+        mContainLayout.addView(mFloatWindow);
+
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.type = WindowManager.LayoutParams.TYPE_PHONE;
+        params.format = PixelFormat.RGBA_8888;
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        params.gravity = Gravity.START | Gravity.TOP;
+        params.width = mScreenWidth;
+        params.height = mScreenHeight;
+        params.x = 0;
+        params.y = 0;
+        mWindowManager.addView(mContainLayout, params);
+        showExplain(word, "");
+    }
+
+    private void showExplain(String word, String url) {
+        Observable
+                .create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+                    try {
+                        List<Spanned> explain;
+                        if(url.isEmpty()) {
+                            explain = CambirdgeApi.getExplain(
+                                    ClipboardMonitor.this, word);
+                        } else {
+                            explain = CambirdgeApi.getExplain(
+                                    ClipboardMonitor.this, word, url);
+                        }
+                        subscriber.onNext(explain);
+                    } catch (IOException | IndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                        subscriber.onError(e);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(explain -> mFloatWindow.setExplain(explain)
+                , throwable -> {
+                    if(throwable instanceof IOException) {
+                        Toast.makeText(ClipboardMonitor.this,
+                                "网络连接失败", Toast.LENGTH_SHORT).show();
+                    } else if(throwable instanceof IndexOutOfBoundsException) {
+                        Toast.makeText(ClipboardMonitor.this,
+                                "该单词无中文翻译", Toast.LENGTH_SHORT).show();
+                        mWindowManager.removeView(mContainLayout);
+                    }
+                });
     }
 
     private void hideFloatButton() {
         if(mFloatButton != null) {
             mWindowManager.removeView(mFloatButton);
             mFloatButton = null;
+        }
+    }
+
+    private class FloatWindowListenerImpl implements FloatWindow.FloatWindowListener {
+        private String mWord;
+
+        public FloatWindowListenerImpl(String word) {
+            mWord = word;
+        }
+
+        @Override
+        public void onChangeExplain() {
+            mFloatWindow.showLoading();
+            showExplain(mWord, CambirdgeApi.DICTIONARY_CHINESE_URL);
+        }
+
+        @Override
+        public void onStar() {
+            WordbookUtil wordbookUtil = new WordbookUtil(ClipboardMonitor.this);
+            if(wordbookUtil.wordExisted(mWord)) {
+                Toast.makeText(ClipboardMonitor.this, "单词已存在", Toast.LENGTH_SHORT).show();
+            } else {
+                wordbookUtil.saveWord(mWord);
+                Toast.makeText(ClipboardMonitor.this, "单词已保存至单词本", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onClose() {
+            mWindowManager.removeView(mContainLayout);
         }
     }
 

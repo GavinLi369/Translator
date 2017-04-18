@@ -19,6 +19,7 @@
     <color name="colorToolbarText">#222222</color>
     <color name="colorStarBg">#0000</color>
     <color name="colorCloseBg">#0000</color>
+    <color name="colorChineseBg">#0000</color>
     <color name="colorFloatWindowContain">#5000</color>
 
     <!--FLoating Action Menu-->

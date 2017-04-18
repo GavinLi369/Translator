@@ -23,10 +23,10 @@ import gavinli.translator.R;
  */
 
 public class FloatWindow extends RelativeLayout {
-    private OnCloseListener mOnCloseListener;
-    private OnStarListener mOnStarListener;
     private TextView mTextView;
     private ProgressBar mProgressBar;
+
+    private FloatWindowListener mListener;
 
     public FloatWindow(Context context) {
         super(context);
@@ -58,15 +58,26 @@ public class FloatWindow extends RelativeLayout {
         title.setTextSize(20);
         topLayout.addView(title);
 
+        ImageButton chinese = new ImageButton(getContext());
+        LinearLayout.LayoutParams chineseParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        chineseParams.setMargins(100, 3, 0, 0);
+        chinese.setLayoutParams(chineseParams);
+        chinese.setBackgroundResource(R.color.colorChineseBg);
+        chinese.setImageResource(R.drawable.ic_chinese);
+        chinese.setOnClickListener(view -> mListener.onChangeExplain());
+        topLayout.addView(chinese);
+
         ImageButton star = new ImageButton(getContext());
-        LinearLayout.LayoutParams starParams = new LinearLayout.LayoutParams
-                (LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-        starParams.setMargins(150, 0, 0, 0);
+        LinearLayout.LayoutParams starParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        starParams.setMargins(30, 0, 0, 0);
         star.setLayoutParams(starParams);
         star.setBackgroundResource(R.color.colorStarBg);
         star.setImageResource(R.drawable.ic_star);
-        star.setOnClickListener(view -> mOnStarListener.onStar());
+        star.setOnClickListener(view -> mListener.onStar());
         topLayout.addView(star);
 
 
@@ -74,20 +85,14 @@ public class FloatWindow extends RelativeLayout {
         LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams
                 (LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT);
-        closeParams.setMargins(30, 1, 0, 0);
+        closeParams.setMargins(26, 1, 0, 0);
         close.setLayoutParams(closeParams);
         close.setBackgroundResource(R.color.colorCloseBg);
         close.setImageResource(R.drawable.ic_close);
-        close.setOnClickListener(view -> mOnCloseListener.onClose());
+        close.setOnClickListener(view -> mListener.onClose());
         topLayout.addView(close);
 
-        mProgressBar = new ProgressBar(getContext());
-        LayoutParams progressBarParams = new LayoutParams
-                (ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-        progressBarParams.addRule(CENTER_IN_PARENT);
-        mProgressBar.setLayoutParams(progressBarParams);
-        addView(mProgressBar);
+        showLoading();
 
         mTextView = new TextView(getContext());
         LayoutParams textViewParams = new LayoutParams
@@ -112,19 +117,26 @@ public class FloatWindow extends RelativeLayout {
         }
     }
 
-    public void setOnStarListener(OnStarListener listener) {
-        mOnStarListener = listener;
+    public void showLoading() {
+        if(mTextView != null) mTextView.setText("");
+        mProgressBar = new ProgressBar(getContext());
+        LayoutParams progressBarParams = new LayoutParams
+                (ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+        progressBarParams.addRule(CENTER_IN_PARENT);
+        mProgressBar.setLayoutParams(progressBarParams);
+        addView(mProgressBar);
     }
 
-    public interface OnStarListener {
+    public void setFloatWindowListener(FloatWindowListener listener) {
+        mListener = listener;
+    }
+
+    public interface FloatWindowListener {
+        void onChangeExplain();
+
         void onStar();
-    }
 
-    public void setOnCloseListener(OnCloseListener listener) {
-        mOnCloseListener = listener;
-    }
-
-    public interface OnCloseListener {
         void onClose();
     }
 }
