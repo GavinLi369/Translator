@@ -2,7 +2,7 @@ package gavinli.translator.wordbook;
 
 import android.os.AsyncTask;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by GavinLi
@@ -24,14 +24,14 @@ public class WordbookPresenter implements WordbookContract.Presenter {
         new LoadWordsTask().execute();
     }
 
-    class LoadWordsTask extends AsyncTask<Void, Void, ArrayList<String>> {
+    class LoadWordsTask extends AsyncTask<Void, Void, List<String>> {
         @Override
-        protected ArrayList<String> doInBackground(Void... voids) {
+        protected List<String> doInBackground(Void... voids) {
             return mModel.getWords();
         }
 
         @Override
-        protected void onPostExecute(ArrayList<String> words) {
+        protected void onPostExecute(List<String> words) {
             if(words.size() == 0) {
                 mView.showBackground();
             } else {

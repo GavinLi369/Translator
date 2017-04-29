@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import gavinli.translator.R;
 
@@ -16,10 +16,10 @@ import gavinli.translator.R;
  */
 
 public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHolder> {
-    private ArrayList<String> mWords;
+    private List<String> mWords;
     private OnItemClickListener mItemClickListener;
 
-    public WordListAdapter(ArrayList<String> words) {
+    public WordListAdapter(List<String> words) {
         mWords = words;
     }
 

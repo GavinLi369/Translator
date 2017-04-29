@@ -1,6 +1,6 @@
 package gavinli.translator.wordbook;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
@@ -18,7 +18,7 @@ public class WordbookContract {
     }
 
     interface View extends BaseView<Presenter> {
-        void showWords(ArrayList<String> words);
+        void showWords(List<String> words);
 
         void showBackground();
 
@@ -26,7 +26,7 @@ public class WordbookContract {
     }
 
     interface Model {
-        ArrayList<String> getWords();
+        List<String> getWords();
 
         void removeWord(String word);
     }

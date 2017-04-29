@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import gavinli.translator.R;
 import gavinli.translator.worddetail.WordDetailActivity;
@@ -56,7 +56,7 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
     }
 
     @Override
-    public void showWords(ArrayList<String> words) {
+    public void showWords(List<String> words) {
         mAdapter = new WordListAdapter(words);
         mAdapter.setOnItemClickListener(view -> {
             TextView textView = (TextView) view.findViewById(R.id.tv_word);

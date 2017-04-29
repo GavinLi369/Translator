@@ -7,6 +7,8 @@ import java.util.List;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
+import gavinli.translator.util.ExplainNotFoundException;
+import gavinli.translator.util.HtmlDecoder;
 
 /**
  * Created by GavinLi
@@ -16,10 +18,10 @@ import gavinli.translator.BaseView;
 public class SearchContract {
     interface Model {
         List<Spanned> getExplain(String word)
-                throws IOException, IndexOutOfBoundsException;
+                throws IOException, ExplainNotFoundException;
 
         List<Spanned> getChineseExplain(String word)
-                throws IOException, IndexOutOfBoundsException;
+                throws IOException, ExplainNotFoundException;
 
         List<String> getComplete(String key, int num) throws IOException;
 

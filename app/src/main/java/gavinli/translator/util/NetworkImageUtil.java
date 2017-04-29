@@ -10,7 +10,7 @@ import java.util.List;
  * Created by GavinLi
  * on 17-3-19.
  */
-
+//TODO 使用多线程
 public abstract class NetworkImageUtil {
     protected List<String> mImageUrls = new ArrayList<>();
 

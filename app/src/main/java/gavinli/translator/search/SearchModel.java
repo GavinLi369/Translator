@@ -6,8 +6,10 @@ import android.text.Spanned;
 import java.io.IOException;
 import java.util.List;
 
-import gavinli.translator.datebase.WordbookUtil;
+import gavinli.translator.datebase.WordbookDb;
 import gavinli.translator.util.CambirdgeApi;
+import gavinli.translator.util.ExplainLoader;
+import gavinli.translator.util.ExplainNotFoundException;
 
 /**
  * Created by GavinLi
@@ -16,23 +18,30 @@ import gavinli.translator.util.CambirdgeApi;
 
 public class SearchModel implements SearchContract.Model {
     private Context mContext;
-    private WordbookUtil mWordbookUtil;
+    private WordbookDb mWordbookDb;
 
     public SearchModel(Context context) {
         mContext = context;
-        mWordbookUtil = new WordbookUtil(context);
+        mWordbookDb = new WordbookDb(context);
     }
 
     @Override
     public List<Spanned> getExplain(String word)
-            throws IOException, IndexOutOfBoundsException {
-        return CambirdgeApi.getExplain(mContext, word);
+            throws IOException, ExplainNotFoundException {
+        return ExplainLoader
+                .with(mContext)
+                .search(word)
+                .load();
     }
 
     @Override
     public List<Spanned> getChineseExplain(String word)
-            throws IOException, IndexOutOfBoundsException {
-        return CambirdgeApi.getExplain(mContext, word, CambirdgeApi.DICTIONARY_CHINESE_URL);
+            throws IOException, ExplainNotFoundException {
+        return ExplainLoader
+                .with(mContext)
+                .search(word)
+                .dictionary(CambirdgeApi.DICTIONARY_CHINESE_URL)
+                .load();
     }
 
     @Override
@@ -42,11 +51,11 @@ public class SearchModel implements SearchContract.Model {
 
     @Override
     public boolean wordExisted(String word) {
-        return mWordbookUtil.wordExisted(word);
+        return mWordbookDb.wordExisted(word);
     }
 
     @Override
     public void saveWord(String word) {
-        mWordbookUtil.saveWord(word);
+        mWordbookDb.saveWord(word);
     }
 }

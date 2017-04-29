@@ -43,11 +43,13 @@ public class HtmlDecoder {
         mContext = context;
     }
 
-    @SuppressWarnings("deprecation")
-    public ArrayList<Spanned> decode() throws IndexOutOfBoundsException {
+    public ArrayList<Spanned> decode() throws ExplainNotFoundException {
         Document document = Jsoup.parse(mHtml);
         //只显示英国翻译
-        Element britishEntry = document.getElementsByClass("entry-body").get(0);
+        Elements entries = document.getElementsByClass("entry-body");
+        if(entries.size() == 0) throw new ExplainNotFoundException();
+
+        Element britishEntry = entries.get(0);
         Elements positions = britishEntry.getElementsByClass("entry-body__el clrd js-share-holder");
         for(Element position : positions) {
             buildPositionHeader(position);
@@ -64,7 +66,6 @@ public class HtmlDecoder {
         return mSpanneds;
     }
 
-    @SuppressWarnings("deprecation")
     private void buildPositionHeader(Element posHeader) {
         String positionHeader = posHeader.getElementsByClass("headword").get(0).text();
         SpannableString posHeaderSpanned = new SpannableString(positionHeader);
@@ -98,8 +99,6 @@ public class HtmlDecoder {
             regionBuilder.append(posSpanned);
         }
 
-
-
         //音标
         //存在该单词其他形式的音标，这里避免错误显示
         Element realPosHeader = posHeader.getElementsByClass("pos-header").get(0);
@@ -127,7 +126,6 @@ public class HtmlDecoder {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private SpannableStringBuilder buildPronInfo(Element pronInfo) {
         SpannableStringBuilder resultBuilder = new SpannableStringBuilder();
         //有可能有多个音标，此时region为空
@@ -214,7 +212,6 @@ public class HtmlDecoder {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void buildDefineBlock(Element defineBlock) {
         //解释
         Element define = defineBlock.getElementsByClass("def-block pad-indent").get(0);
@@ -239,7 +236,6 @@ public class HtmlDecoder {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void buildPhraseBlock(Element phraseBlock) {
         //词组
         String phraseTitle = phraseBlock.getElementsByClass("phrase-title").get(0).text();
@@ -286,7 +282,6 @@ public class HtmlDecoder {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private SpannableStringBuilder buildDefine(Element define) {
         SpannableStringBuilder defineBuilder = new SpannableStringBuilder();
         if(define.getElementsByClass("gram").size() != 0) {
@@ -309,7 +304,6 @@ public class HtmlDecoder {
         return defineBuilder.append(defineSpanned);
     }
 
-    @SuppressWarnings("deprecation")
     private SpannableString buildExample(Element example) {
         SpannableString exampleSpanned = new SpannableString(example.text());
         exampleSpanned.setSpan(new ForegroundColorSpan(mContext.getResources().getColor(R.color.colorExample)),
@@ -321,7 +315,6 @@ public class HtmlDecoder {
         return exampleSpanned;
     }
 
-    @SuppressWarnings("deprecation")
     private Spanned buildBlockHeader(Element blockHeader) {
         //主单词
         String headWord = blockHeader.getElementsByClass("hw").get(0).text();

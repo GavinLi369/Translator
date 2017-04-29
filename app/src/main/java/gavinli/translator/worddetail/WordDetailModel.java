@@ -6,7 +6,8 @@ import android.text.Spanned;
 import java.io.IOException;
 import java.util.List;
 
-import gavinli.translator.util.CambirdgeApi;
+import gavinli.translator.util.ExplainLoader;
+import gavinli.translator.util.ExplainNotFoundException;
 
 /**
  * Created by GavinLi
@@ -22,7 +23,10 @@ public class WordDetailModel implements WordDetailContract.Model {
 
     @Override
     public List<Spanned> getExplain(String word)
-            throws IOException, IndexOutOfBoundsException {
-        return CambirdgeApi.getExplain(mContext, word);
+            throws IOException, ExplainNotFoundException {
+        return ExplainLoader
+                .with(mContext)
+                .search(word)
+                .load();
     }
 }

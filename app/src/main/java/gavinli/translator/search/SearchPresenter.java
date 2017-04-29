@@ -3,13 +3,11 @@ package gavinli.translator.search;
 import android.os.AsyncTask;
 import android.text.Spanned;
 
-import com.orhanobut.logger.Logger;
-
 import java.io.IOException;
 import java.util.List;
 
+import gavinli.translator.util.ExplainNotFoundException;
 import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -37,68 +35,50 @@ public class SearchPresenter implements SearchContract.Presenter {
             mAutoComplete.unsubscribe();
             mAutoComplete = null;
         }
-        Observable<List<Spanned>> observable = Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+        Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
             try {
                 subscriber.onNext(mModel.getExplain(word.replace(" ", "-")));
-            } catch (IOException | IndexOutOfBoundsException e) {
+            } catch (IOException | ExplainNotFoundException e) {
                 e.printStackTrace();
                 subscriber.onError(e);
             }
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-        observable.subscribe(new Subscriber<List<Spanned>>() {
-            @Override
-            public void onCompleted() {
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                if(e instanceof IOException) {
-                    mView.showNetworkError();
-                } else if (e instanceof IndexOutOfBoundsException) {
-                    mView.showNotFoundWordError();
-                    mCurrentWord = "";
-                }
-            }
-
-            @Override
-            public void onNext(List<Spanned> spanneds) {
-                mView.hideBackground();
-                mView.showExplain(spanneds);
-                mCurrentWord = spanneds.get(0).toString();
-            }
-        });
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(spanneds -> {
+                    mView.hideBackground();
+                    mView.showExplain(spanneds);
+                    mCurrentWord = spanneds.get(0).toString();
+                }, e -> {
+                    if(e instanceof IOException) {
+                        mView.showNetworkError();
+                    } else if (e instanceof ExplainNotFoundException) {
+                        mView.showNotFoundWordError();
+                        mCurrentWord = "";
+                    }
+                });
     }
 
     @Override
     public void loadChineseExplain(String word) {
-        Observable<List<Spanned>> observable = Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+        Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
             try {
                 subscriber.onNext(mModel.getChineseExplain(word.replace(" ", "-")));
-            } catch (IOException | IndexOutOfBoundsException e) {
+            } catch (IOException | ExplainNotFoundException e) {
                 e.printStackTrace();
                 subscriber.onError(e);
             }
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-        observable.subscribe(new Subscriber<List<Spanned>>() {
-            @Override
-            public void onCompleted() {
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                if(e instanceof IOException) {
-                    mView.showNetworkError();
-                } else if (e instanceof IndexOutOfBoundsException) {
-                    mView.showChineseExplainNotFoundError();
-                }
-            }
-
-            @Override
-            public void onNext(List<Spanned> spanneds) {
-                mView.showChineseExplain(spanneds);
-                mCurrentWord = spanneds.get(0).toString();
-            }
-        });
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(spanneds -> {
+                    mView.showChineseExplain(spanneds);
+                    mCurrentWord = spanneds.get(0).toString();
+                }, e -> {
+                    if(e instanceof IOException) {
+                        mView.showNetworkError();
+                    } else if (e instanceof ExplainNotFoundException) {
+                        mView.showChineseExplainNotFoundError();
+                    }
+                });
     }
 
     @Override
@@ -107,38 +87,27 @@ public class SearchPresenter implements SearchContract.Presenter {
             mAutoComplete.unsubscribe();
             mAutoComplete = null;
         }
-        Observable<List<String>> observable = Observable.create((Observable.OnSubscribe<List<String>>) subscriber -> {
+        mAutoComplete = Observable.create((Observable.OnSubscribe<List<String>>) subscriber -> {
             try {
                 subscriber.onNext(mModel.getComplete(key, num));
             } catch (IOException e) {
                 e.printStackTrace();
                 subscriber.onError(e);
             }
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-        mAutoComplete = observable.subscribe(new Subscriber<List<String>>() {
-            @Override
-            public void onCompleted() {
-                mAutoComplete = null;
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                if(e instanceof IOException) {
-                    mView.showNetworkError();
-                }
-                mAutoComplete = null;
-            }
-
-            @Override
-            public void onNext(List<String> words) {
-                mView.showSuggestion(words);
-            }
-        });
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(words ->
+                    mView.showSuggestion(words)
+                , e -> {
+                    if(e instanceof IOException) {
+                        mView.showNetworkError();
+                    }
+                    mAutoComplete = null;
+                });
     }
 
     @Override
     public void saveWord() {
-        Logger.d("clicked");
         if(!mCurrentWord.equals("")) new SaveWordTask().execute(mCurrentWord);
     }
 

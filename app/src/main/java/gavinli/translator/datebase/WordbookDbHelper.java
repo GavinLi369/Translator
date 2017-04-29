@@ -3,6 +3,7 @@ package gavinli.translator.datebase;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
 
 /**
  * Created by GavinLi
@@ -35,5 +36,10 @@ public class WordbookDbHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL(SQL_DELETE_ENTRIES);
         onCreate(sqLiteDatabase);
+    }
+
+    public static class WordbookEntry implements BaseColumns {
+        public static final String TABLE_NAME = "wordbook";
+        public static final String COLUMN_NAME_WORD = "word";
     }
 }

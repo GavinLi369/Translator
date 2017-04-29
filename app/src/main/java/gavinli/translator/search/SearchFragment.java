@@ -3,6 +3,7 @@ package gavinli.translator.search;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -14,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.SearchSuggestionsAdapter;
@@ -35,12 +35,14 @@ import gavinli.translator.imageexplain.ImageActivity;
 
 public class SearchFragment extends Fragment implements SearchContract.View, FloatingSearchView.OnSearchListener,
         FloatingSearchView.OnQueryChangeListener, SearchSuggestionsAdapter.OnBindSuggestionCallback{
+    private View mRootView;
     private TextView mExplainView;
     private FloatingSearchView mSearchBar;
     private ScrollView mScrollView;
     private DrawerLayout mDrawerLayout;
     private FloatingActionMenu mMenuFab;
     private FloatingActionButton mChineseFab;
+
     private SearchContract.Presenter mPresenter;
 
     public static final String INTENT_KEY = "key";
@@ -48,40 +50,41 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_search, container, false);
-        mScrollView = (ScrollView) root.findViewById(R.id.scroll_view);
-        mExplainView = (TextView) root.findViewById(R.id.tv_define);
+        mRootView = inflater.inflate(R.layout.fragment_search, container, false);
+        mScrollView = (ScrollView) mRootView.findViewById(R.id.scroll_view);
+        mExplainView = (TextView) mRootView.findViewById(R.id.tv_define);
         mExplainView.setMovementMethod(LinkMovementMethod.getInstance());
-        mMenuFab = (FloatingActionMenu) root.findViewById(R.id.fab_menu);
+        mMenuFab = (FloatingActionMenu) mRootView.findViewById(R.id.fab_menu);
         mMenuFab.setClosedOnTouchOutside(true);
         mMenuFab.hideMenu(false);
-        FloatingActionButton starFab = (FloatingActionButton) root.findViewById(R.id.fab_star);
+        FloatingActionButton starFab = (FloatingActionButton) mRootView.findViewById(R.id.fab_star);
         starFab.setOnClickListener(view -> {
             mMenuFab.close(true);
             mPresenter.saveWord();
         });
-        FloatingActionButton imageFab = (FloatingActionButton) root.findViewById(R.id.fab_image);
+        FloatingActionButton imageFab = (FloatingActionButton) mRootView.findViewById(R.id.fab_image);
         imageFab.setOnClickListener(view -> {
             mMenuFab.close(true);
             Intent intent = new Intent(getContext(), ImageActivity.class);
             intent.putExtra(INTENT_KEY, mPresenter.getCurrentWord());
             startActivity(intent);
         });
-        mChineseFab = (FloatingActionButton) root.findViewById(R.id.fab_chinese);
+        mChineseFab = (FloatingActionButton) mRootView.findViewById(R.id.fab_chinese);
         mChineseFab.setOnClickListener(view -> {
             mSearchBar.showProgress();
             mPresenter.loadChineseExplain(mPresenter.getCurrentWord());
             mMenuFab.close(true);
         });
-        mSearchBar = (FloatingSearchView) root.findViewById(R.id.search_view);
+        mSearchBar = (FloatingSearchView) mRootView.findViewById(R.id.search_view);
         mSearchBar.setOnSearchListener(this);
         mSearchBar.setOnQueryChangeListener(this);
         mSearchBar.setOnBindSuggestionCallback(this);
         if(mDrawerLayout != null) {
             mSearchBar.attachNavigationDrawerToMenuButton(mDrawerLayout);
         }
+        mSearchBar.setSelected(true);
         showBackground();
-        return root;
+        return mRootView;
     }
 
     @Override
@@ -126,14 +129,14 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     @Override
     public void showNetworkError() {
         mSearchBar.hideProgress();
-        Toast.makeText(getContext(), "网络连接失败", Toast.LENGTH_SHORT).show();
+        Snackbar.make(mRootView, "网络连接失败", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
     public void showNotFoundWordError() {
         mMenuFab.hideMenu(true);
         mSearchBar.hideProgress();
-        Toast.makeText(getContext(), "无该单词", Toast.LENGTH_SHORT).show();
+        Snackbar.make(mRootView, "无该单词", Snackbar.LENGTH_SHORT).show();
         mExplainView.setText("");
         showBackground();
     }
@@ -141,15 +144,14 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     @Override
     public void showChineseExplainNotFoundError() {
         mSearchBar.hideProgress();
-        Toast.makeText(getContext(), "该单词无汉语解释", Toast.LENGTH_SHORT).show();
+        Snackbar.make(mRootView, "该单词无汉语解释", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
     public void showWordInfo(String info) {
-        Toast.makeText(getContext(), info, Toast.LENGTH_SHORT).show();
+        Snackbar.make(mRootView, info, Snackbar.LENGTH_SHORT).show();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void showBackground() {
         mScrollView.setBackgroundResource(R.drawable.bg_search);

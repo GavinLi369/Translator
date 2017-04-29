@@ -3,6 +3,7 @@ package gavinli.translator.worddetail;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spanned;
@@ -10,7 +11,6 @@ import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -21,7 +21,8 @@ import gavinli.translator.R;
  * on 16-12-30.
  */
 
-public class WordDetailActivity extends AppCompatActivity implements WordDetailContract.View {
+public class WordDetailActivity extends AppCompatActivity
+        implements WordDetailContract.View {
     public static final String INTENT_WORD_KEY = "word";
 
     private TextView mWordDefine;
@@ -63,7 +64,15 @@ public class WordDetailActivity extends AppCompatActivity implements WordDetailC
     @Override
     public void showNetworkError() {
         mProgressBar.setVisibility(View.GONE);
-        Toast.makeText(this, "网络连接失败", Toast.LENGTH_SHORT).show();
+        Snackbar.make(findViewById(android.R.id.content),
+                "网络连接失败", Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showExplainNotFoundError() {
+        mProgressBar.setVisibility(View.GONE);
+        Snackbar.make(findViewById(android.R.id.content),
+                "该单词暂无解释", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override

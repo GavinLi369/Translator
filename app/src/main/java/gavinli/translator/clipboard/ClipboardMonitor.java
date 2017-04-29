@@ -1,6 +1,5 @@
 package gavinli.translator.clipboard;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -25,8 +24,10 @@ import java.util.TimerTask;
 
 import gavinli.translator.MainActivity;
 import gavinli.translator.R;
-import gavinli.translator.datebase.WordbookUtil;
+import gavinli.translator.datebase.WordbookDb;
 import gavinli.translator.util.CambirdgeApi;
+import gavinli.translator.util.ExplainLoader;
+import gavinli.translator.util.ExplainNotFoundException;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -104,7 +105,6 @@ public class ClipboardMonitor extends Service
         }
     }
 
-    @SuppressLint("InflateParams")
     private void showFloatButton(String word) {
         if(mFloatButton != null) {
             hideFloatButton();
@@ -166,20 +166,20 @@ public class ClipboardMonitor extends Service
         showExplain(word, "");
     }
 
-    private void showExplain(String word, String url) {
+    private void showExplain(String word, String dictionary) {
         Observable
                 .create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
                     try {
                         List<Spanned> explain;
-                        if(url.isEmpty()) {
-                            explain = CambirdgeApi.getExplain(
-                                    ClipboardMonitor.this, word);
+                        if(dictionary.isEmpty()) {
+                            explain = ExplainLoader.with(ClipboardMonitor.this)
+                                    .search(word).load();
                         } else {
-                            explain = CambirdgeApi.getExplain(
-                                    ClipboardMonitor.this, word, url);
+                            explain = ExplainLoader.with(ClipboardMonitor.this)
+                                    .search(word).dictionary(dictionary).load();
                         }
                         subscriber.onNext(explain);
-                    } catch (IOException | IndexOutOfBoundsException e) {
+                    } catch (IOException | ExplainNotFoundException e) {
                         e.printStackTrace();
                         subscriber.onError(e);
                     }
@@ -221,11 +221,11 @@ public class ClipboardMonitor extends Service
 
         @Override
         public void onStar() {
-            WordbookUtil wordbookUtil = new WordbookUtil(ClipboardMonitor.this);
-            if(wordbookUtil.wordExisted(mWord)) {
+            WordbookDb wordbookDb = new WordbookDb(ClipboardMonitor.this);
+            if(wordbookDb.wordExisted(mWord)) {
                 Toast.makeText(ClipboardMonitor.this, "单词已存在", Toast.LENGTH_SHORT).show();
             } else {
-                wordbookUtil.saveWord(mWord);
+                wordbookDb.saveWord(mWord);
                 Toast.makeText(ClipboardMonitor.this, "单词已保存至单词本", Toast.LENGTH_SHORT).show();
             }
         }

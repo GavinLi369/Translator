@@ -2,7 +2,6 @@ package gavinli.translator.util;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
-import android.text.Spanned;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,29 +27,14 @@ public class CambirdgeApi {
     private static final String EN_AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
     private static final String CH_AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english-chinese-simplified/?q=";
 
-    public static List<Spanned> getExplain(Context context, String word)
-            throws IOException{
-        String dictionary = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(context.getString(R.string.key_dictionary), null);
-        if(dictionary == null) throw new RuntimeException("设置不应为空");
-        String url = null;
-        if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[0])) {
-            url = DICTIONARY_ENGLISH_URL;
-        } else if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[1])){
-            url = DICTIONARY_CHINESE_URL;
-        }
-        return getExplain(context, word, url);
-    }
-
-    public static List<Spanned> getExplain(Context context, String word, String url)
+    public static String getExplainSource(String word, String url)
             throws IOException{
         Request request = new Request.Builder()
                 .url(url + word)
                 .build();
         Response response = new OkHttpClient().newCall(request).execute();
-        HtmlDecoder htmlDecoder = new HtmlDecoder(response.body().string(), context);
 
-        return htmlDecoder.decode();
+        return response.body().string();
     }
 
     public static List<String> getComplete(Context context, String key, int num)

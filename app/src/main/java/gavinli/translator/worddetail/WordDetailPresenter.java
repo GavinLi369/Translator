@@ -5,8 +5,8 @@ import android.text.Spanned;
 import java.io.IOException;
 import java.util.List;
 
+import gavinli.translator.util.ExplainNotFoundException;
 import rx.Observable;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -27,34 +27,26 @@ public class WordDetailPresenter implements WordDetailContract.Presenter {
 
     @Override
     public void loadWordExplain(String word) {
-        Observable<List<Spanned>> observable = Observable.create(new Observable.OnSubscribe<List<Spanned>>() {
-            @Override
-            public void call(Subscriber<? super List<Spanned>> subscriber) {
-                try {
-                    List<Spanned> spanneds = mModel.getExplain(word.replace(" ", "-"));
-                    subscriber.onNext(spanneds);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    subscriber.onError(e);
-                }
-            }
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-        observable.subscribe(new Subscriber<List<Spanned>>() {
-            @Override
-            public void onCompleted() {
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                if(e instanceof IOException) {
-                    mView.showNetworkError();
-                }
-            }
-
-            @Override
-            public void onNext(List<Spanned> spanneds) {
-                mView.showWordExplain(spanneds);
-            }
-        });
+        Observable
+                .create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+                    try {
+                        List<Spanned> spanneds = mModel.getExplain(word.replace(" ", "-"));
+                        subscriber.onNext(spanneds);
+                    } catch (ExplainNotFoundException | IOException e) {
+                        e.printStackTrace();
+                        subscriber.onError(e);
+                    }
+                })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(spanneds ->
+                    mView.showWordExplain(spanneds)
+                , e -> {
+                    if(e instanceof IOException) {
+                        mView.showNetworkError();
+                    } else if(e instanceof ExplainNotFoundException) {
+                        mView.showExplainNotFoundError();
+                    }
+                });
     }
 }

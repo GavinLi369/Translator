@@ -7,6 +7,7 @@ import java.util.List;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
+import gavinli.translator.util.ExplainNotFoundException;
 
 /**
  * Created by GavinLi
@@ -16,13 +17,15 @@ import gavinli.translator.BaseView;
 public class WordDetailContract {
     interface Model {
         List<Spanned> getExplain(String word)
-                throws IOException, IndexOutOfBoundsException ;
+                throws IOException, ExplainNotFoundException;
     }
 
     interface View extends BaseView<Presenter> {
         void showWordExplain(List<Spanned> spanneds);
 
         void showNetworkError();
+
+        void showExplainNotFoundError();
     }
 
     interface Presenter extends BasePresenter {
