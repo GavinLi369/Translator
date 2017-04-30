@@ -1,4 +1,4 @@
-package gavinli.translator.imageexplain;
+package gavinli.translator.image;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -60,7 +60,7 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         imageRecyclerView.addOnScrollListener(new ScrollRefreshListener());
         mProgressBar = (ProgressBar) findViewById(R.id.bar_loading);
 
-        new ImagePresenter(this, new ImageModel(key));
+        new ImagePresenter(this, new ImageModel(this, key));
     }
 
     private void zoomImageFromThumb(View view, Bitmap bitmap) {
@@ -145,7 +145,13 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
             mProgressBar.setVisibility(View.GONE);
         mAdapter.addImages(bitmaps);
         mAdapter.notifyItemRangeInserted(mAdapter.getItemCount(),
-                mAdapter.getItemCount() + bitmaps.size());
+                bitmaps.size());
+    }
+
+    @Override
+    public void removeRangePlaceHolds(int start, int end) {
+        mAdapter.removeRangeImages(start, end);
+        mAdapter.notifyItemRangeRemoved(start, end - start);
     }
 
     @Override

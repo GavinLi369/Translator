@@ -1,4 +1,4 @@
-package gavinli.translator.imageexplain;
+package gavinli.translator.image;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -59,6 +59,10 @@ public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageRecyclerAdap
 
     public void addImages(List<Bitmap> images) {
         mImages.addAll(images);
+    }
+
+    public void removeRangeImages(int start, int end) {
+        mImages.subList(start, end).clear();
     }
 
     public List<Bitmap> getImages() {

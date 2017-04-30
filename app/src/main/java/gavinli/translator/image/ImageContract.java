@@ -1,4 +1,4 @@
-package gavinli.translator.imageexplain;
+package gavinli.translator.image;
 
 import android.graphics.Bitmap;
 
@@ -19,6 +19,8 @@ public class ImageContract {
 
         void showPlaceHolds(List<Bitmap> bitmaps);
 
+        void removeRangePlaceHolds(int start, int end);
+
         void showNetworkError();
     }
 
@@ -27,7 +29,6 @@ public class ImageContract {
     }
 
     interface Model {
-        List<String> getImageUrls(int num, int offset) throws IOException;
         List<Bitmap> getImages(int num, int offset) throws IOException;
     }
 }
