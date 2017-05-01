@@ -56,7 +56,6 @@ public class ImagePresenter implements ImageContract.Presenter {
                     .getColor(mPlaceHolder[(int) (Math.random() * 5)]));
             bitmaps.add(bitmap);
         }
-        //TODO 如果有图片无法显示，需要移除place hold
         mView.showPlaceHolds(bitmaps);
 
         performLoadImages();

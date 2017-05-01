@@ -12,6 +12,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -37,6 +38,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         FloatingSearchView.OnQueryChangeListener, SearchSuggestionsAdapter.OnBindSuggestionCallback{
     private View mRootView;
     private TextView mExplainView;
+    private ImageView mBackground;
     private FloatingSearchView mSearchBar;
     private ScrollView mScrollView;
     private DrawerLayout mDrawerLayout;
@@ -51,7 +53,9 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_search, container, false);
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         mScrollView = (ScrollView) mRootView.findViewById(R.id.scroll_view);
+        mBackground = (ImageView) mRootView.findViewById(R.id.img_bg);
         mExplainView = (TextView) mRootView.findViewById(R.id.tv_define);
         mExplainView.setMovementMethod(LinkMovementMethod.getInstance());
         mMenuFab = (FloatingActionMenu) mRootView.findViewById(R.id.fab_menu);
@@ -154,12 +158,12 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showBackground() {
-        mScrollView.setBackgroundResource(R.drawable.bg_search);
+        mBackground.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideBackground() {
-        mScrollView.setBackground(null);
+        mBackground.setVisibility(View.GONE);
     }
 
     @Override
