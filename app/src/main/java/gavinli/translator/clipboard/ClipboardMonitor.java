@@ -5,17 +5,19 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v7.view.ContextThemeWrapper;
 import android.text.Spanned;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
@@ -65,6 +67,14 @@ public class ClipboardMonitor extends Service
     public void onDestroy() {
         super.onDestroy();
         mClipboardManager.removePrimaryClipChangedListener(this);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        if(mWindowManager != null && mContainLayout != null) {
+            mWindowManager.removeView(mContainLayout);
+            showFloatWindow("test");
+        }
     }
 
     @Override
@@ -130,6 +140,10 @@ public class ClipboardMonitor extends Service
     private void showFloatWindow(String word) {
         hideFloatButton();
 
+        //切换横竖屏时保证屏幕宽高的正确
+        mScreenWidth = getResources().getDisplayMetrics().widthPixels;
+        mScreenHeight = getResources().getDisplayMetrics().heightPixels;
+
         mContainLayout = new LinearLayout(this);
         mContainLayout.setBackgroundResource(R.color.colorFloatWindowContain);
         //单击解释区域外部，则关闭悬浮框
@@ -144,11 +158,18 @@ public class ClipboardMonitor extends Service
             }
         });
 
-        mFloatWindow = new FloatWindow(ClipboardMonitor.this);
-        mFloatWindow.setFloatWindowListener(new FloatWindowListenerImpl(word));
+        ContextThemeWrapper wrapper = new ContextThemeWrapper(ClipboardMonitor.this, R.style.Theme_AppCompat);
+        mFloatWindow = new FloatWindow(wrapper);
+        mFloatWindow.setFloatWindowListener(new FloatWindowListenerImpl(word.toLowerCase()));
 
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(450, 600);
-        layoutParams.setMargins((mScreenWidth - 450) / 2, 100, 0, 0);
+        int height = mScreenHeight * 2 / 3;
+        int top = mScreenHeight / 6;
+
+        int width = mScreenWidth * 5 / 6;
+        int left = mScreenWidth / 12;
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
+        layoutParams.setMargins(left, top, 0, 0);
         mFloatWindow.setLayoutParams(layoutParams);
         mContainLayout.addView(mFloatWindow);
 
@@ -189,12 +210,11 @@ public class ClipboardMonitor extends Service
                 .subscribe(explain -> mFloatWindow.setExplain(explain)
                 , throwable -> {
                     if(throwable instanceof IOException) {
-                        Toast.makeText(ClipboardMonitor.this,
-                                "网络连接失败", Toast.LENGTH_SHORT).show();
-                    } else if(throwable instanceof IndexOutOfBoundsException) {
-                        Toast.makeText(ClipboardMonitor.this,
-                                "该单词无中文翻译", Toast.LENGTH_SHORT).show();
-                        mWindowManager.removeView(mContainLayout);
+                        Snackbar.make(mFloatWindow, "网络连接失败",
+                                Snackbar.LENGTH_SHORT).show();
+                    } else if(throwable instanceof ExplainNotFoundException) {
+                        Snackbar.make(mFloatWindow, "未找到翻译",
+                                Snackbar.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -223,10 +243,12 @@ public class ClipboardMonitor extends Service
         public void onStar() {
             WordbookDb wordbookDb = new WordbookDb(ClipboardMonitor.this);
             if(wordbookDb.wordExisted(mWord)) {
-                Toast.makeText(ClipboardMonitor.this, "单词已存在", Toast.LENGTH_SHORT).show();
+                Snackbar.make(mFloatWindow, "单词已存在",
+                        Snackbar.LENGTH_SHORT).show();
             } else {
                 wordbookDb.saveWord(mWord);
-                Toast.makeText(ClipboardMonitor.this, "单词已保存至单词本", Toast.LENGTH_SHORT).show();
+                Snackbar.make(mFloatWindow, "单词已保存至单词本",
+                        Snackbar.LENGTH_SHORT).show();
             }
         }
 

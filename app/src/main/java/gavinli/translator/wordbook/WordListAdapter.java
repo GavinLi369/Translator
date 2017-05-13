@@ -45,6 +45,11 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHo
         return mWords.size();
     }
 
+    public void addItem(String word) {
+        mWords.add(word);
+        notifyItemInserted(mWords.size() - 1);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView mTextView;
 

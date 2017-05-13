@@ -118,7 +118,7 @@ public class ExplainLoader {
     }
 
     private File checkOrCreateCacheDir() throws IOException {
-        File explainCacheDir = new File(mContext.getCacheDir() +
+        File explainCacheDir = new File(mContext.getFilesDir() +
                 File.separator + CACHE_DIR);
         if(!explainCacheDir.exists()) {
             if(!explainCacheDir.mkdirs()) {

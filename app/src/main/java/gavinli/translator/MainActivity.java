@@ -9,6 +9,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import gavinli.translator.clipboard.ClipboardMonitor;
 import gavinli.translator.search.SearchFragment;
 import gavinli.translator.search.SearchModel;
@@ -29,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        handleGlobalException();
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
@@ -74,5 +83,32 @@ public class MainActivity extends AppCompatActivity implements
             mDrawerLayout.closeDrawer(mNavigationView);
         }
         return true;
+    }
+
+    private static final String ERROR_LOG_NAME = "error.log";
+
+    /**
+     * 全局异常处理
+     */
+    private void handleGlobalException() {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            File file = new File(getFilesDir().getPath() + File.separator + ERROR_LOG_NAME);
+            try {
+                if (!file.exists()) file.createNewFile();
+                StringWriter stackTrace = new StringWriter();
+                e.printStackTrace(new PrintWriter(stackTrace));
+                String report = "************ CAUSE OF ERROR ************\n\n" +
+                        stackTrace.toString();
+
+                PrintWriter writer = new PrintWriter(new FileOutputStream(file));
+                writer.write(report);
+                writer.flush();
+                writer.close();
+            } catch (FileNotFoundException exception) {
+                exception.printStackTrace();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 }

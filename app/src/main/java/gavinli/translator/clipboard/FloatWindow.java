@@ -2,12 +2,13 @@ package gavinli.translator.clipboard;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.design.widget.CoordinatorLayout;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -22,7 +23,7 @@ import gavinli.translator.R;
  * on 17-1-1.
  */
 
-public class FloatWindow extends RelativeLayout {
+public class FloatWindow extends CoordinatorLayout {
     private TextView mTextView;
     private ProgressBar mProgressBar;
 
@@ -41,16 +42,16 @@ public class FloatWindow extends RelativeLayout {
     private void init() {
         setBackgroundColor(Color.WHITE);
 
-        LinearLayout topLayout = new LinearLayout(getContext());
+        RelativeLayout topLayout = new RelativeLayout(getContext());
         LayoutParams topLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 70);
         topLayout.setLayoutParams(topLayoutParams);
         topLayout.setBackgroundResource(R.color.colorPrimary);
         addView(topLayout);
 
         TextView title = new TextView(getContext());
-        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams
-                (LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams titleParams = new RelativeLayout.LayoutParams
+                (RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
         titleParams.setMargins(20, 12, 0, 0);
         title.setLayoutParams(titleParams);
         title.setTextColor(Color.WHITE);
@@ -59,10 +60,11 @@ public class FloatWindow extends RelativeLayout {
         topLayout.addView(title);
 
         ImageButton chinese = new ImageButton(getContext());
-        LinearLayout.LayoutParams chineseParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        chineseParams.setMargins(100, 3, 0, 0);
+        RelativeLayout.LayoutParams chineseParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        chineseParams.setMargins(0, 3, 146, 0);
+        chineseParams.addRule(RelativeLayout.ALIGN_PARENT_END);
         chinese.setLayoutParams(chineseParams);
         chinese.setBackgroundResource(R.color.colorChineseBg);
         chinese.setImageResource(R.drawable.ic_chinese);
@@ -70,10 +72,11 @@ public class FloatWindow extends RelativeLayout {
         topLayout.addView(chinese);
 
         ImageButton star = new ImageButton(getContext());
-        LinearLayout.LayoutParams starParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        starParams.setMargins(30, 0, 0, 0);
+        RelativeLayout.LayoutParams starParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        starParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        starParams.setMargins(0, 0, 80, 0);
         star.setLayoutParams(starParams);
         star.setBackgroundResource(R.color.colorStarBg);
         star.setImageResource(R.drawable.ic_star);
@@ -82,10 +85,11 @@ public class FloatWindow extends RelativeLayout {
 
 
         ImageButton close = new ImageButton(getContext());
-        LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams
-                (LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-        closeParams.setMargins(26, 1, 0, 0);
+        RelativeLayout.LayoutParams closeParams = new RelativeLayout.LayoutParams
+                (RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+        closeParams.addRule(RelativeLayout.ALIGN_PARENT_END);
+        closeParams.setMargins(0, 1, 20, 0);
         close.setLayoutParams(closeParams);
         close.setBackgroundResource(R.color.colorCloseBg);
         close.setImageResource(R.drawable.ic_close);
@@ -123,7 +127,7 @@ public class FloatWindow extends RelativeLayout {
         LayoutParams progressBarParams = new LayoutParams
                 (ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
-        progressBarParams.addRule(CENTER_IN_PARENT);
+        progressBarParams.gravity = Gravity.CENTER;
         mProgressBar.setLayoutParams(progressBarParams);
         addView(mProgressBar);
     }

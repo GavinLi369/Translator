@@ -15,6 +15,8 @@ public class WordbookContract {
         void loadWords();
 
         void removeWord(String word);
+
+        void restoreWord();
     }
 
     interface View extends BaseView<Presenter> {
@@ -29,5 +31,7 @@ public class WordbookContract {
         List<String> getWords();
 
         void removeWord(String word);
+
+        void saveWord(String word);
     }
 }
