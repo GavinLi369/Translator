@@ -181,6 +181,8 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     @Override
     public void onSearchTextChanged(String oldQuery, String newQuery) {
         if(newQuery.length() < 2){
+            mSearchBar.hideProgress();
+            mPresenter.cancelAutoCompleteIfCompleting();
             mSearchBar.swapSuggestions(new ArrayList<>());
             return;
         }

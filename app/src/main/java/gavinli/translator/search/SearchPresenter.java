@@ -4,11 +4,13 @@ import android.os.AsyncTask;
 import android.text.Spanned;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import gavinli.translator.util.ExplainNotFoundException;
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -20,8 +22,9 @@ import rx.schedulers.Schedulers;
 public class SearchPresenter implements SearchContract.Presenter {
     private SearchContract.View mView;
     private SearchContract.Model mModel;
-    private Subscription mAutoComplete;
     private String mCurrentWord = "";
+
+    private Timer mTimer;
 
     public SearchPresenter(SearchContract.View view, SearchContract.Model model) {
         mView = view;
@@ -31,10 +34,10 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void loadExplain(String word) {
-        if (mAutoComplete != null) {
-            mAutoComplete.unsubscribe();
-            mAutoComplete = null;
+        if(mTimer != null) {
+            mTimer.cancel();
         }
+
         Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
             try {
                 subscriber.onNext(mModel.getExplain(word.replace(" ", "-")));
@@ -83,11 +86,26 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void loadAutoComplete(String key, int num) {
-        if (mAutoComplete != null) {
-            mAutoComplete.unsubscribe();
-            mAutoComplete = null;
+        if(mTimer != null) {
+            mTimer.cancel();
         }
-        mAutoComplete = Observable.create((Observable.OnSubscribe<List<String>>) subscriber -> {
+        mTimer = new Timer(true);
+        mTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                performLoadCompleted(key, num);
+            }
+        }, 1000);
+    }
+
+    @Override
+    public void cancelAutoCompleteIfCompleting() {
+        if(mTimer != null) {
+            mTimer.cancel();
+        }
+    }
+
+    private void performLoadCompleted(String key, int num) {Observable.create((Observable.OnSubscribe<List<String>>) subscriber -> {
             try {
                 subscriber.onNext(mModel.getComplete(key, num));
             } catch (IOException e) {
@@ -97,25 +115,32 @@ public class SearchPresenter implements SearchContract.Presenter {
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(words ->
-                    mView.showSuggestion(words)
-                , e -> {
-                    if(e instanceof IOException) {
-                        mView.showNetworkError();
-                    }
-                    mAutoComplete = null;
-                });
+                                mView.showSuggestion(words)
+                        , e -> {
+                            if(e instanceof IOException) {
+                                mView.showNetworkError();
+                            }
+                        });
     }
 
     @Override
     public void saveWord() {
-        if(!mCurrentWord.equals("")) new SaveWordTask().execute(mCurrentWord);
+        if(!mCurrentWord.equals("")) new SaveWordTask(mModel, mView).execute(mCurrentWord);
     }
 
-    class SaveWordTask extends AsyncTask<String, Void, String> {
+    static class SaveWordTask extends AsyncTask<String, Void, String> {
+        private SoftReference<SearchContract.Model> mModelSoftReference;
+        private SoftReference<SearchContract.View> mViewSoftReference;
+
+        public SaveWordTask(SearchContract.Model model, SearchContract.View view) {
+            mModelSoftReference = new SoftReference<>(model);
+            mViewSoftReference = new SoftReference<>(view);
+        }
+
         @Override
         protected String doInBackground(String... strings) {
-            if(!mModel.wordExisted(strings[0])) {
-                mModel.saveWord(strings[0]);
+            if(!mModelSoftReference.get().wordExisted(strings[0])) {
+                mModelSoftReference.get().saveWord(strings[0]);
                 return "单词已保存至单词本";
             } else {
                 return "单词已存在";
@@ -124,7 +149,7 @@ public class SearchPresenter implements SearchContract.Presenter {
 
         @Override
         protected void onPostExecute(String info) {
-            mView.showWordInfo(info);
+            mViewSoftReference.get().showWordInfo(info);
         }
     }
 

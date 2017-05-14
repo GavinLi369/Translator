@@ -57,6 +57,8 @@ public class SearchContract {
 
         void loadAutoComplete(String key, int num);
 
+        void cancelAutoCompleteIfCompleting();
+
         void saveWord();
 
         String getCurrentWord();

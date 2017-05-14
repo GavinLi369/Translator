@@ -2,6 +2,7 @@ package gavinli.translator;
 
 import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.drawer_search) {
             if(!(getSupportFragmentManager().getFragments().get(0) instanceof SearchFragment)) {
                 mSearchFragment = new SearchFragment();
