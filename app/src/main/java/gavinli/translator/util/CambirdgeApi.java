@@ -40,8 +40,7 @@ public class CambirdgeApi {
     public static List<String> getComplete(Context context, String key, int num)
             throws IOException {
         String dictionary = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(context.getString(R.string.key_dictionary), null);
-        if(dictionary == null) throw new RuntimeException("设置不应为空");
+                .getString(context.getString(R.string.key_dictionary), "0");
         String url = null;
         if(dictionary.equals(context.getResources().getStringArray(R.array.explain_language_values)[0])) {
             url = EN_AUTO_COMPLETE_URL;

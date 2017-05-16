@@ -41,7 +41,7 @@ public class ExplainLoader {
         mContext = context;
         String dictionaryNum = PreferenceManager
                 .getDefaultSharedPreferences(mContext)
-                .getString(mContext.getString(R.string.key_dictionary), null);
+                .getString(mContext.getString(R.string.key_dictionary), "0");
         mDictionary = Integer.parseInt(dictionaryNum) == 0 ?
                 CambirdgeApi.DICTIONARY_ENGLISH_URL : CambirdgeApi.DICTIONARY_CHINESE_URL;
     }
