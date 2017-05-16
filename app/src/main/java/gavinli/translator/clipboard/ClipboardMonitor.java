@@ -66,6 +66,7 @@ public class ClipboardMonitor extends Service
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopForeground(true);
         mClipboardManager.removePrimaryClipChangedListener(this);
     }
 

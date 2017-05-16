@@ -1,15 +1,14 @@
 package gavinli.translator.setting;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
-import android.widget.Toast;
+import android.support.design.widget.Snackbar;
 
+import gavinli.translator.App;
 import gavinli.translator.R;
-import gavinli.translator.clipboard.ClipboardMonitor;
 
 /**
  * Created by GavinLi
@@ -47,10 +46,15 @@ public class SettingsFragment extends PreferenceFragment
         if(s.equals(getString(R.string.key_clipboard))) {
             SwitchPreference clipboardPreference = (SwitchPreference) findPreference(s);
             if(clipboardPreference.isChecked()) {
-                Toast.makeText(getActivity(), "Tap to Translate is on", Toast.LENGTH_SHORT).show();
-                getActivity().startService(new Intent(getActivity(), ClipboardMonitor.class));
+                ((App) getActivity().getApplication()).startClipboardMonitor();
+                if(getView() != null) {
+                    Snackbar.make(getView(), "Tap to Translate is on", Snackbar.LENGTH_SHORT).show();
+                }
             } else {
-                Toast.makeText(getActivity(), "Tap to Translate is off", Toast.LENGTH_SHORT).show();
+                ((App) getActivity().getApplication()).stopClipboardMonitor();
+                if(getView() != null) {
+                    Snackbar.make(getView(), "Tap to Translate is off", Snackbar.LENGTH_SHORT).show();
+                }
             }
         } else if(s.equals(getString(R.string.key_dictionary))) {
             ListPreference dictionaryPreference = (ListPreference) findPreference(s);
