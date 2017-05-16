@@ -8,8 +8,10 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.view.ContextThemeWrapper;
@@ -18,6 +20,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
@@ -98,20 +101,28 @@ public class ClipboardMonitor extends Service
         if(PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean(getString(R.string.key_clipboard), false)) {
             CharSequence charSequence = mClipboardManager.getPrimaryClip().getItemAt(0).getText();
-            //TODO 内容有可能为空，待解决
             if (charSequence == null) return;
             String text = charSequence.toString();
             //必须是英语单词
             if (!text.matches("[a-zA-Z]+\\s*") ||
                     (text.equals(mPreviousText) && mFloatButton != null)) return;
-            showFloatButton(text.trim());
-            TimerTask hideFloatWindowTask = new TimerTask() {
-                @Override
-                public void run() {
-                    hideFloatButton();
+            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                if(Settings.canDrawOverlays(this)) {
+                    showFloatButton(text.trim());
+                    TimerTask hideFloatWindowTask = new TimerTask() {
+                        @Override
+                        public void run() {
+                            hideFloatButton();
+                        }
+                    };
+                    new Timer().schedule(hideFloatWindowTask, FLOAT_WINDOW_TIME);
+                } else {
+                    String message = "Translator: " +
+                            "Please permit drawing over other apps in Settings";
+                    Toast.makeText(this, message,
+                            Toast.LENGTH_LONG).show();
                 }
-            };
-            new Timer().schedule(hideFloatWindowTask, FLOAT_WINDOW_TIME);
+            }
             mPreviousText = text;
         }
     }

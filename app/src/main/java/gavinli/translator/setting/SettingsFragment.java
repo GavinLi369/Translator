@@ -46,7 +46,7 @@ public class SettingsFragment extends PreferenceFragment
         if(s.equals(getString(R.string.key_clipboard))) {
             SwitchPreference clipboardPreference = (SwitchPreference) findPreference(s);
             if(clipboardPreference.isChecked()) {
-                ((App) getActivity().getApplication()).startClipboardMonitor();
+                ((App) getActivity().getApplication()).startClipboardMonitor(getActivity());
                 if(getView() != null) {
                     Snackbar.make(getView(), "Tap to Translate is on", Snackbar.LENGTH_SHORT).show();
                 }
