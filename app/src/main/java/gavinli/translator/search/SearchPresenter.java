@@ -11,6 +11,7 @@ import java.util.TimerTask;
 
 import gavinli.translator.util.ExplainNotFoundException;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -25,6 +26,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     private String mCurrentWord = "";
 
     private Timer mTimer;
+    private Subscription mAutoCompleteSubscription;
 
     public SearchPresenter(SearchContract.View view, SearchContract.Model model) {
         mView = view;
@@ -34,9 +36,7 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void loadExplain(String word) {
-        if(mTimer != null) {
-            mTimer.cancel();
-        }
+        cancelAutoCompleteIfCompleting();
 
         Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
             try {
@@ -86,9 +86,8 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void loadAutoComplete(String key, int num) {
-        if(mTimer != null) {
-            mTimer.cancel();
-        }
+        cancelAutoCompleteIfCompleting();
+
         mTimer = new Timer(true);
         mTimer.schedule(new TimerTask() {
             @Override
@@ -103,9 +102,13 @@ public class SearchPresenter implements SearchContract.Presenter {
         if(mTimer != null) {
             mTimer.cancel();
         }
+        if(mAutoCompleteSubscription != null) {
+            mAutoCompleteSubscription.unsubscribe();
+        }
     }
 
-    private void performLoadCompleted(String key, int num) {Observable.create((Observable.OnSubscribe<List<String>>) subscriber -> {
+    private void performLoadCompleted(String key, int num) {
+        mAutoCompleteSubscription = Observable.create((Observable.OnSubscribe<List<String>>) subscriber -> {
             try {
                 subscriber.onNext(mModel.getComplete(key, num));
             } catch (IOException e) {

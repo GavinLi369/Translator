@@ -16,6 +16,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import gavinli.translator.clipboard.ClipboardMonitor;
 import gavinli.translator.search.SearchFragment;
@@ -98,7 +100,9 @@ public class MainActivity extends AppCompatActivity implements
                 if (!file.exists()) file.createNewFile();
                 StringWriter stackTrace = new StringWriter();
                 e.printStackTrace(new PrintWriter(stackTrace));
-                String report = "************ CAUSE OF ERROR ************\n\n" +
+                String date = SimpleDateFormat.getDateInstance().format(new Date());
+                String report = "************ CAUSE OF ERROR ************\n" +
+                        "************ " + date + " ************\n\n" +
                         stackTrace.toString();
 
                 PrintWriter writer = new PrintWriter(new FileOutputStream(file));

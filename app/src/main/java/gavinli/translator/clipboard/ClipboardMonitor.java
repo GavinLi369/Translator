@@ -73,7 +73,7 @@ public class ClipboardMonitor extends Service
     public void onConfigurationChanged(Configuration newConfig) {
         if(mWindowManager != null && mContainLayout != null) {
             mWindowManager.removeView(mContainLayout);
-            showFloatWindow("test");
+            showFloatWindow(mPreviousText);
         }
     }
 
@@ -152,6 +152,7 @@ public class ClipboardMonitor extends Service
             mFloatWindow.getGlobalVisibleRect(rect);
             if(!rect.contains((int) event.getX(), (int) event.getY())) {
                 mWindowManager.removeView(mContainLayout);
+                mContainLayout = null;
                 return true;
             } else {
                 return false;
@@ -255,6 +256,7 @@ public class ClipboardMonitor extends Service
         @Override
         public void onClose() {
             mWindowManager.removeView(mContainLayout);
+            mContainLayout = null;
         }
     }
 
