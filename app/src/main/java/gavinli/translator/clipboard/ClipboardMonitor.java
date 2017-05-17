@@ -122,6 +122,15 @@ public class ClipboardMonitor extends Service
                     Toast.makeText(this, message,
                             Toast.LENGTH_LONG).show();
                 }
+            } else {
+                showFloatButton(text.trim());
+                TimerTask hideFloatWindowTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        hideFloatButton();
+                    }
+                };
+                new Timer().schedule(hideFloatWindowTask, FLOAT_WINDOW_TIME);
             }
             mPreviousText = text;
         }
@@ -142,8 +151,8 @@ public class ClipboardMonitor extends Service
         params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         params.gravity = Gravity.START | Gravity.TOP;
-        params.width = 120;
-        params.height = 120;
+        params.width = (int) (mScreenWidth / 4.5);
+        params.height = (int) (mScreenHeight / 4.5);
         params.x = mScreenWidth + 100;
         params.y = mScreenHeight / 5;
         mWindowManager.addView(mFloatButton, params);

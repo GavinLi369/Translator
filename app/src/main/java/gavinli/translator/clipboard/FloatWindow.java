@@ -42,8 +42,13 @@ public class FloatWindow extends CoordinatorLayout {
     private void init() {
         setBackgroundColor(Color.WHITE);
 
+        //保证宽度不随屏幕旋转变换
+        int screenWidth = Math.min(getResources().getDisplayMetrics().widthPixels,
+                getResources().getDisplayMetrics().heightPixels);
+
         RelativeLayout topLayout = new RelativeLayout(getContext());
-        LayoutParams topLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 70);
+        int topHeight = (int) (screenWidth / 7.7);
+        LayoutParams topLayoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, topHeight);
         topLayout.setLayoutParams(topLayoutParams);
         topLayout.setBackgroundResource(R.color.colorPrimary);
         addView(topLayout);
@@ -52,7 +57,9 @@ public class FloatWindow extends CoordinatorLayout {
         RelativeLayout.LayoutParams titleParams = new RelativeLayout.LayoutParams
                 (RelativeLayout.LayoutParams.WRAP_CONTENT,
                         RelativeLayout.LayoutParams.WRAP_CONTENT);
-        titleParams.setMargins(20, 12, 0, 0);
+        int titleTop = screenWidth / 45;
+        int titleLeft = screenWidth / 27;
+        titleParams.setMargins(titleLeft, titleTop, 0, 0);
         title.setLayoutParams(titleParams);
         title.setTextColor(Color.WHITE);
         title.setText(R.string.app_name);
@@ -63,7 +70,9 @@ public class FloatWindow extends CoordinatorLayout {
         RelativeLayout.LayoutParams chineseParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        chineseParams.setMargins(0, 3, 146, 0);
+        int chineseTop = screenWidth / 180;
+        int chineseRight = (int) (screenWidth / 3.7);
+        chineseParams.setMargins(0, chineseTop, chineseRight, 0);
         chineseParams.addRule(RelativeLayout.ALIGN_PARENT_END);
         chinese.setLayoutParams(chineseParams);
         chinese.setBackgroundResource(R.color.colorChineseBg);
@@ -76,7 +85,8 @@ public class FloatWindow extends CoordinatorLayout {
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         starParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        starParams.setMargins(0, 0, 80, 0);
+        int starRight = (int) (screenWidth / 6.75);
+        starParams.setMargins(0, 0, starRight, 0);
         star.setLayoutParams(starParams);
         star.setBackgroundResource(R.color.colorStarBg);
         star.setImageResource(R.drawable.ic_star);
@@ -89,7 +99,9 @@ public class FloatWindow extends CoordinatorLayout {
                 (RelativeLayout.LayoutParams.WRAP_CONTENT,
                         RelativeLayout.LayoutParams.WRAP_CONTENT);
         closeParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        closeParams.setMargins(0, 1, 20, 0);
+        int closeTop = screenWidth / 540;
+        int closeRight = screenWidth / 27;
+        closeParams.setMargins(0, closeTop, closeRight, 0);
         close.setLayoutParams(closeParams);
         close.setBackgroundResource(R.color.colorCloseBg);
         close.setImageResource(R.drawable.ic_close);
@@ -102,12 +114,13 @@ public class FloatWindow extends CoordinatorLayout {
         LayoutParams textViewParams = new LayoutParams
                 (LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         mTextView.setLayoutParams(textViewParams);
-        mTextView.setPadding(32, 0, 32, 0);
+        int textLeft = (int) (screenWidth / 16.875);
+        mTextView.setPadding(textLeft, 0, textLeft, 0);
         mTextView.setMovementMethod(LinkMovementMethod.getInstance());
         ScrollView scrollView = new ScrollView(getContext());
         LayoutParams scrollParams = new LayoutParams
                 (LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        scrollParams.setMargins(0, 70, 0, 0);
+        scrollParams.setMargins(0, topHeight, 0, 0);
         scrollView.setLayoutParams(scrollParams);
         scrollView.addView(mTextView);
         addView(scrollView);
