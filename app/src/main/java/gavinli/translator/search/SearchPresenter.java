@@ -26,6 +26,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     private String mCurrentWord = "";
 
     private Timer mTimer;
+    private static final int COMPLETE_DELAY = 500;
     private Subscription mAutoCompleteSubscription;
 
     public SearchPresenter(SearchContract.View view, SearchContract.Model model) {
@@ -94,7 +95,7 @@ public class SearchPresenter implements SearchContract.Presenter {
             public void run() {
                 performLoadCompleted(key, num);
             }
-        }, 1000);
+        }, COMPLETE_DELAY);
     }
 
     @Override

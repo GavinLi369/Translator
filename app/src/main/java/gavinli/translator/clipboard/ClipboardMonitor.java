@@ -57,6 +57,7 @@ public class ClipboardMonitor extends Service
     private String mPreviousText = "";
     private int mScreenWidth;
     private int mScreenHeight;
+    private String mCurrentText = "";
 
     @Override
     public void onCreate() {
@@ -229,8 +230,10 @@ public class ClipboardMonitor extends Service
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(explain -> mFloatWindow.setExplain(explain)
-                , throwable -> {
+                .subscribe(explain -> {
+                    mCurrentText = explain.get(0).toString();
+                    mFloatWindow.setExplain(explain);
+                }, throwable -> {
                     if(throwable instanceof IOException) {
                         Snackbar.make(mFloatWindow, "网络连接失败",
                                 Snackbar.LENGTH_SHORT).show();
@@ -263,14 +266,16 @@ public class ClipboardMonitor extends Service
 
         @Override
         public void onStar() {
-            WordbookDb wordbookDb = new WordbookDb(ClipboardMonitor.this);
-            if(wordbookDb.wordExisted(mWord)) {
-                Snackbar.make(mFloatWindow, "单词已存在",
-                        Snackbar.LENGTH_SHORT).show();
-            } else {
-                wordbookDb.saveWord(mWord);
-                Snackbar.make(mFloatWindow, "单词已保存至单词本",
-                        Snackbar.LENGTH_SHORT).show();
+            if(mCurrentText != null && !mCurrentText.isEmpty()) {
+                WordbookDb wordbookDb = new WordbookDb(ClipboardMonitor.this);
+                if (wordbookDb.wordExisted(mCurrentText)) {
+                    Snackbar.make(mFloatWindow, "单词已存在",
+                            Snackbar.LENGTH_SHORT).show();
+                } else {
+                    wordbookDb.saveWord(mCurrentText);
+                    Snackbar.make(mFloatWindow, "单词已保存至单词本",
+                            Snackbar.LENGTH_SHORT).show();
+                }
             }
         }
 

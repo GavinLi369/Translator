@@ -93,7 +93,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showExplain(List<Spanned> explains) {
-        mChineseFab.setVisibility(View.VISIBLE);
+        mChineseFab.setVisibility(View.INVISIBLE);
         mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
