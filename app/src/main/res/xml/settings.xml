@@ -13,4 +13,8 @@
         android:entryValues="@array/explain_language_values"
         android:defaultValue="0"/>
 
+    <Preference
+        android:key="@string/key_update"
+        android:title="@string/setting_update"/>
+
 </PreferenceScreen>

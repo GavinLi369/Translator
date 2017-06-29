@@ -2,10 +2,20 @@
     <string name="app_name">Translator</string>
     <string name="search">Search</string>
     <string name="wordbook">Wordbook</string>
+
+    <!--Settings-->
     <string name="settings">Settings</string>
     <string name="setting_clipboard">Tap to Translate</string>
     <string name="setting_dictionary">Dictionary</string>
+    <string name="setting_update">Check Update</string>
     <string name="key_clipboard">perference_clipboard</string>
-    <string name="worddetail">Explain</string>
     <string name="key_dictionary">perference_dictionary</string>
+    <string name="key_update">perference_update</string>
+
+    <!--Update-->
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_update">Update</string>
+    <string name="find_update_fail">已是最新版本</string>
+
+    <string name="worddetail">Explain</string>
 </resources>

@@ -1,12 +1,28 @@
 apply plugin: 'com.android.application'
 
+def keystorePSW = ''
+def keystoreAlias = ''
+def keystoreAliasPSW = ''
+def keyfile = file('s.keystore.temp')
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def keystoreFilepath = properties.getProperty("keystore.path")
+
+if (keystoreFilepath) {
+    keystorePSW = properties.getProperty("keystore.password")
+    keystoreAlias = properties.getProperty("keystore.alias")
+    keystoreAliasPSW = properties.getProperty("keystore.alias_password")
+    keyfile = file(keystoreFilepath)
+}
+
 android {
     signingConfigs {
         config {
-            keyAlias 'GavinAndroidKey'
-            keyPassword '15091578018LCY'
-            storeFile file('/home/gavinli/keystores/android.jks')
-            storePassword '15091578018LCY'
+            keyAlias keystoreAlias
+            keyPassword keystoreAliasPSW
+            storeFile keyfile
+            storePassword keystorePSW
         }
     }
     compileSdkVersion 25
@@ -32,6 +48,17 @@ android {
     }
     lintOptions {
         disable 'RestrictedApi'
+    }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+            if(outputFile != null && outputFile.name.endsWith('.apk')) {
+                def fileName = outputFile.name.replace('app',
+                        "Translator-${defaultConfig.versionName}")
+                outputFileName = fileName
+            }
+        }
     }
 }
 
