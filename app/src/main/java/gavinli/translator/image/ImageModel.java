@@ -25,7 +25,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import gavinli.translator.util.GoogleImageUtil;
+import gavinli.translator.util.FreeImagesUtil;
 
 /**
  * Created by GavinLi
@@ -38,18 +38,18 @@ public class ImageModel implements ImageContract.Model {
 
     private Context mContext;
 
-    private GoogleImageUtil mImageUtil;
+    private FreeImagesUtil mImageUtil;
     private List<String> mImageUrls = null;
 
     public ImageModel(Context context, String key) {
         mContext = context;
-        mImageUtil = new GoogleImageUtil(key);
+        mImageUtil = new FreeImagesUtil(key);
 
     }
 
     @Override
     public List<Bitmap> getImages(int num, int offset) throws IOException {
-        if(mImageUrls == null) mImageUrls = mImageUtil.getImageUrls();
+        if(mImageUrls == null) mImageUrls = mImageUtil.getImageLinks();
         List<Bitmap> images = new ArrayList<>();
         final DiskLruCache diskLruCache = DiskLruCache.open(checkOrCreateCacheDir(),
                 1, 1, CACHE_SIZE);

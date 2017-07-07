@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.Spanned;
 
+
 import com.bumptech.glide.disklrucache.DiskLruCache;
 
 import java.io.BufferedReader;
