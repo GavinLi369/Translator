@@ -44,14 +44,6 @@
         app:menu_colorPressed="@color/colorFabPlusPressed">
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fab_chinese"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_chinese"
-            android:visibility="gone"
-            style="@style/FabChineseStyle"/>
-
-        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/fab_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

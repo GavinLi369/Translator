@@ -43,7 +43,6 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     private ScrollView mScrollView;
     private DrawerLayout mDrawerLayout;
     private FloatingActionMenu mMenuFab;
-    private FloatingActionButton mChineseFab;
 
     private SearchContract.Presenter mPresenter;
 
@@ -73,12 +72,6 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
             intent.putExtra(INTENT_KEY, mPresenter.getCurrentWord());
             startActivity(intent);
         });
-        mChineseFab = (FloatingActionButton) mRootView.findViewById(R.id.fab_chinese);
-        mChineseFab.setOnClickListener(view -> {
-            mSearchBar.showProgress();
-            mPresenter.loadChineseExplain(mPresenter.getCurrentWord());
-            mMenuFab.close(true);
-        });
         mSearchBar = (FloatingSearchView) mRootView.findViewById(R.id.search_view);
         mSearchBar.setOnSearchListener(this);
         mSearchBar.setOnQueryChangeListener(this);
@@ -93,7 +86,6 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showExplain(List<Spanned> explains) {
-        mChineseFab.setVisibility(View.INVISIBLE);
         mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
@@ -106,7 +98,6 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showChineseExplain(List<Spanned> explains) {
-        mChineseFab.setVisibility(View.GONE);
         mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
