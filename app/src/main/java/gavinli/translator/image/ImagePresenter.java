@@ -25,8 +25,8 @@ public class ImagePresenter implements ImageContract.Presenter {
     private Context mContext;
 
     private int mOffset = 0;
-    private static final int PLACE_HOLD_WIDTH = 230;
-    private static final int PLACE_HOLD_HEIGHT = 170;
+    private final int PLACE_HOLD_WIDTH;
+    private final int PLACE_HOLD_HEIGHT;
 
     private final int[] mPlaceHolder = {
         R.color.colorPlaceHold1,
@@ -38,8 +38,10 @@ public class ImagePresenter implements ImageContract.Presenter {
 
     public ImagePresenter(ImageContract.View view, ImageContract.Model model) {
         mView = view;
-        if(mView instanceof Activity) mContext = (Context) mView;
         mModel = model;
+        if(mView instanceof Activity) mContext = (Context) mView;
+        PLACE_HOLD_WIDTH = (int) (mContext.getResources().getDisplayMetrics().widthPixels / 2.5);
+        PLACE_HOLD_HEIGHT = (int) (PLACE_HOLD_WIDTH / 1.3);
         mView.setPresenter(this);
     }
 

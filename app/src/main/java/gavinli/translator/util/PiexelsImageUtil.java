@@ -12,15 +12,15 @@ import okhttp3.Response;
 
 /**
  * Created by GavinLi
- * on 7/7/17.
+ * on 7/8/17.
  */
 
-public class FreeImagesUtil {
-    private static final String SEARCH_URL = "http://cn.freeimages.com/search/";
+public class PiexelsImageUtil {
+    private static final String SEARCH_URL = "https://www.pexels.com/search/";
 
     private String mKey;
 
-    public FreeImagesUtil(String key) {
+    public PiexelsImageUtil(String key) {
         mKey = key;
     }
 
@@ -34,7 +34,7 @@ public class FreeImagesUtil {
 
     private List<String> findImageLinksFromHtml(String html) {
         List<String> links = new ArrayList<>();
-        Pattern pattern = Pattern.compile("<img src=\"(.+?jpg)\"");
+        Pattern pattern = Pattern.compile("src=\"(http.+?)\"");
         Matcher matcher = pattern.matcher(html);
         while(matcher.find()) {
             links.add(matcher.group(1));

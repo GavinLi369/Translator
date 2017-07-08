@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
@@ -46,6 +47,9 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         String key = getIntent().getExtras().getString(SearchFragment.INTENT_KEY);
         toolbar.setTitle(key);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setShowHideAnimationEnabled(true);
 
         RecyclerView imageRecyclerView = (RecyclerView) findViewById(R.id.rv_imagelist);
         mLayoutManager = new FlexboxLayoutManager();
@@ -61,6 +65,12 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         mProgressBar = (ProgressBar) findViewById(R.id.bar_loading);
 
         new ImagePresenter(this, new ImageModel(this, key));
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     private void zoomImageFromThumb(View view, Bitmap bitmap) {

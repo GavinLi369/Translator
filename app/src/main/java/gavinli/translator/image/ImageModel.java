@@ -25,7 +25,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import gavinli.translator.util.FreeImagesUtil;
+import gavinli.translator.util.PiexelsImageUtil;
 
 /**
  * Created by GavinLi
@@ -35,16 +35,17 @@ import gavinli.translator.util.FreeImagesUtil;
 public class ImageModel implements ImageContract.Model {
     private static final String CACHE_DIR = "image";
     private static final int CACHE_SIZE = 20 * 1024 * 1024;
+    private final int BITMAP_SIZE;
 
     private Context mContext;
 
-    private FreeImagesUtil mImageUtil;
+    private PiexelsImageUtil mImageUtil;
     private List<String> mImageUrls = null;
 
     public ImageModel(Context context, String key) {
         mContext = context;
-        mImageUtil = new FreeImagesUtil(key);
-
+        mImageUtil = new PiexelsImageUtil(key);
+        BITMAP_SIZE = (int) (mContext.getResources().getDisplayMetrics().widthPixels / 1.5);
     }
 
     @Override
@@ -127,8 +128,6 @@ public class ImageModel implements ImageContract.Model {
         connection.disconnect();
         return bitmap;
     }
-
-    private static final int BITMAP_SIZE = 384;
 
     private Bitmap loadBitmapFromByteArray(byte[] data) {
         BitmapFactory.Options options = new BitmapFactory.Options();
