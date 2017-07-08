@@ -3,15 +3,18 @@ package gavinli.translator.image;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Handler;
+import android.os.Message;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import gavinli.translator.R;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 
 /**
@@ -24,7 +27,10 @@ public class ImagePresenter implements ImageContract.Presenter {
     private ImageContract.Model mModel;
     private Context mContext;
 
-    private int mOffset = 0;
+    private final ThreadPoolExecutor mExecutor;
+    private final LoadImageHandler mLoadImageHandler;
+
+    private AtomicInteger mOffset;
     private final int PLACE_HOLD_WIDTH;
     private final int PLACE_HOLD_HEIGHT;
 
@@ -40,14 +46,21 @@ public class ImagePresenter implements ImageContract.Presenter {
         mView = view;
         mModel = model;
         if(mView instanceof Activity) mContext = (Context) mView;
+
         PLACE_HOLD_WIDTH = (int) (mContext.getResources().getDisplayMetrics().widthPixels / 2.5);
         PLACE_HOLD_HEIGHT = (int) (PLACE_HOLD_WIDTH / 1.3);
+
+        mOffset = new AtomicInteger(0);
+        mExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+        mLoadImageHandler = new LoadImageHandler(mView);
+
         mView.setPresenter(this);
     }
 
     @Override
     public void loadMoreImages() {
-        if(mOffset > 20) return;
+        final int num = 10;
+        if(mOffset.get() > 20) return;
         List<Bitmap> bitmaps = new ArrayList<>();
         for(int i = 0; i < 10; i++) {
             Bitmap bitmap = Bitmap.createBitmap(
@@ -60,33 +73,38 @@ public class ImagePresenter implements ImageContract.Presenter {
         }
         mView.showPlaceHolds(bitmaps);
 
-        performLoadImages();
+        performLoadImages(num);
     }
 
-    private void performLoadImages() {
-        Observable.create((Observable.OnSubscribe<List<Bitmap>>) subscriber -> {
-            try {
-                List<Bitmap> images = mModel.getImages(10, mOffset);
-                subscriber.onNext(images);
-            } catch (IOException e) {
-                e.printStackTrace();
-                subscriber.onError(e);
-            }
+    private void performLoadImages(int num) {
+        for(int i = 0; i < num; i++) {
+            mExecutor.execute(() -> {
+                try {
+                    final int offset = mOffset.getAndIncrement();
+                    List<Bitmap> images = mModel.getImages(1, offset);
+                    Message message = new Message();
+                    message.obj = images.get(0);
+                    message.arg1 = offset;
+                    mLoadImageHandler.sendMessage(message);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
 
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(images -> {
-                    for(int i = 0; i < images.size(); i++) {
-                        mView.showMoreImage(images.get(i), mOffset++);
-                    }
-                    if(images.size() % 10 != 0) {
-                        mView.removeRangePlaceHolds(mOffset,
-                                mOffset + (10 - images.size()));
-                    }
-                }, e -> {
-                    if(e instanceof IOException) {
-                        mView.showNetworkError();
-                    }
-                });
+    static class LoadImageHandler extends Handler {
+        private WeakReference<ImageContract.View> mViewWeakReference;
+
+        public LoadImageHandler(ImageContract.View view) {
+            mViewWeakReference = new WeakReference<>(view);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            int offset = msg.arg1;
+            Bitmap image = (Bitmap) msg.obj;
+            mViewWeakReference.get().showImage(image, offset);
+        }
     }
 }

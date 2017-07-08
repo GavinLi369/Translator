@@ -142,7 +142,7 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
     }
 
     @Override
-    public void showMoreImage(Bitmap bitmap, int postion) {
+    public void showImage(Bitmap bitmap, int postion) {
         if(mProgressBar.getVisibility() == View.VISIBLE)
             mProgressBar.setVisibility(View.GONE);
         mAdapter.setImage(bitmap, postion);

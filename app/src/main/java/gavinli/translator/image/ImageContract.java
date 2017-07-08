@@ -15,7 +15,7 @@ import gavinli.translator.BaseView;
 
 public class ImageContract {
     interface View extends BaseView<Presenter> {
-        void showMoreImage(Bitmap bitmap, int postion);
+        void showImage(Bitmap bitmap, int postion);
 
         void showPlaceHolds(List<Bitmap> bitmaps);
 
