@@ -15,20 +15,22 @@ import gavinli.translator.BaseView;
 
 public class ImageContract {
     interface View extends BaseView<Presenter> {
+        void showPlaceholders(int num);
+
         void showImage(Bitmap bitmap, int postion);
 
-        void showPlaceHolds(List<Bitmap> bitmaps);
-
-        void removeRangePlaceHolds(int start, int end);
+        void showNotMoreImages();
 
         void showNetworkError();
     }
 
     interface Presenter extends BasePresenter {
-        void loadMoreImages();
+        void loadImages(int num);
     }
 
     interface Model {
-        List<Bitmap> getImages(int num, int offset) throws IOException;
+        int initImageLinks(int num, int offset) throws IOException;
+
+        Bitmap getImage(int offset) throws IOException;
     }
 }

@@ -10,11 +10,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.flexbox.AlignItems;
@@ -22,6 +20,7 @@ import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import gavinli.translator.R;
@@ -37,8 +36,21 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
 
     private ImageRecyclerAdapter mAdapter;
     private FlexboxLayoutManager mLayoutManager;
-    private ProgressBar mProgressBar;
     private AnimatorSet mCurrentAnimator;
+
+    private int PLACE_HOLD_WIDTH;
+    private int PLACE_HOLD_HEIGHT;
+
+    private final int[] mPlaceHolder = {
+            R.color.colorPlaceHold1,
+            R.color.colorPlaceHold2,
+            R.color.colorPlaceHold3,
+            R.color.colorPlaceHold4,
+            R.color.colorPlaceHold5,
+    };
+
+    private boolean mIsLoading = true;
+    private static final int LOAD_NUM = 10;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,21 +60,25 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         String key = getIntent().getExtras().getString(SearchFragment.INTENT_KEY);
         toolbar.setTitle(key);
         setSupportActionBar(toolbar);
+        //开启Back按钮
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setShowHideAnimationEnabled(true);
 
         RecyclerView imageRecyclerView = (RecyclerView) findViewById(R.id.rv_imagelist);
-        mLayoutManager = new FlexboxLayoutManager();
+        mLayoutManager = new FlexboxLayoutManager(this);
         mLayoutManager.setFlexDirection(FlexDirection.ROW);
         mLayoutManager.setFlexWrap(FlexWrap.WRAP);
         mLayoutManager.setAlignItems(AlignItems.STRETCH);
         imageRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new ImageRecyclerAdapter(this);
+        mAdapter = new ImageRecyclerAdapter();
         mAdapter.setOnItemClickLinstener((view, postion) ->
             zoomImageFromThumb(view, mAdapter.getImages().get(postion)));
         imageRecyclerView.setAdapter(mAdapter);
         imageRecyclerView.addOnScrollListener(new ScrollRefreshListener());
-        mProgressBar = (ProgressBar) findViewById(R.id.bar_loading);
+
+        PLACE_HOLD_WIDTH = (int) (getResources().getDisplayMetrics().widthPixels / 2.5);
+        PLACE_HOLD_HEIGHT = (int) (PLACE_HOLD_WIDTH / 1.3);
 
         new ImagePresenter(this, new ImageModel(this, key));
     }
@@ -127,41 +143,29 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            super.onScrollStateChanged(recyclerView, newState);
-            if(newState == RecyclerView.SCROLL_STATE_IDLE &&
+            if(!mIsLoading && newState == RecyclerView.SCROLL_STATE_IDLE &&
                     mLastVisibleItem + 1 == mAdapter.getItemCount()) {
-                mPresenter.loadMoreImages();
+                mIsLoading = true;
+                mAdapter.showLoadingFooter();
+                mPresenter.loadImages(LOAD_NUM);
             }
         }
 
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-//            mLastVisibleItem = mLayoutManager.getFlexItemCount();
+            mLastVisibleItem = mLayoutManager.findLastCompletelyVisibleItemPosition();
         }
     }
 
     @Override
     public void showImage(Bitmap bitmap, int postion) {
-        if(mProgressBar.getVisibility() == View.VISIBLE)
-            mProgressBar.setVisibility(View.GONE);
         mAdapter.setImage(bitmap, postion);
         mAdapter.notifyItemChanged(postion);
     }
 
     @Override
-    public void showPlaceHolds(List<Bitmap> bitmaps) {
-        if(mProgressBar.getVisibility() == View.VISIBLE)
-            mProgressBar.setVisibility(View.GONE);
-        mAdapter.addImages(bitmaps);
-        mAdapter.notifyItemRangeInserted(mAdapter.getItemCount(),
-                bitmaps.size());
-    }
-
-    @Override
-    public void removeRangePlaceHolds(int start, int end) {
-        mAdapter.removeRangeImages(start, end);
-        mAdapter.notifyItemRangeRemoved(start, end - start);
+    public void showNotMoreImages() {
+        mAdapter.showNotMoreImages();
     }
 
     @Override
@@ -170,8 +174,29 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
     }
 
     @Override
+    public void showPlaceholders(int num) {
+        mAdapter.removeLoadingFooter();
+        mIsLoading = false;
+
+        List<Bitmap> bitmaps = new ArrayList<>();
+        for(int i = 0; i < num; i++) {
+            Bitmap bitmap = Bitmap.createBitmap(
+                    PLACE_HOLD_WIDTH,
+                    PLACE_HOLD_HEIGHT,
+                    Bitmap.Config.ARGB_8888);
+            bitmap.eraseColor(getResources()
+                    .getColor(mPlaceHolder[(int) (Math.random() * 5)]));
+            bitmaps.add(bitmap);
+        }
+        mAdapter.addImages(bitmaps);
+        mAdapter.notifyItemRangeInserted(mAdapter.getItemCount(),
+                bitmaps.size());
+    }
+
+    @Override
     public void setPresenter(ImageContract.Presenter presenter) {
         mPresenter = presenter;
-        mPresenter.loadMoreImages();
+        mAdapter.showLoadingFooter();
+        mPresenter.loadImages(LOAD_NUM);
     }
 }

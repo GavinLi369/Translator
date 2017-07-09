@@ -21,11 +21,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import gavinli.translator.util.PiexelsImageUtil;
+import gavinli.translator.util.PexelsImageUtil;
 
 /**
  * Created by GavinLi
@@ -39,70 +36,57 @@ public class ImageModel implements ImageContract.Model {
 
     private Context mContext;
 
-    private PiexelsImageUtil mImageUtil;
-    private List<String> mImageUrls = null;
+    private PexelsImageUtil mImageUtil;
+    private List<String> mImageUrls;
 
     public ImageModel(Context context, String key) {
         mContext = context;
-        mImageUtil = new PiexelsImageUtil(key);
+        mImageUtil = new PexelsImageUtil(key);
+        mImageUrls = new ArrayList<>();
         BITMAP_SIZE = (int) (mContext.getResources().getDisplayMetrics().widthPixels / 1.5);
     }
 
     @Override
-    public List<Bitmap> getImages(int num, int offset) throws IOException {
-        if(mImageUrls == null) mImageUrls = mImageUtil.getImageLinks();
-        List<Bitmap> images = new ArrayList<>();
+    public int initImageLinks(int num, int offset) throws IOException {
+        if(Looper.myLooper() == Looper.getMainLooper())
+            throw new RuntimeException("不能在主线程操作网络");
+        while(mImageUrls.size() < offset + num) {
+            List<String> links = mImageUtil.getImageLinks();
+            if(links.size() == 0) {
+                return mImageUrls.size() - offset;
+            }
+            mImageUrls.addAll(links);
+        }
+        return num;
+    }
+
+    @Override
+    public Bitmap getImage(int offset) throws IOException {
+        final String url = mImageUrls.get(offset);
         final DiskLruCache diskLruCache = DiskLruCache.open(checkOrCreateCacheDir(),
                 1, 1, CACHE_SIZE);
-        final ExecutorService threadPool = Executors.newFixedThreadPool(num);
-        final CountDownLatch latch = new CountDownLatch(num);
-        for(String url : mImageUrls.subList(offset, offset + num)) {
-            //从缓存获取
-            String key = caculateMd5(url);
-            DiskLruCache.Value value = diskLruCache.get(key);
-            if(value != null) {
+        //从缓存获取
+        String key = caculateMd5(url);
+        DiskLruCache.Value value = diskLruCache.get(key);
+        try {
+            if (value != null) {
                 try {
                     FileInputStream inputStream = new FileInputStream(value.getFile(0));
-                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                    images.add(bitmap);
+                    return BitmapFactory.decodeStream(inputStream);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                } finally {
-                    latch.countDown();
                 }
-            } else {
-                threadPool.execute(() -> {
-                    try {
-                        //从网络获取
-                        Bitmap image = loadImageFromNetwork(url);
-                        if(image == null) return;
-                        //缓存文件
-                        synchronized (diskLruCache) {
-                            DiskLruCache.Editor editor = diskLruCache.edit(key);
-                            cacheBitmapToDisk(image, editor);
-                        }
-                        synchronized (images) {
-                            images.add(image);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        synchronized (latch) {
-                            latch.countDown();
-                        }
-                    }
-                });
             }
-        }
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            //从网络获取
+            Bitmap image = loadImageFromNetwork(url);
+            if (image == null) throw new IOException("图片地址错误");
+            //缓存文件
+            DiskLruCache.Editor editor = diskLruCache.edit(key);
+            cacheBitmapToDisk(image, editor);
+            return image;
         } finally {
-            threadPool.shutdown();
             diskLruCache.close();
         }
-        return images;
     }
 
     private Bitmap loadImageFromNetwork(String url) throws IOException {
