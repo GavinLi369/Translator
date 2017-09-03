@@ -67,7 +67,7 @@ public class ImagePresenter implements ImageContract.Presenter {
                     mExecutor.execute(() -> {
                         try {
                             final int offset = mOffset.getAndIncrement();
-                            Message showImageMessage = new Message();
+                            final Message showImageMessage = Message.obtain();
                             showImageMessage.what = SHOW_IMAGE;
                             showImageMessage.obj = mModel.getImage(offset);
                             showImageMessage.arg1 = offset;

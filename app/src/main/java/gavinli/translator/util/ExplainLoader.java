@@ -6,14 +6,13 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.Spanned;
 
-
-import com.bumptech.glide.disklrucache.DiskLruCache;
+import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,17 +33,19 @@ public class ExplainLoader {
     private DiskLruCache mDiskLruCache;
     private static final long CACHE_SIZE = 10 * 1024 * 1024;
 
-    public static ExplainLoader with(Context context) {
+    public static ExplainLoader with(Context context) throws IOException {
         return new ExplainLoader(context);
     }
 
-    private ExplainLoader(Context context) {
+    private ExplainLoader(Context context) throws IOException {
         mContext = context;
         String dictionaryNum = PreferenceManager
                 .getDefaultSharedPreferences(mContext)
                 .getString(mContext.getString(R.string.key_dictionary), "0");
         mDictionary = Integer.parseInt(dictionaryNum) == 0 ?
                 CambirdgeApi.DICTIONARY_ENGLISH_URL : CambirdgeApi.DICTIONARY_CHINESE_URL;
+        File dir = CreateCacheDirIfAbsent();
+        mDiskLruCache = DiskLruCache.open(dir, 1, 1, CACHE_SIZE);
     }
 
     public ExplainLoader search(String word) {
@@ -61,8 +62,6 @@ public class ExplainLoader {
         if(mWord == null) throw new RuntimeException("必须设置查询单词");
 
         //从缓存中获取
-        mDiskLruCache = DiskLruCache.open(checkOrCreateCacheDir(),
-                1, 1, CACHE_SIZE);
         String key = caculateMd5(mWord + mDictionary);
         List<Spanned> explains = getExplainFromDisk(key);
         if(explains != null) return explains;
@@ -84,11 +83,10 @@ public class ExplainLoader {
 
     @Nullable
     private List<Spanned> getExplainFromDisk(String key) throws IOException, ExplainNotFoundException {
-        DiskLruCache.Value value = mDiskLruCache.get(key);
-        if(value == null) return null;
-        File file = value.getFile(0);
+        DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
+        if(snapshot == null) return null;
         BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(file)));
+                new InputStreamReader(snapshot.getInputStream(0)));
         StringBuilder builder = new StringBuilder();
         String temp;
         while((temp = reader.readLine()) != null) {
@@ -97,28 +95,16 @@ public class ExplainLoader {
         return new HtmlDecoder(builder.toString(), mContext).decode();
     }
 
-    private void cacheExplainToDisk(String key, String source) {
-        try {
-            //缓存文件存在直接返回
-            DiskLruCache.Value value = mDiskLruCache.get(key);
-            if(value != null) return;
-
-            DiskLruCache.Editor editor = mDiskLruCache.edit(key);
-            File file = editor.getFile(0);
-            try {
-                PrintWriter writer = new PrintWriter(file);
-                writer.print(source);
-                writer.close();
-                editor.commit();
-            } finally {
-                editor.abortUnlessCommitted();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void cacheExplainToDisk(String key, String source) throws IOException {
+        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+        OutputStream out = editor.newOutputStream(0);
+        try (PrintWriter writer = new PrintWriter(out)) {
+            writer.print(source);
+            editor.commit();
         }
     }
 
-    private File checkOrCreateCacheDir() throws IOException {
+    private File CreateCacheDirIfAbsent() throws IOException {
         File explainCacheDir = new File(mContext.getFilesDir() +
                 File.separator + CACHE_DIR);
         if(!explainCacheDir.exists()) {

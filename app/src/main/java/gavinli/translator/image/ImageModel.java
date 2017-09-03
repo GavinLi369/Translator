@@ -6,15 +6,13 @@ import android.graphics.BitmapFactory;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
-import com.bumptech.glide.disklrucache.DiskLruCache;
+import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -38,6 +36,8 @@ public class ImageModel implements ImageContract.Model {
 
     private PexelsImageUtil mImageUtil;
     private List<String> mImageUrls;
+
+    private DiskLruCache mDiskLruCache;
 
     public ImageModel(Context context, String key) {
         mContext = context;
@@ -63,30 +63,25 @@ public class ImageModel implements ImageContract.Model {
     @Override
     public Bitmap getImage(int offset) throws IOException {
         final String url = mImageUrls.get(offset);
-        final DiskLruCache diskLruCache = DiskLruCache.open(checkOrCreateCacheDir(),
-                1, 1, CACHE_SIZE);
+        //lazy load
+        if(mDiskLruCache == null) {
+            File dir = checkOrCreateCacheDir();
+            mDiskLruCache = DiskLruCache.open(dir, 1, 1, CACHE_SIZE);
+        }
         //从缓存获取
         String key = caculateMd5(url);
-        DiskLruCache.Value value = diskLruCache.get(key);
-        try {
-            if (value != null) {
-                try {
-                    FileInputStream inputStream = new FileInputStream(value.getFile(0));
-                    return BitmapFactory.decodeStream(inputStream);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+        DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
+        if (snapshot != null) {
+            try (InputStream inputStream = snapshot.getInputStream(0)) {
+                return BitmapFactory.decodeStream(inputStream);
             }
-            //从网络获取
-            Bitmap image = loadImageFromNetwork(url);
-            if (image == null) throw new IOException("图片地址错误");
-            //缓存文件
-            DiskLruCache.Editor editor = diskLruCache.edit(key);
-            cacheBitmapToDisk(image, editor);
-            return image;
-        } finally {
-            diskLruCache.close();
         }
+        //从网络获取
+        Bitmap image = loadImageFromNetwork(url);
+        if (image == null) throw new IOException("图片地址错误");
+        //缓存文件
+        cacheBitmapToDisk(image, key);
+        return image;
     }
 
     private Bitmap loadImageFromNetwork(String url) throws IOException {
@@ -122,14 +117,13 @@ public class ImageModel implements ImageContract.Model {
         return BitmapFactory.decodeByteArray(data, 0, data.length, options);
     }
 
-    private void cacheBitmapToDisk(@NonNull Bitmap bitmap, DiskLruCache.Editor editor)
+    private void cacheBitmapToDisk(@NonNull Bitmap bitmap, String key)
             throws IOException {
-        File file = editor.getFile(0);
-        FileOutputStream outputStream = new FileOutputStream(file);
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-        outputStream.close();
+        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+        try (OutputStream outputStream = editor.newOutputStream(0)) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+        }
         editor.commit();
-        editor.abortUnlessCommitted();
     }
 
     private int caculateInSampleSize(int width, int reqWidth) {

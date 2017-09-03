@@ -114,8 +114,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }).start();
         });
-        builder.setNegativeButton(R.string.cancel_text, (dialog, which) -> {});
-        builder.setCancelable(true);
+        builder.setNegativeButton(R.string.cancel_text, (dialog, which) -> file.delete());
         builder.create().show();
     }
 
