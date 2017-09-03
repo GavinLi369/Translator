@@ -30,13 +30,14 @@ public class App extends Application {
 
     private Intent mClipboardMonitorIntent;
 
-    private static final String ERROR_LOG_NAME = "error.log";
+    public static final String ERROR_LOG_NAME = "error.log";
+
+    public static final String SERVER_HOST = "192.243.117.153";
+    public static final int UPLOAD_LOG_PROT = 8850;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-        uploadErrorLogIfExist();
 
         handleGlobalException();
     }
@@ -58,11 +59,6 @@ public class App extends Application {
         if(mClipboardMonitorIntent != null) {
             stopService(mClipboardMonitorIntent);
         }
-    }
-
-    //TODO upload error log
-    private void uploadErrorLogIfExist() {
-
     }
 
     /**
