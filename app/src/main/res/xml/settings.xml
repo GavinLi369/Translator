@@ -3,7 +3,7 @@
     <SwitchPreference
         android:id="@+id/preference_clipboard"
         android:key="@string/key_clipboard"
-        android:title="@string/setting_clipboard"
+        android:title="@string/tap_to_translate"
         android:defaultValue="false"/>
 
     <ListPreference

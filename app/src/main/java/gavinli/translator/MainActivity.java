@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void realUploadLog(File file) throws IOException {
-        Socket socket = new Socket(App.SERVER_HOST, App.UPLOAD_LOG_PROT);
+        Socket socket = new Socket(App.SERVER_HOST, App.UPLOAD_LOG_PORT);
         OutputStream out = socket.getOutputStream();
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
             try (BufferedReader reader = new BufferedReader(
