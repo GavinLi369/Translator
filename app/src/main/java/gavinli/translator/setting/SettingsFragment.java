@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,8 +18,6 @@ import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatDialog;
 import android.widget.Button;
@@ -35,6 +32,7 @@ import java.net.Socket;
 import gavinli.translator.App;
 import gavinli.translator.R;
 import gavinli.translator.clipboard.ClipboardMonitor;
+import gavinli.translator.util.permisson.RequestPermissons;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -73,7 +71,6 @@ public class SettingsFragment extends PreferenceFragment
                 .getStringArray(R.array.explain_language_values);
         mDictionaryArray = getResources()
                 .getStringArray(R.array.explain_languages);
-
         String currentValue = mDictionary.getValue();
         if(currentValue.equals(mValueArray[0])) {
             mDictionary.setSummary(mDictionaryArray[0]);
@@ -82,7 +79,14 @@ public class SettingsFragment extends PreferenceFragment
         }
 
         mCheckUpdate.setSummary("Current version: " + App.VERSION_NAME);
-        mCheckUpdate.setOnPreferenceClickListener(preference -> checkUpdate());
+        mCheckUpdate.setOnPreferenceClickListener(preference -> {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                String[] permissons = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                new RequestPermissons(getActivity())
+                        .request(permissons, this::showUpdateDialog);
+            }
+            return true;
+        });
     }
 
     @Override
@@ -161,17 +165,6 @@ public class SettingsFragment extends PreferenceFragment
     public void stopClipboardMonitor() {
         Intent intent = new Intent(getActivity(), ClipboardMonitor.class);
         getActivity().stopService(intent);
-    }
-
-    private boolean checkUpdate() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if(!checkStrogePermisson()) {
-                requestStrogePermisson();
-            }
-            if(!checkStrogePermisson()) return true;
-        }
-        showUpdateDialog();
-        return true;
     }
 
     private void showUpdateDialog() {
@@ -274,17 +267,5 @@ public class SettingsFragment extends PreferenceFragment
                     "application/vnd.android.package-archive");
             context.startActivity(intent);
         }
-    }
-    private boolean checkStrogePermisson() {
-        return ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestStrogePermisson() {
-        ActivityCompat.requestPermissions(getActivity(),
-                new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE}, 20);
     }
 }
