@@ -24,14 +24,14 @@
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_cancel"/>
+            android:text="@string/cancel_text"/>
 
         <Button
             android:id="@+id/btn_update"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_update"/>
+            android:text="@string/update_text"/>
     </LinearLayout>
 
 </LinearLayout>

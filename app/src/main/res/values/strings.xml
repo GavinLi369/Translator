@@ -14,15 +14,16 @@
     <string name="self_open_draw_overlays">很抱歉，您的设备暂时无法自动跳转到设置界面，
         您需要自行在系统设置中开启应用上绘制权限</string>
     <string name="setting_dictionary">Dictionary</string>
-    <string name="setting_update">Check Update</string>
     <string name="key_clipboard">perference_clipboard</string>
     <string name="key_dictionary">perference_dictionary</string>
     <string name="key_update">perference_update</string>
 
     <!--Update-->
-    <string name="btn_cancel">Cancel</string>
-    <string name="btn_update">Update</string>
-    <string name="find_update_fail">已是最新版本</string>
+    <string name="setting_update">检查更新</string>
+    <string name="setting_update_summary">当前版本：</string>
+    <string name="update_dialog_title">新版更新</string>
+    <string name="update_text">确认升级</string>
+    <string name="update_absent">已是最新版本</string>
 
     <string name="worddetail">Explain</string>
 
