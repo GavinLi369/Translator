@@ -26,19 +26,21 @@ public class App extends Application {
     public static final int CHECK_UPDATE_PORT = 8848;
     public static final int UPLOAD_LOG_PORT = 8850;
 
+    public static int VERSION_CODE;
     public static String VERSION_NAME;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        PackageInfo packageInfo;
         try {
-            VERSION_NAME = getPackageManager()
-                    .getPackageInfo(getPackageName(), 0)
-                    .versionName;
+            packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
+        VERSION_CODE = packageInfo.versionCode;
+        VERSION_NAME = packageInfo.versionName;
 
         handleGlobalException();
     }

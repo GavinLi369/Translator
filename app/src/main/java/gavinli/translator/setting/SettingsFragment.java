@@ -157,10 +157,10 @@ public class SettingsFragment extends PreferenceFragment
     }
 
     private void showUpdateInfo() {
-        Observable.create((Observable.OnSubscribe<String>) subscriber -> {
+        Observable.create((Observable.OnSubscribe<VersionEntry>) subscriber -> {
             try {
-                String remoteVersion = fetchRemoteVersionName();
-                subscriber.onNext(remoteVersion);
+                VersionEntry versionEntry = fetchRemoteVersionEntry();
+                subscriber.onNext(versionEntry);
             } catch (IOException e) {
                 subscriber.onError(e);
             }
@@ -172,40 +172,59 @@ public class SettingsFragment extends PreferenceFragment
                 });
     }
 
-    private String fetchRemoteVersionName() throws IOException {
+    private VersionEntry fetchRemoteVersionEntry() throws IOException {
         try (Socket socket = new Socket(App.SERVER_HOST, App.CHECK_UPDATE_PORT)) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
                     socket.getInputStream()));
-            return bufferedReader.readLine();
+            int versionCode = Integer.parseInt(bufferedReader.readLine());
+            String versionName = bufferedReader.readLine();
+            StringBuilder versionLog = new StringBuilder();
+            String line;
+            while((line = bufferedReader.readLine()) != null) {
+                versionLog.append(line).append("\n");
+            }
+            versionLog.deleteCharAt(versionLog.length() - 1);
+            return new VersionEntry(versionCode, versionName, versionLog.toString());
         }
     }
 
-    private void checkRemoteVersion(String remoteVersion) {
-        String[] updateVersionInfoes = remoteVersion.split("\\.");
-        String[] versionInfoes = App.VERSION_NAME.split("\\.");
-        if(Integer.parseInt(updateVersionInfoes[0]) > Integer.parseInt(versionInfoes[0]) ||
-                Integer.parseInt(updateVersionInfoes[1]) > Integer.parseInt(versionInfoes[1])) {
-            buildUpdateDialog(remoteVersion);
+    private void checkRemoteVersion(VersionEntry versionEntry) {
+        if(versionEntry.versionCode > App.VERSION_CODE) {
+            buildUpdateDialog(versionEntry);
         } else {
             Snackbar.make(getView(), getString(R.string.update_absent),
                     Snackbar.LENGTH_SHORT).show();
         }
     }
 
-    private void buildUpdateDialog(String remoteVersion) {
-        String message = "最新版本：" + remoteVersion;
+    private void buildUpdateDialog(VersionEntry versionEntry) {
+        String message = "最新版本：" + versionEntry.versionName + "\n\n" +
+                versionEntry.versionLog;
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(getString(R.string.update_dialog_title));
         builder.setMessage(message);
         builder.setPositiveButton(R.string.update_text, (dialog1, which) -> startDownload());
         builder.setNegativeButton(R.string.cancel_text, (dialog12, which) -> {});
         builder.create().show();
     }
-
     private void startDownload() {
         DownloadReceiver downloadReceiver = new DownloadReceiver();
         IntentFilter intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         getActivity().registerReceiver(downloadReceiver, intentFilter);
         downloadReceiver.download(getActivity());
+    }
+
+    /**
+     * 服务器传来的新版App信息
+     */
+    class VersionEntry {
+        final int versionCode;
+        final String versionName;
+        final String versionLog;
+
+        public VersionEntry(int versionCode, String versionName, String versionLog) {
+            this.versionCode = versionCode;
+            this.versionName = versionName;
+            this.versionLog = versionLog;
+        }
     }
 }
