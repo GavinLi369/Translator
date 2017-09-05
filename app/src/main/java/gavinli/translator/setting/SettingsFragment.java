@@ -3,25 +3,20 @@ package gavinli.translator.setting;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.FileProvider;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -43,9 +38,6 @@ import rx.schedulers.Schedulers;
 public class SettingsFragment extends PreferenceFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE= 5469;
-
-    private long mQueueId;
-    private String mFilePath;
 
     private ListPreference mDictionary;
     @SuppressWarnings("FieldCanBeLocal")
@@ -205,55 +197,15 @@ public class SettingsFragment extends PreferenceFragment
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.update_dialog_title));
         builder.setMessage(message);
-        builder.setPositiveButton(R.string.update_text, (dialog1, which) -> {
-            getActivity().registerReceiver(new DowloadCompleteReceiver(),
-                    new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-            downloadApk();
-        });
+        builder.setPositiveButton(R.string.update_text, (dialog1, which) -> startDownload());
         builder.setNegativeButton(R.string.cancel_text, (dialog12, which) -> {});
         builder.create().show();
     }
 
-
-    private void downloadApk() {
-        DownloadManager downloadManager = (DownloadManager) getActivity()
-                .getSystemService(Context.DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(
-                Uri.parse("http://192.243.117.153:8849/"));
-        File file = new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-                "Translator.apk");
-        if(file.exists()) {
-            file.delete();
-        }
-        mFilePath = file.getPath();
-        request.setDestinationUri(Uri.fromFile(file));
-        mQueueId = downloadManager.enqueue(request);
-    }
-
-    class DowloadCompleteReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-            if(id == mQueueId) {
-                promptInstall(context, mFilePath);
-                getActivity().unregisterReceiver(this);
-            }
-        }
-
-        private void promptInstall(Context context, String filePath) {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Uri apkUri;
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                apkUri = FileProvider.getUriForFile(context,
-                        "gavinli.translator", new File(filePath));
-            } else {
-                apkUri = Uri.fromFile(new File(filePath));
-            }
-            intent.setDataAndType(apkUri,
-                    "application/vnd.android.package-archive");
-            context.startActivity(intent);
-        }
+    private void startDownload() {
+        DownloadReceiver downloadReceiver = new DownloadReceiver();
+        IntentFilter intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        getActivity().registerReceiver(downloadReceiver, intentFilter);
+        downloadReceiver.download(getActivity());
     }
 }

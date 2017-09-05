@@ -13,7 +13,7 @@
     <string name="can_draw_overlays_off">授予权限失败，无法使用划词翻译</string>
     <string name="self_open_draw_overlays">很抱歉，您的设备暂时无法自动跳转到设置界面，
         您需要自行在系统设置中开启应用上绘制权限</string>
-    <string name="setting_dictionary">Dictionary</string>
+    <string name="setting_dictionary">翻译语言</string>
     <string name="key_clipboard">perference_clipboard</string>
     <string name="key_dictionary">perference_dictionary</string>
     <string name="key_update">perference_update</string>
