@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -16,7 +17,9 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.view.ContextThemeWrapper;
 import android.text.Spanned;
+import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -52,7 +55,7 @@ public class ClipboardMonitor extends Service
     private WindowManager mWindowManager;
     private View mFloatButton;
     private FloatWindow mFloatWindow;
-    private LinearLayout mContainLayout;
+    private ContainLayout mContainLayout;
 
     private String mPreviousText = "";
     private int mScreenWidth;
@@ -166,19 +169,27 @@ public class ClipboardMonitor extends Service
         mScreenWidth = getResources().getDisplayMetrics().widthPixels;
         mScreenHeight = getResources().getDisplayMetrics().heightPixels;
 
-        mContainLayout = new LinearLayout(this);
+        mContainLayout = new ContainLayout(this);
         mContainLayout.setBackgroundResource(R.color.colorFloatWindowContain);
         //单击解释区域外部，则关闭悬浮框
         mContainLayout.setOnTouchListener((v, event) -> {
-            Rect rect = new Rect();
-            mFloatWindow.getGlobalVisibleRect(rect);
-            if(!rect.contains((int) event.getX(), (int) event.getY())) {
-                mWindowManager.removeView(mContainLayout);
-                mContainLayout = null;
-                return true;
-            } else {
-                return false;
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    Rect rect = new Rect();
+                    mFloatWindow.getGlobalVisibleRect(rect);
+                    if(!rect.contains((int) event.getX(), (int) event.getY())) {
+                        mWindowManager.removeView(mContainLayout);
+                        mContainLayout = null;
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case MotionEvent.ACTION_UP:
+                    v.performClick();
+                default:
+                    break;
             }
+            return true;
         });
 
         ContextThemeWrapper wrapper = new ContextThemeWrapper(ClipboardMonitor.this, R.style.Theme_AppCompat);
@@ -290,5 +301,21 @@ public class ClipboardMonitor extends Service
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private class ContainLayout extends LinearLayout {
+        public ContainLayout(Context context) {
+            super(context);
+        }
+
+        public ContainLayout(Context context, @Nullable AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        @Override
+        public boolean performClick() {
+            super.performClick();
+            return true;
+        }
     }
 }

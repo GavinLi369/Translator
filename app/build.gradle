@@ -25,14 +25,14 @@ android {
             storePassword keystorePSW
         }
     }
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "gavinli.translator"
         minSdkVersion 17
-        targetSdkVersion 25
-        versionCode 2
-        versionName "1.1"
+        targetSdkVersion 26
+        versionCode 3
+        versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
