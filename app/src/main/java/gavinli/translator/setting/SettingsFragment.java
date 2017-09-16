@@ -220,7 +220,8 @@ public class SettingsFragment extends PreferenceFragment
     private void startDownload() {
         DownloadReceiver downloadReceiver = new DownloadReceiver();
         IntentFilter intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        getActivity().registerReceiver(downloadReceiver, intentFilter);
+        // 防止用户退出设置界面，这里使用Application类注册下载监听
+        getActivity().getApplication().registerReceiver(downloadReceiver, intentFilter);
         downloadReceiver.download(getActivity());
     }
 

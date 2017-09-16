@@ -24,6 +24,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(
                 Uri.parse("http://192.243.117.153:8849/"));
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
         File dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         File file = new File(dir, "Translator.apk");
         if(file.exists()) {
