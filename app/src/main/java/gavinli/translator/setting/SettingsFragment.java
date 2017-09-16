@@ -76,6 +76,12 @@ public class SettingsFragment extends PreferenceFragment
             }
             return true;
         });
+
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            if(!Settings.canDrawOverlays(getActivity())) {
+                mTapToTranslate.setChecked(false);
+            }
+        }
     }
 
     @Override
@@ -97,8 +103,7 @@ public class SettingsFragment extends PreferenceFragment
         if(s.equals(getString(R.string.key_clipboard))) {
             if(mTapToTranslate.isChecked()) {
                 startClipboardMonitor();
-                Snackbar.make(getView(), getString(R.string.tap_to_translate_on),
-                            Snackbar.LENGTH_SHORT).show();
+
             } else {
                 stopClipboardMonitor();
                 Snackbar.make(getView(), getString(R.string.tap_to_translate_off),
@@ -127,10 +132,14 @@ public class SettingsFragment extends PreferenceFragment
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         Uri.parse("package:" + getActivity().getPackageName()));
                 startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
+            } else {
+                Snackbar.make(getView(), getString(R.string.tap_to_translate_on),
+                        Snackbar.LENGTH_SHORT).show();
             }
         } else {
             Snackbar.make(getView(), getString(R.string.self_open_draw_overlays),
                     Snackbar.LENGTH_LONG).show();
+            mTapToTranslate.setChecked(false);
         }
     }
 
@@ -143,11 +152,13 @@ public class SettingsFragment extends PreferenceFragment
 
     private void confirmCanDrawOverlays() {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M &&
-                Settings.canDrawOverlays(getActivity()) &&
-                getView() != null) {
+                !Settings.canDrawOverlays(getActivity())) {
             Snackbar.make(getView(), getString(R.string.can_draw_overlays_off),
                     Snackbar.LENGTH_SHORT).show();
             mTapToTranslate.setChecked(false);
+        } else {
+            Snackbar.make(getView(), getString(R.string.tap_to_translate_on),
+                    Snackbar.LENGTH_SHORT).show();
         }
     }
 
