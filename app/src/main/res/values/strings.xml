@@ -28,7 +28,7 @@
     <string name="worddetail">Explain</string>
 
     <!--Image-->
-    <string name="not_more_images">Not More Images</string>
+    <string name="not_more_images">No More</string>
 
     <!--ErrorLog-->
     <string name="dialog_title">上传崩溃日志</string>

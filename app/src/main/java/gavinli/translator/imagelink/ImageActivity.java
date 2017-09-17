@@ -1,4 +1,4 @@
-package gavinli.translator.image;
+package gavinli.translator.imagelink;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -20,11 +20,12 @@ import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import gavinli.translator.R;
 import gavinli.translator.search.SearchFragment;
+import gavinli.translator.util.imageloader.ImageLoader;
+import rx.Observable;
 
 /**
  * Created by GavinLi
@@ -34,24 +35,13 @@ import gavinli.translator.search.SearchFragment;
 public class ImageActivity extends AppCompatActivity implements ImageContract.View {
     private ImageContract.Presenter mPresenter;
 
-    private ImageRecyclerAdapter mAdapter;
+    private ImageAdapter mAdapter;
     private FlexboxLayoutManager mLayoutManager;
     private AnimatorSet mCurrentAnimator;
 
-    private int PLACE_HOLD_WIDTH;
-    private int PLACE_HOLD_HEIGHT;
-
-    private final int[] mPlaceHolder = {
-            R.color.colorPlaceHold1,
-            R.color.colorPlaceHold2,
-            R.color.colorPlaceHold3,
-            R.color.colorPlaceHold4,
-            R.color.colorPlaceHold5,
-    };
-
-    private boolean mIsLoading = true;
     private static final int LOAD_NUM = 10;
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,26 +51,38 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         toolbar.setTitle(key);
         setSupportActionBar(toolbar);
         //开启Back按钮
-        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setShowHideAnimationEnabled(true);
 
+        buildRecyclerView();
+
+        new ImagePresenter(this, new ImageModel(key));
+    }
+
+    private void buildRecyclerView() {
         RecyclerView imageRecyclerView = (RecyclerView) findViewById(R.id.rv_imagelist);
         mLayoutManager = new FlexboxLayoutManager(this);
         mLayoutManager.setFlexDirection(FlexDirection.ROW);
         mLayoutManager.setFlexWrap(FlexWrap.WRAP);
         mLayoutManager.setAlignItems(AlignItems.STRETCH);
         imageRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new ImageRecyclerAdapter();
-        mAdapter.setOnItemClickLinstener((view, postion) ->
-            zoomImageFromThumb(view, mAdapter.getImages().get(postion)));
+        mAdapter = new ImageAdapter(this);
+        mAdapter.setOnItemClickLinstener(this::onItemClick);
         imageRecyclerView.setAdapter(mAdapter);
         imageRecyclerView.addOnScrollListener(new ScrollRefreshListener());
+    }
 
-        PLACE_HOLD_WIDTH = (int) (getResources().getDisplayMetrics().widthPixels / 2.5);
-        PLACE_HOLD_HEIGHT = (int) (PLACE_HOLD_WIDTH / 1.3);
-
-        new ImagePresenter(this, new ImageModel(this, key));
+    private void onItemClick(View view, int postion) {
+        new Thread(() -> {
+            try {
+                Bitmap image = ImageLoader.with(this)
+                        .load(mAdapter.getImageLinks().get(postion))
+                        .get();
+                this.runOnUiThread(() -> zoomImageFromThumb(view, image));
+            } catch (IOException e) {
+                this.runOnUiThread(this::showNetworkError);
+            }
+        }).start();
     }
 
     @Override
@@ -143,11 +145,17 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            if(!mIsLoading && newState == RecyclerView.SCROLL_STATE_IDLE &&
+            if(newState == RecyclerView.SCROLL_STATE_IDLE &&
                     mLastVisibleItem + 1 == mAdapter.getItemCount()) {
-                mIsLoading = true;
-                mAdapter.showLoadingFooter();
-                mPresenter.loadImages(LOAD_NUM);
+                Observable<String> observable = mPresenter.loadImages(LOAD_NUM);
+                observable.subscribe(link -> {
+                    if(link != null) {
+                        mAdapter.addImageLinks(link);
+                        mAdapter.notifyItemInserted(mAdapter.getItemCount());
+                    } else {
+                        mAdapter.showNotMoreImages();
+                    }
+                }, Throwable::printStackTrace);
             }
         }
 
@@ -157,46 +165,21 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         }
     }
 
-    @Override
-    public void showImage(Bitmap bitmap, int postion) {
-        mAdapter.setImage(bitmap, postion);
-        mAdapter.notifyItemChanged(postion);
-    }
-
-    @Override
-    public void showNotMoreImages() {
-        mAdapter.showNotMoreImages();
-    }
-
-    @Override
-    public void showNetworkError() {
+    private void showNetworkError() {
         Toast.makeText(this, "网络连接出错", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void showPlaceholders(int num) {
-        mAdapter.removeLoadingFooter();
-        mIsLoading = false;
-
-        List<Bitmap> bitmaps = new ArrayList<>();
-        for(int i = 0; i < num; i++) {
-            Bitmap bitmap = Bitmap.createBitmap(
-                    PLACE_HOLD_WIDTH,
-                    PLACE_HOLD_HEIGHT,
-                    Bitmap.Config.ARGB_8888);
-            bitmap.eraseColor(getResources()
-                    .getColor(mPlaceHolder[(int) (Math.random() * 5)]));
-            bitmaps.add(bitmap);
-        }
-        mAdapter.addImages(bitmaps);
-        mAdapter.notifyItemRangeInserted(mAdapter.getItemCount(),
-                bitmaps.size());
     }
 
     @Override
     public void setPresenter(ImageContract.Presenter presenter) {
         mPresenter = presenter;
-        mAdapter.showLoadingFooter();
-        mPresenter.loadImages(LOAD_NUM);
+        Observable<String> observable = mPresenter.loadImages(LOAD_NUM);
+        observable.subscribe(link -> {
+            if(link != null) {
+                mAdapter.addImageLinks(link);
+                mAdapter.notifyItemInserted(mAdapter.getItemCount());
+            } else {
+                mAdapter.showNotMoreImages();
+            }
+        }, throwable -> showNetworkError());
     }
 }

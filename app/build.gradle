@@ -74,6 +74,6 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
     compile 'com.github.clans:fab:1.6.4'
-    compile 'com.google.android:flexbox:0.3.0-alpha4'
+    compile 'com.google.android:flexbox:0.3.0'
     compile 'com.jakewharton:disklrucache:2.0.2'
 }

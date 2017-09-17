@@ -29,7 +29,7 @@
 
         <activity android:name=".worddetail.WordDetailActivity"/>
 
-        <activity android:name=".image.ImageActivity"/>
+        <activity android:name=".imagelink.ImageActivity"/>
 
         <receiver android:name=".clipboard.ClipboardMonitorStarter">
             <intent-filter>
