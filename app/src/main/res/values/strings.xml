@@ -2,11 +2,14 @@
     <string name="app_name">Translator</string>
     <string name="search">Search</string>
     <string name="wordbook">Wordbook</string>
+    <string name="worddetail">Explain</string>
+    <string name="settings">Settings</string>
 
     <string name="network_error">网络连接失败</string>
 
+    <string name="progress_message">请稍候&#8230;</string>
+
     <!--Settings-->
-    <string name="settings">Settings</string>
     <string name="tap_to_translate">划词翻译</string>
     <string name="tap_to_translate_on">划词翻译已开启</string>
     <string name="tap_to_translate_off">划词翻译已关闭</string>
@@ -25,7 +28,6 @@
     <string name="update_text">确认升级</string>
     <string name="update_absent">已是最新版本</string>
 
-    <string name="worddetail">Explain</string>
 
     <!--Image-->
     <string name="not_more_images">No More</string>
@@ -35,4 +37,21 @@
     <string name="dialog_message">日志中只会包含上次应用的崩溃信息以及手机的基本信息</string>
     <string name="confirm_text">确认</string>
     <string name="cancel_text">取消</string>
+
+    <!--Account-->
+    <string name="logout">退出登录</string>
+    <string name="account">账号</string>
+    <string name="password">密码</string>
+    <string name="signin">注册</string>
+    <string name="login">登录</string>
+    <string name="account_name">昵称</string>
+    <string name="face">头像</string>
+    <string name="switch_to_login">已经有账号了？登录</string>
+    <string name="switch_to_signup">还没有账号？马上注册</string>
+    <string name="wrong_account">用户名不存在</string>
+    <string name="wrong_password">密码错误</string>
+    <string name="account_illegal">用户名必须在3&#8211;20个字符之间</string>
+    <string name="name_illegal">昵称必须在3&#8211;20个字符之间</string>
+    <string name="password_illegal">密码必须在3&#8211;20个字符之间</string>
+    <string name="account_has_used">用户名已被使用</string>
 </resources>

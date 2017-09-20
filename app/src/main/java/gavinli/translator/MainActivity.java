@@ -10,6 +10,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -22,7 +24,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import gavinli.translator.account.AccountActivity;
 import gavinli.translator.clipboard.ClipboardMonitor;
+import gavinli.translator.datebase.AccountData;
+import gavinli.translator.datebase.AccountDatebase;
 import gavinli.translator.search.SearchFragment;
 import gavinli.translator.search.SearchModel;
 import gavinli.translator.search.SearchPresenter;
@@ -33,8 +38,12 @@ import gavinli.translator.wordbook.WordbookPresenter;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener {
+    private static final int ACCOUNT_REQUEST_CODE = 138;
+
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
+    private ImageView mAccountImage;
+    private TextView mNameText;
 
     private SearchFragment mSearchFragment;
 
@@ -48,6 +57,18 @@ public class MainActivity extends AppCompatActivity implements
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mNavigationView.setNavigationItemSelectedListener(this);
+        mAccountImage = mNavigationView.getHeaderView(0).findViewById(R.id.img_account);
+        mAccountImage.setOnClickListener(view -> {
+            Intent intent = new Intent(this, AccountActivity.class);
+            startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
+        });
+        mNameText = mNavigationView.getHeaderView(0).findViewById(R.id.tv_name);
+        AccountDatebase accountDatebase = new AccountDatebase(this);
+        AccountData accountData = accountDatebase.getAccountData();
+        if(accountData != null) {
+            mAccountImage.setImageBitmap(accountData.face);
+            mNameText.setText(accountData.name);
+        }
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         mSearchFragment = new SearchFragment();
@@ -59,6 +80,22 @@ public class MainActivity extends AppCompatActivity implements
         if(PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean(getString(R.string.key_clipboard), false))
             startService(new Intent(this, ClipboardMonitor.class));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == ACCOUNT_REQUEST_CODE) {
+            AccountDatebase accountDatebase = new AccountDatebase(this);
+            AccountData accountData = accountDatebase.getAccountData();
+            if(accountData != null) {
+                mAccountImage.setImageBitmap(accountData.face);
+                mNameText.setText(accountData.name);
+            } else {
+                mAccountImage.setImageResource(R.drawable.img_default_face);
+                mNameText.setText("");
+            }
+        }
     }
 
     @Override

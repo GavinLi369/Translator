@@ -63,7 +63,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         if(!hasFooter || position != mImageLinks.size() &&
                 holder instanceof ImageViewHolder) {
             ImageViewHolder imageViewHolder = (ImageViewHolder) holder;
-            imageViewHolder.mExplainView.setImageResource(R.drawable.img_default);
+            imageViewHolder.mExplainView.setImageResource(R.drawable.img_placeholder);
             ImageLoader.with(mContext)
                     .load(mImageLinks.get(position))
                     .lessThan(mLessThanWidth, ImageLoader.DEFAULT_SIZE)

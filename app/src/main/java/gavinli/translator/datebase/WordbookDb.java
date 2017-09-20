@@ -14,25 +14,25 @@ import java.util.List;
  */
 
 public class WordbookDb {
-    private WordbookDbHelper mDbHelper;
+    private TranslatorDbHelper mDbHelper;
 
     public WordbookDb(Context context) {
-        mDbHelper = new WordbookDbHelper(context);
+        mDbHelper = new TranslatorDbHelper(context);
     }
 
     public List<String> getWords() {
         List<String> words = new ArrayList<>();
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         String[] projection = {
-                WordbookDbHelper.WordbookEntry._ID,
-                WordbookDbHelper.WordbookEntry.COLUMN_NAME_WORD
+                TranslatorDbHelper.WordbookEntry._ID,
+                TranslatorDbHelper.WordbookEntry.COLUMN_NAME_WORD
         };
-        Cursor cursor = db.query(WordbookDbHelper.WordbookEntry.TABLE_NAME,
+        Cursor cursor = db.query(TranslatorDbHelper.WordbookEntry.TABLE_NAME,
                 projection, null, null, null, null, null);
         if(cursor.moveToFirst()) {
             do {
                 words.add(cursor.getString(cursor.getColumnIndexOrThrow(
-                        WordbookDbHelper.WordbookEntry.COLUMN_NAME_WORD)));
+                        TranslatorDbHelper.WordbookEntry.COLUMN_NAME_WORD)));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -42,12 +42,12 @@ public class WordbookDb {
     public boolean wordExisted(String word) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         String[] projection = {
-                WordbookDbHelper.WordbookEntry._ID,
-                WordbookDbHelper.WordbookEntry.COLUMN_NAME_WORD
+                TranslatorDbHelper.WordbookEntry._ID,
+                TranslatorDbHelper.WordbookEntry.COLUMN_NAME_WORD
         };
-        String selection = WordbookDbHelper.WordbookEntry.COLUMN_NAME_WORD + " = ?";
+        String selection = TranslatorDbHelper.WordbookEntry.COLUMN_NAME_WORD + " = ?";
         String[] selectionArg = { word };
-        Cursor cursor = db.query(WordbookDbHelper.WordbookEntry.TABLE_NAME,
+        Cursor cursor = db.query(TranslatorDbHelper.WordbookEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArg,
@@ -62,14 +62,14 @@ public class WordbookDb {
     public void saveWord(String word) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(WordbookDbHelper.WordbookEntry.COLUMN_NAME_WORD, word);
-        db.insert(WordbookDbHelper.WordbookEntry.TABLE_NAME, null, values);
+        values.put(TranslatorDbHelper.WordbookEntry.COLUMN_NAME_WORD, word);
+        db.insert(TranslatorDbHelper.WordbookEntry.TABLE_NAME, null, values);
     }
 
     public void removeWord(String word) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        String selection = WordbookDbHelper.WordbookEntry.COLUMN_NAME_WORD + " = ?";
+        String selection = TranslatorDbHelper.WordbookEntry.COLUMN_NAME_WORD + " = ?";
         String[] selectionArg = { word };
-        db.delete(WordbookDbHelper.WordbookEntry.TABLE_NAME, selection, selectionArg);
+        db.delete(TranslatorDbHelper.WordbookEntry.TABLE_NAME, selection, selectionArg);
     }
 }

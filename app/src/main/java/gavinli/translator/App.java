@@ -25,6 +25,9 @@ public class App extends Application {
     public static final String SERVER_HOST = "192.243.117.153";
     public static final int CHECK_UPDATE_PORT = 8848;
     public static final int UPLOAD_LOG_PORT = 8850;
+    public static final int SIGN_UP_PORT = 8851;
+    public static final int LOGIN_PORT = 8852;
+    public static final int UPDATE_INFO_PORT = 8853;
 
     public static int VERSION_CODE;
     public static String VERSION_NAME;
