@@ -49,7 +49,8 @@ public class AccountServer {
             }
             try (OutputStream out = socket.getOutputStream();
                  InputStream in = socket.getInputStream()) {
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(out, "UTF-8"));
                 writer.write(jsonObject.toString() + '\n');
                 writer.flush();
 
@@ -85,7 +86,8 @@ public class AccountServer {
             }
             try (OutputStream out = socket.getOutputStream();
                  InputStream in = socket.getInputStream()) {
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(out, "UTF-8"));
                 writer.write(jsonObject.toString() + '\n');
                 writer.flush();
 
@@ -131,7 +133,8 @@ public class AccountServer {
             }
             try (OutputStream out = socket.getOutputStream();
                  InputStream in = socket.getInputStream()) {
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(out, "UTF-8"));
                 writer.write(jsonObject.toString() + '\n');
                 writer.flush();
 
