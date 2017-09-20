@@ -80,6 +80,8 @@ public class AccountActivity extends Activity {
                     mAccountText.setText(accountData.id);
                     mNameText.setText(accountData.name);
                     mFaceImage.setImageBitmap(accountData.face);
+                } else {
+                    finish();
                 }
                 break;
             case GALLERY_REQUSET_CODE:
