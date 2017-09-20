@@ -100,7 +100,7 @@ public class AccountActivity extends Activity {
                     return;
                 }
                 Uri fileUri;
-                if(Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     // Android 7.0 "file://" uri权限适配
                     fileUri = FileProvider.getUriForFile(this,
                             "gavinli.translator", faceFile);
@@ -162,10 +162,8 @@ public class AccountActivity extends Activity {
     }
 
     private void updateInfo(AccountData data) {
-        Observable<Boolean> observable = AccountServer.performUpdateInfo(mAccountData);
-        observable.observeOn(AndroidSchedulers.mainThread()).subscribe(success -> {
-
-        });
+        Observable<Boolean> observable = AccountServer.performUpdateInfo(data);
+        observable.observeOn(AndroidSchedulers.mainThread()).subscribe(success -> {});
     }
 
     private void logOut() {
