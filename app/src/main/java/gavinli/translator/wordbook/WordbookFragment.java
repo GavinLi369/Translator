@@ -1,6 +1,7 @@
 package gavinli.translator.wordbook;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.util.UiTool;
 import gavinli.translator.worddetail.WordDetailActivity;
 
 /**
@@ -38,12 +40,15 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_wordbook, container, false);
-        Toolbar mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
+        Toolbar mToolbar = root.findViewById(R.id.toolbar);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mToolbar.setElevation(UiTool.dpToPx(getContext(), 4));
+        }
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, mToolbar,
                 R.string.app_name, R.string.app_name);
         mDrawerToggle.syncState();
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-        mWordListView = (RecyclerView) root.findViewById(R.id.word_list);
+        mWordListView = root.findViewById(R.id.word_list);
         mWordListView.setLayoutManager(new LinearLayoutManager(getContext()));
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchCallBack());
         itemTouchHelper.attachToRecyclerView(mWordListView);
@@ -60,7 +65,7 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
     public void showWords(List<String> words) {
         mAdapter = new WordListAdapter(words);
         mAdapter.setOnItemClickListener(view -> {
-            TextView textView = (TextView) view.findViewById(R.id.tv_word);
+            TextView textView = view.findViewById(R.id.tv_word);
             Intent intent = new Intent(getActivity(), WordDetailActivity.class);
             intent.putExtra(WordDetailActivity.INTENT_WORD_KEY, textView.getText());
             startActivity(intent);
