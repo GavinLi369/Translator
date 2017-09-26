@@ -94,8 +94,10 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public void showNotMoreImages() {
-        hasFooter = true;
-        notifyItemChanged(mImageLinks.size());
+        if (!hasFooter) {
+            hasFooter = true;
+            notifyItemChanged(mImageLinks.size());
+        }
     }
 
     public List<String> getImageLinks() {

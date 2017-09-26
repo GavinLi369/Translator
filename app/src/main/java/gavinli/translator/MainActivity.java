@@ -19,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -135,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    // TODO failed to upload log on Xiaomi phone
     private void showUploadLogDialog(File file) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.dialog_title));
@@ -157,16 +159,16 @@ public class MainActivity extends AppCompatActivity implements
 
     private void realUploadLog(File file) throws IOException {
         Socket socket = new Socket(App.SERVER_HOST, App.UPLOAD_LOG_PORT);
-        OutputStream out = socket.getOutputStream();
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file)))) {
-                String temp;
-                while((temp = reader.readLine()) != null) {
-                    writer.write(temp, 0, temp.length());
-                    writer.write("\n", 0, 1);
-                }
+        try (OutputStream out = socket.getOutputStream();
+             InputStream in = new FileInputStream(file)) {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String temp;
+            while((temp = reader.readLine()) != null) {
+                writer.write(temp, 0, temp.length());
+                writer.write("\n", 0, 1);
             }
+            writer.flush();
         }
         socket.close();
         file.delete();

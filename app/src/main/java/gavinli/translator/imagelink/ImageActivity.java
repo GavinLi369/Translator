@@ -41,6 +41,8 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
 
     private static final int LOAD_NUM = 10;
 
+    private boolean mNoMore = false;
+
     @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -145,7 +147,7 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            if(newState == RecyclerView.SCROLL_STATE_IDLE &&
+            if(!mNoMore && newState == RecyclerView.SCROLL_STATE_IDLE &&
                     mLastVisibleItem + 1 == mAdapter.getItemCount()) {
                 Observable<String> observable = mPresenter.loadImages(LOAD_NUM);
                 observable.subscribe(link -> {
@@ -153,6 +155,7 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
                         mAdapter.addImageLinks(link);
                         mAdapter.notifyItemInserted(mAdapter.getItemCount());
                     } else {
+                        mNoMore = true;
                         mAdapter.showNotMoreImages();
                     }
                 }, Throwable::printStackTrace);
