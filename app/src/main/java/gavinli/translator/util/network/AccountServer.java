@@ -7,20 +7,18 @@ import android.util.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
 import gavinli.translator.App;
 import gavinli.translator.datebase.AccountData;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
@@ -29,6 +27,8 @@ import rx.schedulers.Schedulers;
  */
 
 public class AccountServer {
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
     public static Observable<Boolean> performSignUp(AccountData accountData) {
         return Observable.create((Observable.OnSubscribe<Boolean>) subscriber -> {
             Map<String, String> infoes = new HashMap<>();
@@ -40,74 +40,51 @@ public class AccountServer {
             String faceBase64 = Base64.encodeToString(faceOut.toByteArray(), Base64.DEFAULT);
             infoes.put("face", faceBase64);
             JSONObject jsonObject = new JSONObject(infoes);
-            Socket socket;
+            Request request = new Request.Builder()
+                    .url(App.HOST + "/account")
+                    .post(RequestBody.create(JSON, jsonObject.toString()))
+                    .build();
             try {
-                socket = new Socket(App.SERVER_HOST, App.SIGN_UP_PORT);
+                Response response = new OkHttpClient().newCall(request).execute();
+                if (response.code() == StatusCode.CREATED) {
+                    subscriber.onNext(true);
+                } else {
+                    subscriber.onNext(false);
+                }
             } catch (IOException e) {
                 subscriber.onError(e);
-                return;
-            }
-            try (OutputStream out = socket.getOutputStream();
-                 InputStream in = socket.getInputStream()) {
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(out, "UTF-8"));
-                writer.write(jsonObject.toString() + '\n');
-                writer.flush();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String resultStr = reader.readLine();
-                JSONObject result = new JSONObject(resultStr);
-                subscriber.onNext(result.getBoolean("result"));
-            } catch (IOException | JSONException e) {
-                subscriber.onError(e);
-            }
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }).subscribeOn(Schedulers.io());
     }
 
     public static Observable<AccountData> performLogIn(AccountData accountData) {
         return Observable.create((Observable.OnSubscribe<AccountData>) subscriber -> {
-            JSONObject jsonObject = new JSONObject();
+            Request request = new Request.Builder()
+                    .url(App.HOST + "/account/" + accountData.id)
+                    .build();
+            String json;
             try {
-                jsonObject.put("id", accountData.id);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            Socket socket;
-            try {
-                socket = new Socket(App.SERVER_HOST, App.LOGIN_PORT);
+                Response response = new OkHttpClient().newCall(request).execute();
+                if (response.code() == StatusCode.NOT_FOUND) {
+                    subscriber.onNext(null);
+                    return;
+                }
+                json = response.body().string();
             } catch (IOException e) {
                 subscriber.onError(e);
                 return;
             }
-            try (OutputStream out = socket.getOutputStream();
-                 InputStream in = socket.getInputStream()) {
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(out, "UTF-8"));
-                writer.write(jsonObject.toString() + '\n');
-                writer.flush();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                JSONObject result = new JSONObject(reader.readLine());
-                boolean success = result.getBoolean("result");
-                if(!success) {
-                    subscriber.onNext(null);
-                    return;
-                }
-                JSONObject resultData = result.getJSONObject("data");
-                String account = resultData.getString("id");
-                String name = resultData.getString("name");
-                String password = resultData.getString("password");
-                String faceBase64 = resultData.getString("face");
+            try {
+                JSONObject result = new JSONObject(json);
+                String account = result.getString("id");
+                String name = result.getString("name");
+                String password = result.getString("password");
+                String faceBase64 = result.getString("face");
                 byte[] faceData = Base64.decode(faceBase64, Base64.DEFAULT);
                 Bitmap face = BitmapFactory.decodeByteArray(faceData, 0, faceData.length);
                 AccountData data = new AccountData(account, name, password, face);
                 subscriber.onNext(data);
-            } catch (IOException | JSONException e) {
+            } catch (JSONException e) {
                 subscriber.onError(e);
             }
         }).subscribeOn(Schedulers.io());
@@ -124,29 +101,17 @@ public class AccountServer {
             String faceBase64 = Base64.encodeToString(faceOut.toByteArray(), Base64.DEFAULT);
             infoes.put("face", faceBase64);
             JSONObject jsonObject = new JSONObject(infoes);
-            Socket socket;
+            Request request = new Request.Builder()
+                    .url(App.HOST + "/account/" + accountData.id)
+                    .post(RequestBody.create(JSON, jsonObject.toString()))
+                    .build();
             try {
-                socket = new Socket(App.SERVER_HOST, App.UPDATE_INFO_PORT);
-            } catch (IOException e) {
-                subscriber.onError(e);
-                return;
-            }
-            try (OutputStream out = socket.getOutputStream();
-                 InputStream in = socket.getInputStream()) {
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(out, "UTF-8"));
-                writer.write(jsonObject.toString() + '\n');
-                writer.flush();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String resultStr = reader.readLine();
-                JSONObject result = new JSONObject(resultStr);
-                subscriber.onNext(result.getBoolean("result"));
-            } catch (IOException | JSONException e) {
-                subscriber.onError(e);
-            }
-            try {
-                socket.close();
+                Response response = new OkHttpClient().newCall(request).execute();
+                if (response.code() == StatusCode.CREATED) {
+                    subscriber.onNext(true);
+                } else {
+                    subscriber.onNext(false);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
