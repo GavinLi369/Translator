@@ -103,7 +103,7 @@ public class AccountServer {
             JSONObject jsonObject = new JSONObject(infoes);
             Request request = new Request.Builder()
                     .url(App.HOST + "/account/" + accountData.id)
-                    .post(RequestBody.create(JSON, jsonObject.toString()))
+                    .put(RequestBody.create(JSON, jsonObject.toString()))
                     .build();
             try {
                 Response response = new OkHttpClient().newCall(request).execute();
