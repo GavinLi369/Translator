@@ -29,8 +29,8 @@ public class Dispatcher {
         mDiskCache = diskCache;
         mExecutorService = executorService;
         mKey = getKeyByUrl(mUrl);
-        mLessThanWidth = ImageLoader.DEFAULT_SIZE;
-        mLessThanHeight = ImageLoader.DEFAULT_SIZE;
+        mLessThanWidth = ImageLoader.DEFAULT_IMAGE_SIZE;
+        mLessThanHeight = ImageLoader.DEFAULT_IMAGE_SIZE;
     }
 
     public void into(ImageView imageView) {
@@ -42,7 +42,7 @@ public class Dispatcher {
                 ImageLoader.HANDLER.post(() -> {
                     ImageView view = imageViewReference.get();
                     if(view != null && view.getTag().equals(mUrl)) {
-                        imageView.setImageBitmap(image);
+                        view.setImageBitmap(image);
                     }
                 });
             } catch (IOException e) {

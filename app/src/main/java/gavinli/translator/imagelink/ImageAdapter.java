@@ -66,7 +66,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             imageViewHolder.mExplainView.setImageResource(R.drawable.img_placeholder);
             ImageLoader.with(mContext)
                     .load(mImageLinks.get(position))
-                    .lessThan(mLessThanWidth, ImageLoader.DEFAULT_SIZE)
+                    .lessThan(mLessThanWidth, ImageLoader.DEFAULT_IMAGE_SIZE)
                     .into(imageViewHolder.mExplainView);
             ViewGroup.LayoutParams params = imageViewHolder.mExplainView.getLayoutParams();
             if (params instanceof FlexboxLayoutManager.LayoutParams) {

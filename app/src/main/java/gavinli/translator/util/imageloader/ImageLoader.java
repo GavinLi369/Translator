@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,13 +28,13 @@ public class ImageLoader {
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     private static final int CORE_THREAD_NUM = CPU_COUNT + 1;
     private static final int MAX_THREAD_NUM = 2 * CPU_COUNT + 1;
-    private static final int KEEP_ALIVE_TIME = 10;
+    private static final int KEEP_ALIVE_TIME = 60;
     private static final int QUEUE_CAPACITY = 30;
 
-    public static final int DEFAULT_SIZE = Integer.MAX_VALUE;
+    public static final int DEFAULT_IMAGE_SIZE = Integer.MAX_VALUE;
 
     private final MemoryCache mMemoryCache;
-    private final DiskCache mDiskCache;
+    private DiskCache mDiskCache;
     private final ExecutorService mExecutorService;
 
     private ImageLoader(Context context) {
@@ -41,8 +42,12 @@ public class ImageLoader {
         mContext = context.getApplicationContext();
         mMemoryCache = new MemoryCache(calculateMemoryCacheSize(mContext));
         final File directory = checkOrCreateDirectory(mContext, DISK_CACHE_DIR);
-        mDiskCache = new DiskCache(directory,
-                BuildConfig.VERSION_CODE,calculateDiskCacheSize());
+        try {
+            mDiskCache = new DiskCache(directory,
+                    BuildConfig.VERSION_CODE, calculateDiskCacheSize());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         mExecutorService = new ThreadPoolExecutor(CORE_THREAD_NUM,
                 MAX_THREAD_NUM, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(QUEUE_CAPACITY),
