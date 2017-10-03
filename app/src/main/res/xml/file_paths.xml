@@ -2,6 +2,6 @@
 <resources>
     <paths>
         <external-path name="download" path="Download"/>
-        <cache-path name="cache" path="" />
+        <external-cache-path name="cache" path="" />
     </paths>
 </resources>

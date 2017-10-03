@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
@@ -20,6 +21,14 @@ public class RoundImageView extends AppCompatImageView {
     private static final int CIRCLE_STOKE_WIDTH = 2;
     private Path circlePath = new Path();
     private Paint mPaint = new Paint();
+
+    {
+        // Canvas.clipPath() isn't supported with hardware acceleration
+        // in Android 4.2
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        }
+    }
 
     public RoundImageView(Context context) {
         super(context);

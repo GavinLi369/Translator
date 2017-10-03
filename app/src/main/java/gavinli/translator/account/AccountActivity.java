@@ -1,5 +1,6 @@
 package gavinli.translator.account;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -33,8 +34,9 @@ import rx.android.schedulers.AndroidSchedulers;
 
 public class AccountActivity extends Activity {
     private static final int GALLERY_REQUSET_CODE = 138;
-    private static final int CROP_REQUEST_CODE = 139;
-    private static final int LOG_IN_REQUSET_CODE = 140;
+    private static final int GALLERY_REQUSET_CODE_KITKAT = 139;
+    private static final int CROP_REQUEST_CODE = 140;
+    private static final int LOG_IN_REQUSET_CODE = 141;
 
     private ImageView mFaceImage;
     private TextView mAccountText;
@@ -70,7 +72,6 @@ public class AccountActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case LOG_IN_REQUSET_CODE:
                 if(resultCode == RESULT_OK) {
@@ -85,29 +86,10 @@ public class AccountActivity extends Activity {
                 }
                 break;
             case GALLERY_REQUSET_CODE:
-                if(resultCode != RESULT_OK) return;
-                Uri contentUri = data.getData();
-                if (contentUri == null) return;
-                File faceFile;
-                try {
-                    ParcelFileDescriptor parcelFileDescriptor =
-                            getContentResolver().openFileDescriptor(contentUri, "r");
-                    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                    Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
-                    faceFile = saveBitmap(image);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return;
-                }
-                Uri fileUri;
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    // Android 7.0 "file://" uri权限适配
-                    fileUri = FileProvider.getUriForFile(this,
-                            "gavinli.translator", faceFile);
-                } else {
-                    fileUri = Uri.fromFile(faceFile);
-                }
-                routeToCrop(fileUri);
+                handleGalleryResult(resultCode, data);
+                break;
+            case GALLERY_REQUSET_CODE_KITKAT:
+                handleGalleryKitKatResult(resultCode, data);
                 break;
             case CROP_REQUEST_CODE:
                 // 此处crop正常返回resultCode也不为RESULT_OK
@@ -132,18 +114,59 @@ public class AccountActivity extends Activity {
         }
     }
 
-    private void routeToGallery() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
-            startActivityForResult(intent, GALLERY_REQUSET_CODE);
+    private void handleGalleryResult(int resultCode, Intent data) {
+        if(resultCode != RESULT_OK) return;
+        String path = data.getData().getPath();
+        Bitmap image = BitmapFactory.decodeFile(path);
+        File faceFile;
+        try {
+            faceFile = saveBitmap(image);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        Uri fileUri = Uri.fromFile(faceFile);
+        routeToCrop(fileUri);
+    }
+
+    // Result uri is "content://" after Android 4.4
+    private void handleGalleryKitKatResult(int resultCode, Intent data) {
+        if(resultCode != RESULT_OK) return;
+        Uri contentUri = data.getData();
+        if (contentUri == null) return;
+        File faceFile;
+        try {
+            ParcelFileDescriptor parcelFileDescriptor =
+                    getContentResolver().openFileDescriptor(contentUri, "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            faceFile = saveBitmap(image);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        Uri fileUri;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Android 7.0 "file://" uri权限适配
+            fileUri = FileProvider.getUriForFile(this,
+                    "gavinli.translator", faceFile);
         } else {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
+            fileUri = Uri.fromFile(faceFile);
+        }
+        routeToCrop(fileUri);
+    }
+
+    private void routeToGallery() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            startActivityForResult(intent, GALLERY_REQUSET_CODE_KITKAT);
+        } else {
             startActivityForResult(intent, GALLERY_REQUSET_CODE);
         }
     }
+
 
     private void routeToCrop(Uri uri) {
         Intent intent = new Intent("com.android.camera.action.CROP");
@@ -173,7 +196,7 @@ public class AccountActivity extends Activity {
     }
 
     private File saveBitmap(Bitmap bitmap) throws IOException {
-        File file = new File(getCacheDir(), "face-cache");
+        File file = new File(getExternalCacheDir(), "face-cache");
         if (!file.exists()) file.createNewFile();
         try (OutputStream out = new FileOutputStream(file)) {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
