@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <paths>
-        <external-path name="download" path="Download"/>
         <external-cache-path name="cache" path="" />
     </paths>
 </resources>

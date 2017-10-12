@@ -23,9 +23,6 @@ public class App extends Application {
     public static final String ERROR_LOG_NAME = "error.log";
 
     public static final String HOST = "http://192.243.117.153:4567";
-    public static final String SERVER_HOST = "192.243.117.153";
-    public static final int CHECK_UPDATE_PORT = 8848;
-    public static final int UPLOAD_LOG_PORT = 8850;
 
     public static int VERSION_CODE;
     public static String VERSION_NAME;

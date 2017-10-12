@@ -15,15 +15,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
 
 import gavinli.translator.account.AccountActivity;
 import gavinli.translator.clipboard.ClipboardMonitor;
@@ -36,10 +32,15 @@ import gavinli.translator.setting.SettingsActivity;
 import gavinli.translator.wordbook.WordbookFragment;
 import gavinli.translator.wordbook.WordbookModel;
 import gavinli.translator.wordbook.WordbookPresenter;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener {
     private static final int ACCOUNT_REQUEST_CODE = 138;
+    private static final MediaType PLAIN = MediaType.parse("text/plain; charset=utf-8");
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
@@ -158,19 +159,28 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void realUploadLog(File file) throws IOException {
-        Socket socket = new Socket(App.SERVER_HOST, App.UPLOAD_LOG_PORT);
-        try (OutputStream out = socket.getOutputStream();
-             InputStream in = new FileInputStream(file)) {
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        String log = getLogFromFile(file);
+        // delete the log regardless of whether the upload is sucessful.
+        file.delete();
+
+        Request request = new Request.Builder()
+                .url(App.HOST + "/log/error")
+                .post(RequestBody.create(PLAIN, log))
+                .build();
+        new OkHttpClient().newCall(request).execute();
+    }
+
+    private String getLogFromFile(File file) throws IOException {
+        try (InputStream in = new FileInputStream(file)) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            StringBuilder log = new StringBuilder();
             String temp;
             while((temp = reader.readLine()) != null) {
-                writer.write(temp, 0, temp.length());
-                writer.write("\n", 0, 1);
+                log.append(temp).append('\n');
             }
-            writer.flush();
+            // remove the last '\n'
+            log.deleteCharAt(log.length() - 1);
+            return log.toString();
         }
-        socket.close();
-        file.delete();
     }
 }

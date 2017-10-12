@@ -6,10 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.support.v4.content.FileProvider;
 
 import java.io.File;
+
+import gavinli.translator.App;
 
 /**
  * Created by gavin on 9/5/17.
@@ -23,10 +24,9 @@ public class DownloadReceiver extends BroadcastReceiver {
     public void download(Context context) {
         DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(
-                Uri.parse("http://192.243.117.153:8849/"));
+                Uri.parse(App.HOST + "/download/apk"));
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-        File dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(dir, "Translator.apk");
+        File file = new File(context.getExternalCacheDir(), "Translator.apk");
         if(file.exists()) {
             file.delete();
         }

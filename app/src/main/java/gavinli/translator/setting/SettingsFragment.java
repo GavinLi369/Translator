@@ -16,15 +16,18 @@ import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 
-import java.io.BufferedReader;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
 
 import gavinli.translator.App;
 import gavinli.translator.R;
 import gavinli.translator.clipboard.ClipboardMonitor;
 import gavinli.translator.util.permisson.RequestPermissons;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -184,19 +187,21 @@ public class SettingsFragment extends PreferenceFragment
     }
 
     private VersionEntry fetchRemoteVersionEntry() throws IOException {
-        try (Socket socket = new Socket(App.SERVER_HOST, App.CHECK_UPDATE_PORT)) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                    socket.getInputStream()));
-            int versionCode = Integer.parseInt(bufferedReader.readLine());
-            String versionName = bufferedReader.readLine();
-            StringBuilder versionLog = new StringBuilder();
-            String line;
-            while((line = bufferedReader.readLine()) != null) {
-                versionLog.append(line).append("\n");
-            }
-            versionLog.deleteCharAt(versionLog.length() - 1);
-            return new VersionEntry(versionCode, versionName, versionLog.toString());
+        Request request = new Request.Builder()
+                .url(App.HOST + "/download/version")
+                .build();
+        Response response = new OkHttpClient().newCall(request).execute();
+        VersionEntry versionEntry;
+        try {
+            JSONObject jsonObject = new JSONObject(response.body().string());
+            int versionCode = jsonObject.getInt("versionCode");
+            String versionName = jsonObject.getString("versionName");
+            String versionLog = jsonObject.getString("versionLog");
+            versionEntry = new VersionEntry(versionCode, versionName, versionLog);
+        } catch (JSONException e) {
+            throw new IOException("Json格式错误");
         }
+        return versionEntry;
     }
 
     private void checkRemoteVersion(VersionEntry versionEntry) {
