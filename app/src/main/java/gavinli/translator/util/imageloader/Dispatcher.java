@@ -56,12 +56,12 @@ public class Dispatcher {
      */
     private Map<ImageView, ImageRequestor> mRequestorMap;
 
-    public Dispatcher(String url, MemoryCache memoryCache, DiskCache diskCache,
+    public Dispatcher(ImageLoader imageLoader, String url, MemoryCache memoryCache, DiskCache diskCache,
                       Executor executor, Map<ImageView, ImageRequestor> requestorMap) {
         mMemoryCache = memoryCache;
         mExecutor = executor;
         mKey = canculateMd5(url);
-        mLoaderTask = new LoaderTask(mKey, url, null,
+        mLoaderTask = new LoaderTask(imageLoader, mKey, url, null,
                 ImageLoader.DEFAULT_IMAGE_SIZE, ImageLoader.DEFAULT_IMAGE_SIZE);
         mRequestor = new ImageRequestor(this, diskCache, mLoaderTask);
         mRequestorMap = requestorMap;

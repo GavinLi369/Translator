@@ -92,7 +92,11 @@ public class ImageLoader {
     }
 
     public Dispatcher load(String url) {
-        return new Dispatcher(url, mMemoryCache, mDiskCache, mExecutor, mRequestorMap);
+        return new Dispatcher(this, url, mMemoryCache, mDiskCache, mExecutor, mRequestorMap);
+    }
+
+    public Context getContext() {
+        return mContext;
     }
 
     private File checkOrCreateDirectory(Context context, String dir) {

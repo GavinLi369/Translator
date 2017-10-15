@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.os.Looper;
 import android.widget.ImageView;
 
+import gavinli.translator.util.imageloader.drawable.FadeDrawable;
+
 /**
  * 图片加载任务实体类
  *
@@ -11,6 +13,8 @@ import android.widget.ImageView;
  */
 
 public final class LoaderTask {
+    private ImageLoader mImageLoader;
+
     /**
      * 任务标示符
      */
@@ -36,9 +40,12 @@ public final class LoaderTask {
      */
     private int mMaxHeight;
 
-    public int postion;
-
-    public LoaderTask(String key, String url, ImageView imageView, int maxWidth, int maxHeight) {
+    public LoaderTask(ImageLoader imageLoader,
+                      String key,
+                      String url,
+                      ImageView imageView,
+                      int maxWidth, int maxHeight) {
+        mImageLoader = imageLoader;
         mKey = key;
         mUrl = url;
         mImageView = imageView;
@@ -55,7 +62,7 @@ public final class LoaderTask {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new RuntimeException("不能在子线程操作UI");
         }
-        mImageView.setImageBitmap(bitmap);
+        FadeDrawable.setBitmap(mImageLoader.getContext(), mImageView, bitmap);
     }
 
     public String getKey() {
