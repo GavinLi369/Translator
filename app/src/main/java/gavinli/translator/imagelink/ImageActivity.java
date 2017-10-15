@@ -21,11 +21,14 @@ import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import gavinli.translator.R;
 import gavinli.translator.search.SearchFragment;
 import gavinli.translator.util.imageloader.ImageLoader;
 import rx.Observable;
+import rx.functions.Func0;
 
 /**
  * Created by GavinLi
@@ -150,10 +153,13 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
             if(!mNoMore && newState == RecyclerView.SCROLL_STATE_IDLE &&
                     mLastVisibleItem + 1 == mAdapter.getItemCount()) {
                 Observable<String> observable = mPresenter.loadImages(LOAD_NUM);
-                observable.subscribe(link -> {
-                    if(link != null) {
-                        mAdapter.addImageLinks(link);
-                        mAdapter.notifyItemInserted(mAdapter.getItemCount());
+                observable.collect((Func0<List<String>>) ArrayList::new, List::add)
+                    .subscribe(links -> {
+                    if (!links.isEmpty()) {
+                        for (String link : links) {
+                            mAdapter.addImageLinks(link);
+                        }
+                        mAdapter.notifyItemRangeChanged(mAdapter.getItemCount(), links.size());
                     } else {
                         mNoMore = true;
                         mAdapter.showNotMoreImages();

@@ -60,24 +60,17 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if(!hasFooter || position != mImageLinks.size() &&
-                holder instanceof ImageViewHolder) {
+        if(!hasFooter || holder instanceof ImageViewHolder) {
             ImageViewHolder imageViewHolder = (ImageViewHolder) holder;
-            imageViewHolder.mExplainView.setImageResource(R.drawable.img_placeholder);
             ImageLoader.with(mContext)
                     .load(mImageLinks.get(position))
                     .lessThan(mLessThanWidth, ImageLoader.DEFAULT_IMAGE_SIZE)
-                    .into(imageViewHolder.mExplainView);
-            ViewGroup.LayoutParams params = imageViewHolder.mExplainView.getLayoutParams();
-            if (params instanceof FlexboxLayoutManager.LayoutParams) {
-                FlexboxLayoutManager.LayoutParams layoutParams = (FlexboxLayoutManager.LayoutParams) params;
-                layoutParams.setFlexGrow(1.0f);
-            }
-            imageViewHolder.mExplainView.setOnClickListener(view -> {
-                if (mLinstener != null) mLinstener.onClick(imageViewHolder.mExplainView, position);
+                    .placeholder(R.drawable.img_placeholder)
+                    .into(imageViewHolder.mImageView);
+            imageViewHolder.mImageView.setOnClickListener(view -> {
+                if (mLinstener != null) mLinstener.onClick(imageViewHolder.mImageView, position);
             });
-        } else if (hasFooter &&
-                position == mImageLinks.size()) {
+        } else {
             LoadingFooterHolder loadingFooterHolder = (LoadingFooterHolder) holder;
             loadingFooterHolder.mProgressBar.setVisibility(View.GONE);
             loadingFooterHolder.mInfoTextView.setVisibility(View.VISIBLE);
@@ -93,6 +86,9 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         mImageLinks.add(link);
     }
 
+    /**
+     * 在RercylerView底部显示信息，表示无更多图片。
+     */
     public void showNotMoreImages() {
         if (!hasFooter) {
             hasFooter = true;
@@ -105,11 +101,16 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     class ImageViewHolder extends RecyclerView.ViewHolder {
-        private ImageView mExplainView;
+        private ImageView mImageView;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
-            mExplainView = itemView.findViewById(R.id.iv_explain);
+            mImageView = itemView.findViewById(R.id.iv_explain);
+            ViewGroup.LayoutParams params = mImageView.getLayoutParams();
+            if (params instanceof FlexboxLayoutManager.LayoutParams) {
+                FlexboxLayoutManager.LayoutParams layoutParams = (FlexboxLayoutManager.LayoutParams) params;
+                layoutParams.setFlexGrow(1.0f);
+            }
         }
     }
 
@@ -124,10 +125,18 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
+    /**
+     * 设置Item点击监听
+     *
+     * @param linstener Item点击监听器
+     */
     public void setOnItemClickLinstener(OnItemClickLinstener linstener) {
         mLinstener = linstener;
     }
 
+    /**
+     * Item点击监听接口
+     */
     public interface OnItemClickLinstener {
         void onClick(View view, int postion);
     }

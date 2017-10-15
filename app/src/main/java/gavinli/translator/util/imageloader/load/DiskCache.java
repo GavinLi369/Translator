@@ -1,4 +1,4 @@
-package gavinli.translator.util.imageloader;
+package gavinli.translator.util.imageloader.load;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

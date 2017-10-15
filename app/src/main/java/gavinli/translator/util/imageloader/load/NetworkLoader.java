@@ -1,4 +1,4 @@
-package gavinli.translator.util.imageloader;
+package gavinli.translator.util.imageloader.load;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,10 +13,24 @@ import java.net.URL;
  * Created by gavin on 17-8-16.
  */
 
-public class NetworkUtil {
-    private NetworkUtil() {}
+public class NetworkLoader {
+    /**
+     * 取消加载
+     */
+    private volatile boolean mCanceled = false;
 
-    public static Bitmap getBitmap(String url, int reqWidth, int reqHeight) throws IOException {
+    /**
+     * 从网络获取图片
+     *
+     * @param url 图片url
+     *
+     * @param reqWidth 图片最大宽度，用来缩放图片。
+     *
+     * @param reqHeight 图片最大高度，用来缩放图片。
+     *
+     * @throws IOException 网络连接错误
+     */
+    public Bitmap fetchBitmap(String url, int reqWidth, int reqHeight) throws IOException {
         URL realUrl = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
         try(InputStream in = connection.getInputStream();
@@ -24,6 +38,7 @@ public class NetworkUtil {
             byte[] temp = new byte[1024];
             int length;
             while((length = in.read(temp)) > -1) {
+                if (mCanceled) return null;
                 out.write(temp, 0, length);
             }
             out.flush();
@@ -42,7 +57,27 @@ public class NetworkUtil {
         }
     }
 
-    private static int cancaulateSampleSize(int width, int height, int reqWidth, int reqHeight) {
+    /**
+     * 取消加载，直接返回null。
+     */
+    public void cancel() {
+        mCanceled = true;
+    }
+
+    /**
+     * 由reqWidth, reqHeight计算图片缩放系数
+     *
+     * @param width 图片原始宽度
+     *
+     * @param height 图片原始高度
+     *
+     * @param reqWidth 图片最大宽度
+     *
+     * @param reqHeight 图片最大高度
+     *
+     * @return 图片缩放系数
+     */
+    private int cancaulateSampleSize(int width, int height, int reqWidth, int reqHeight) {
         int sampleSize = 1;
         while(width > reqWidth || height > reqHeight) {
             sampleSize *= 2;

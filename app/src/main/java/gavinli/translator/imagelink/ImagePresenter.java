@@ -29,11 +29,12 @@ public class ImagePresenter implements ImageContract.Presenter {
                 for(int i = 0; i < num; i++) {
                     try {
                         String link = mModel.getImageLink();
-                        subscriber.onNext(link);
+                        if (link != null) subscriber.onNext(link);
                     } catch (IOException e) {
                         subscriber.onError(e);
                     }
                 }
+                subscriber.onCompleted();
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 }
