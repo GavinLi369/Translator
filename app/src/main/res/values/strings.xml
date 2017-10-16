@@ -31,6 +31,7 @@
 
     <!--Image-->
     <string name="not_more_images">No More</string>
+    <string name="progress_dialog_message">请稍候&#8230;</string>
 
     <!--ErrorLog-->
     <string name="dialog_title">上传崩溃日志</string>

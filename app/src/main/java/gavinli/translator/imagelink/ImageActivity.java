@@ -2,6 +2,7 @@ package gavinli.translator.imagelink;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -181,14 +182,21 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
     @Override
     public void setPresenter(ImageContract.Presenter presenter) {
         mPresenter = presenter;
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.progress_dialog_message));
+        progressDialog.show();
         Observable<String> observable = mPresenter.loadImages(LOAD_NUM);
         observable.subscribe(link -> {
+            progressDialog.cancel();
             if(link != null) {
                 mAdapter.addImageLinks(link);
                 mAdapter.notifyItemInserted(mAdapter.getItemCount());
             } else {
                 mAdapter.showNotMoreImages();
             }
-        }, throwable -> showNetworkError());
+        }, throwable -> {
+            showNetworkError();
+            progressDialog.cancel();
+        });
     }
 }
