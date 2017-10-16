@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import gavinli.translator.util.PexelsImageUtil;
-
 /**
  * Created by GavinLi
  * on 17-3-12.
@@ -15,7 +13,7 @@ import gavinli.translator.util.PexelsImageUtil;
 
 public class ImageModel implements ImageContract.Model {
     private PexelsImageUtil mImageUtil;
-    private Queue<String> mImageLinks;
+    private Queue<NetworkImage> mImageLinks;
 
 
     public ImageModel(String key) {
@@ -24,7 +22,7 @@ public class ImageModel implements ImageContract.Model {
     }
 
     @Override
-    public String getImageLink() throws IOException {
+    public NetworkImage getImageLink() throws IOException {
         if(Looper.myLooper() == Looper.getMainLooper())
             throw new RuntimeException("不能在主线程操作网络");
         if(mImageLinks.isEmpty()) {

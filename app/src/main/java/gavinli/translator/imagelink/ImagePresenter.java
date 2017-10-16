@@ -24,13 +24,13 @@ public class ImagePresenter implements ImageContract.Presenter {
     }
 
     @Override
-    public Observable<String> loadImages(int num) {
-        return Observable.create((Observable.OnSubscribe<String>) subscriber -> {
+    public Observable<NetworkImage> loadImages(int num) {
+        return Observable.create((Observable.OnSubscribe<NetworkImage>) subscriber -> {
                 for(int i = 0; i < num; i++) {
                     try {
-                        String link = mModel.getImageLink();
-                        if (link == null) break;
-                        subscriber.onNext(link);
+                        NetworkImage imageEntry = mModel.getImageLink();
+                        if (imageEntry == null) break;
+                        subscriber.onNext(imageEntry);
                     } catch (IOException e) {
                         subscriber.onError(e);
                         return;

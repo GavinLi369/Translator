@@ -82,7 +82,7 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         new Thread(() -> {
             try {
                 Bitmap image = ImageLoader.with(this)
-                        .load(mAdapter.getImageLinks().get(postion))
+                        .load(mAdapter.getImageLinks().get(postion).getUrl())
                         .get();
                 this.runOnUiThread(() -> zoomImageFromThumb(view, image));
             } catch (IOException e) {
@@ -153,11 +153,11 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             if(!mNoMore && newState == RecyclerView.SCROLL_STATE_IDLE &&
                     mLastVisibleItem + 1 == mAdapter.getItemCount()) {
-                Observable<String> observable = mPresenter.loadImages(LOAD_NUM);
-                observable.collect((Func0<List<String>>) ArrayList::new, List::add)
+                Observable<NetworkImage> observable = mPresenter.loadImages(LOAD_NUM);
+                observable.collect((Func0<List<NetworkImage>>) ArrayList::new, List::add)
                     .subscribe(links -> {
                     if (!links.isEmpty()) {
-                        for (String link : links) {
+                        for (NetworkImage link : links) {
                             mAdapter.addImageLinks(link);
                         }
                         mAdapter.notifyItemRangeChanged(mAdapter.getItemCount(), links.size());
@@ -185,12 +185,12 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.progress_dialog_message));
         progressDialog.show();
-        Observable<String> observable = mPresenter.loadImages(LOAD_NUM);
-        observable.collect((Func0<List<String>>) ArrayList::new, List::add)
+        Observable<NetworkImage> observable = mPresenter.loadImages(LOAD_NUM);
+        observable.collect((Func0<List<NetworkImage>>) ArrayList::new, List::add)
                 .subscribe(links -> {
             progressDialog.cancel();
             if(!links.isEmpty()) {
-                for (String link : links) {
+                for (NetworkImage link : links) {
                     mAdapter.addImageLinks(link);
                 }
                 mAdapter.notifyItemRangeChanged(mAdapter.getItemCount(), links.size());

@@ -1,6 +1,7 @@
 package gavinli.translator.imagelink;
 
 import android.content.Context;
+import android.graphics.drawable.GradientDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +24,7 @@ import gavinli.translator.util.imageloader.ImageLoader;
  */
 
 public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<String> mImageLinks = new ArrayList<>();
+    private List<NetworkImage> mImageLinks = new ArrayList<>();
     private OnItemClickLinstener mLinstener;
 
     private Context mContext;
@@ -62,10 +63,14 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(!hasFooter || holder instanceof ImageViewHolder) {
             ImageViewHolder imageViewHolder = (ImageViewHolder) holder;
+            NetworkImage networkImage  = mImageLinks.get(position);
+            GradientDrawable placeholder = (GradientDrawable) mContext.getResources()
+                    .getDrawable(R.drawable.img_placeholder);
+            placeholder.setSize(networkImage.getWidth(), networkImage.getHeight());
             ImageLoader.with(mContext)
-                    .load(mImageLinks.get(position))
-                    .lessThan(mLessThanWidth, ImageLoader.DEFAULT_IMAGE_SIZE)
-                    .placeholder(R.drawable.img_placeholder)
+                    .load(networkImage.getUrl())
+//                    .lessThan(mLessThanWidth, ImageLoader.DEFAULT_IMAGE_SIZE)
+                    .placeholder(placeholder)
                     .into(imageViewHolder.mImageView);
             imageViewHolder.mImageView.setOnClickListener(view -> {
                 if (mLinstener != null) mLinstener.onClick(imageViewHolder.mImageView, position);
@@ -82,7 +87,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         return hasFooter ? mImageLinks.size() + 1 : mImageLinks.size();
     }
 
-    public void addImageLinks(String link) {
+    public void addImageLinks(NetworkImage link) {
         mImageLinks.add(link);
     }
 
@@ -96,7 +101,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    public List<String> getImageLinks() {
+    public List<NetworkImage> getImageLinks() {
         return mImageLinks;
     }
 

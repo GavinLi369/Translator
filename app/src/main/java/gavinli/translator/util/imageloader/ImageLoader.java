@@ -12,9 +12,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import gavinli.translator.BuildConfig;
 import gavinli.translator.util.imageloader.load.DiskCache;
@@ -45,11 +42,6 @@ public class ImageLoader {
     };
     private static final String DISK_CACHE_DIR = "imageloader-cache";
 
-    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final int CORE_THREAD_NUM = CPU_COUNT + 1;
-    private static final int MAX_THREAD_NUM = 2 * CPU_COUNT + 1;
-    private static final int KEEP_ALIVE_TIME = 60;
-
     public static final int DEFAULT_IMAGE_SIZE = Integer.MAX_VALUE;
 
     private final MemoryCache mMemoryCache;
@@ -72,11 +64,7 @@ public class ImageLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mExecutor = new ThreadPoolExecutor(CORE_THREAD_NUM,
-                MAX_THREAD_NUM,
-                KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
-                new LoaderThreadFactory());
+        mExecutor = new LoaderExecutor();
         mRequestorMap = new WeakHashMap<>();
     }
 

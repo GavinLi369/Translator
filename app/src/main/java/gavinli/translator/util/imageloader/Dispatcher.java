@@ -1,6 +1,7 @@
 package gavinli.translator.util.imageloader;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.DrawableRes;
@@ -20,6 +21,7 @@ import gavinli.translator.util.imageloader.load.MemoryCache;
  */
 
 public class Dispatcher {
+    private ImageLoader mImageLoader;
     private final MemoryCache mMemoryCache;
     private final Executor mExecutor;
     private final String mKey;
@@ -39,7 +41,7 @@ public class Dispatcher {
     /**
      * 图片加载完成前的占位图片
      */
-    private @DrawableRes int mPlaceholder;
+    private Drawable mPlaceholder;
 
     /**
      * 图片加载任务实体类
@@ -58,6 +60,7 @@ public class Dispatcher {
 
     public Dispatcher(ImageLoader imageLoader, String url, MemoryCache memoryCache, DiskCache diskCache,
                       Executor executor, Map<ImageView, ImageRequestor> requestorMap) {
+        mImageLoader = imageLoader;
         mMemoryCache = memoryCache;
         mExecutor = executor;
         mKey = canculateMd5(url);
@@ -83,9 +86,19 @@ public class Dispatcher {
     /**
      * 设置占位图片
      *
-     * @param placeholder 占位图片
+     * @param placeholder 占位图片资源id
      */
     public Dispatcher placeholder(@DrawableRes int placeholder) {
+        mPlaceholder = mImageLoader.getContext().getResources().getDrawable(placeholder);
+        return this;
+    }
+
+    /**
+     * 设置占位图片
+     *
+     * @param placeholder 占位图片
+     */
+    public Dispatcher placeholder(Drawable placeholder) {
         mPlaceholder = placeholder;
         return this;
     }
@@ -108,7 +121,7 @@ public class Dispatcher {
             }
             mRequestorMap.put(imageView, mRequestor);
 
-            imageView.setImageResource(mPlaceholder);
+            imageView.setImageDrawable(mPlaceholder);
             mLoaderTask.setImageView(imageView);
             mExecutor.execute(mRequestor);
         }

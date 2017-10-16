@@ -16,10 +16,10 @@ public class ImageContract {
     }
 
     interface Presenter extends BasePresenter {
-        Observable<String> loadImages(int num);
+        Observable<NetworkImage> loadImages(int num);
     }
 
     interface Model {
-        String getImageLink() throws IOException;
+        NetworkImage getImageLink() throws IOException;
     }
 }

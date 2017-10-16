@@ -33,10 +33,10 @@ public class ImageRequestor implements Runnable {
     public void run() {
         try {
             mResult = request();
+            mDispatcher.dipatchComplete(this);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mDispatcher.dipatchComplete(this);
     }
 
     public Bitmap request() throws IOException {
