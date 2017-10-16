@@ -186,12 +186,16 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         progressDialog.setMessage(getString(R.string.progress_dialog_message));
         progressDialog.show();
         Observable<String> observable = mPresenter.loadImages(LOAD_NUM);
-        observable.subscribe(link -> {
+        observable.collect((Func0<List<String>>) ArrayList::new, List::add)
+                .subscribe(links -> {
             progressDialog.cancel();
-            if(link != null) {
-                mAdapter.addImageLinks(link);
-                mAdapter.notifyItemInserted(mAdapter.getItemCount());
+            if(!links.isEmpty()) {
+                for (String link : links) {
+                    mAdapter.addImageLinks(link);
+                }
+                mAdapter.notifyItemRangeChanged(mAdapter.getItemCount(), links.size());
             } else {
+                mNoMore = true;
                 mAdapter.showNotMoreImages();
             }
         }, throwable -> {

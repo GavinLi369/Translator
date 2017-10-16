@@ -29,9 +29,11 @@ public class ImagePresenter implements ImageContract.Presenter {
                 for(int i = 0; i < num; i++) {
                     try {
                         String link = mModel.getImageLink();
-                        if (link != null) subscriber.onNext(link);
+                        if (link == null) break;
+                        subscriber.onNext(link);
                     } catch (IOException e) {
                         subscriber.onError(e);
+                        return;
                     }
                 }
                 subscriber.onCompleted();
