@@ -2,9 +2,7 @@ package gavinli.translator.setting;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.DownloadManager;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
@@ -15,11 +13,13 @@ import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
+import android.text.Html;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import gavinli.translator.App;
 import gavinli.translator.R;
@@ -122,14 +122,29 @@ public class SettingsFragment extends PreferenceFragment
         }
     }
 
+    /**
+     * 开启剪切板监听
+     */
     public void startClipboardMonitor() {
-        checkCanDrawOverlays();
+        requestDrawOverlaysIfNeed();
 
         Intent intent = new Intent(getActivity(), ClipboardMonitor.class);
         getActivity().startService(intent);
     }
 
-    private void checkCanDrawOverlays() {
+    /**
+     * 关闭剪切板监听
+     */
+    public void stopClipboardMonitor() {
+        Intent intent = new Intent(getActivity(), ClipboardMonitor.class);
+        getActivity().stopService(intent);
+    }
+
+    /**
+     * 检查应用上绘制权限，如果没有则跳转到设置界面。
+     * 当前只支持原生Android 6.0以上系统的跳转，未适配其他版本及设备。
+     */
+    private void requestDrawOverlaysIfNeed() {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
             if(!Settings.canDrawOverlays(getActivity())) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -165,11 +180,6 @@ public class SettingsFragment extends PreferenceFragment
         }
     }
 
-    public void stopClipboardMonitor() {
-        Intent intent = new Intent(getActivity(), ClipboardMonitor.class);
-        getActivity().stopService(intent);
-    }
-
     private void showUpdateInfo() {
         Observable.create((Observable.OnSubscribe<VersionEntry>) subscriber -> {
             try {
@@ -186,62 +196,64 @@ public class SettingsFragment extends PreferenceFragment
                 });
     }
 
+    /**
+     * 从服务器获取最新版app信息
+     *
+     * @return 最新版版本信息
+     *
+     * @throws IOException 网络连接出错，网络数据格式出错。
+     */
     private VersionEntry fetchRemoteVersionEntry() throws IOException {
         Request request = new Request.Builder()
-                .url(App.HOST + "/download/version")
+                .url(App.HOST + "/download/version?cur_ver=" + App.VERSION_CODE)
                 .build();
         Response response = new OkHttpClient().newCall(request).execute();
         VersionEntry versionEntry;
         try {
             JSONObject jsonObject = new JSONObject(response.body().string());
-            int versionCode = jsonObject.getInt("versionCode");
-            String versionName = jsonObject.getString("versionName");
-            String versionLog = jsonObject.getString("versionLog");
-            versionEntry = new VersionEntry(versionCode, versionName, versionLog);
+            versionEntry = new VersionEntry(jsonObject);
         } catch (JSONException e) {
-            throw new IOException("Json格式错误");
+            throw new IOException("JSON格式错误");
         }
         return versionEntry;
     }
 
     private void checkRemoteVersion(VersionEntry versionEntry) {
         if(versionEntry.versionCode > App.VERSION_CODE) {
-            buildUpdateDialog(versionEntry);
+            showUpdateDialog(versionEntry);
         } else {
             Snackbar.make(getView(), getString(R.string.update_absent),
                     Snackbar.LENGTH_SHORT).show();
         }
     }
 
-    private void buildUpdateDialog(VersionEntry versionEntry) {
-        String message = "最新版本：" + versionEntry.versionName + "\n\n" +
-                versionEntry.versionLog;
+    /**
+     * 通过版本信息构建升级提示对话框
+     *
+     * @param versionEntry 版本信息
+     */
+    private void showUpdateDialog(VersionEntry versionEntry) {
+        String message = "<b>最新版本：</b>" + versionEntry.versionName + "<br><br>" +
+                "<b>增量更新：</b><del>" + formatFileSize(versionEntry.fullSize) + "</del> -> " +
+                formatFileSize(versionEntry.patchSize) + "<br><br>" +
+                "<b>更新内容：</b><br>\t\t" + versionEntry.versionLog.replace("\n", "<br>\t\t");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(message);
-        builder.setPositiveButton(R.string.update_text, (dialog1, which) -> startDownload());
+        builder.setMessage(Html.fromHtml(message));
+        builder.setPositiveButton(R.string.update_text, (dialog1, which) -> {
+            new DownloadReceiver().download(getActivity());
+        });
         builder.setNegativeButton(R.string.cancel_text, (dialog12, which) -> {});
         builder.create().show();
     }
-    private void startDownload() {
-        DownloadReceiver downloadReceiver = new DownloadReceiver();
-        IntentFilter intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        // 防止用户退出设置界面，这里使用Application类注册下载监听
-        getActivity().getApplication().registerReceiver(downloadReceiver, intentFilter);
-        downloadReceiver.download(getActivity());
-    }
 
     /**
-     * 服务器传来的新版App信息
+     * 将给定大小转换为字符串表示，保留小数点后两位，单位为M。
+     *
+     * @param size 文件大小(B)
+     *
+     * @return 文件大小(M)
      */
-    class VersionEntry {
-        final int versionCode;
-        final String versionName;
-        final String versionLog;
-
-        public VersionEntry(int versionCode, String versionName, String versionLog) {
-            this.versionCode = versionCode;
-            this.versionName = versionName;
-            this.versionLog = versionLog;
-        }
+    private String formatFileSize(long size) {
+        return String.format(Locale.CHINA, "%.2f", size / 1000000f) + "M";
     }
 }
