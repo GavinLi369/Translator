@@ -35,16 +35,6 @@ public class SearchModel implements SearchContract.Model {
     }
 
     @Override
-    public List<Spanned> getChineseExplain(String word)
-            throws IOException, ExplainNotFoundException {
-        return ExplainLoader
-                .with(mContext)
-                .search(word)
-                .dictionary(CambirdgeApi.DICTIONARY_CHINESE_URL)
-                .load();
-    }
-
-    @Override
     public List<String> getComplete(String key, int num) throws IOException {
         return CambirdgeApi.getComplete(mContext, key, num);
     }

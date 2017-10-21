@@ -48,31 +48,36 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     public static final String INTENT_KEY = "key";
 
+    /**
+     * 翻译已成功显示
+     */
+    private boolean mExplainShowed = false;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_search, container, false);
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        mScrollView = (ScrollView) mRootView.findViewById(R.id.scroll_view);
-        mBackground = (ImageView) mRootView.findViewById(R.id.img_bg);
-        mExplainView = (TextView) mRootView.findViewById(R.id.tv_define);
+        mScrollView = mRootView.findViewById(R.id.scroll_view);
+        mBackground = mRootView.findViewById(R.id.img_bg);
+        mExplainView = mRootView.findViewById(R.id.tv_define);
         mExplainView.setMovementMethod(LinkMovementMethod.getInstance());
-        mMenuFab = (FloatingActionMenu) mRootView.findViewById(R.id.fab_menu);
+        mMenuFab = mRootView.findViewById(R.id.fab_menu);
         mMenuFab.setClosedOnTouchOutside(true);
         mMenuFab.hideMenu(false);
-        FloatingActionButton starFab = (FloatingActionButton) mRootView.findViewById(R.id.fab_star);
+        FloatingActionButton starFab = mRootView.findViewById(R.id.fab_star);
         starFab.setOnClickListener(view -> {
             mMenuFab.close(true);
             mPresenter.saveWord();
         });
-        FloatingActionButton imageFab = (FloatingActionButton) mRootView.findViewById(R.id.fab_image);
+        FloatingActionButton imageFab = mRootView.findViewById(R.id.fab_image);
         imageFab.setOnClickListener(view -> {
             mMenuFab.close(true);
             Intent intent = new Intent(getContext(), ImageActivity.class);
             intent.putExtra(INTENT_KEY, mPresenter.getCurrentWord());
             startActivity(intent);
         });
-        mSearchBar = (FloatingSearchView) mRootView.findViewById(R.id.search_view);
+        mSearchBar = mRootView.findViewById(R.id.search_view);
         mSearchBar.setOnSearchListener(this);
         mSearchBar.setOnQueryChangeListener(this);
         mSearchBar.setOnBindSuggestionCallback(this);
@@ -86,6 +91,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showExplain(List<Spanned> explains) {
+        mExplainShowed = true;
         mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
@@ -97,26 +103,15 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     }
 
     @Override
-    public void showChineseExplain(List<Spanned> explains) {
-        mSearchBar.hideProgress();
-        mExplainView.setText("");
-        mScrollView.scrollTo(0, 0);
-        for (Spanned spanned : explains) {
-            mExplainView.append(spanned);
-            mExplainView.append("\n\n");
-        }
-    }
-
-    @Override
     public void showSuggestion(List<String> suggestions) {
-        if(suggestions != null && suggestions.size() != 0) {
+        if(!mExplainShowed && suggestions != null && suggestions.size() != 0) {
             ArrayList<WordSuggestion> wordSuggestions = new ArrayList<>();
             for(String suggestion : suggestions) {
                 wordSuggestions.add(new WordSuggestion(suggestion));
             }
             mSearchBar.swapSuggestions(wordSuggestions);
         } else {
-            mSearchBar.swapSuggestions(new ArrayList<>());
+            mSearchBar.clearSuggestions();
         }
         mSearchBar.hideProgress();
     }
@@ -134,12 +129,6 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
         Snackbar.make(mRootView, "无该单词", Snackbar.LENGTH_SHORT).show();
         mExplainView.setText("");
         showBackground();
-    }
-
-    @Override
-    public void showChineseExplainNotFoundError() {
-        mSearchBar.hideProgress();
-        Snackbar.make(mRootView, "该单词无汉语解释", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
@@ -171,10 +160,11 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void onSearchTextChanged(String oldQuery, String newQuery) {
+        mExplainShowed = false;
         if(newQuery.length() < 2){
             mSearchBar.hideProgress();
             mPresenter.cancelAutoCompleteIfCompleting();
-            mSearchBar.swapSuggestions(new ArrayList<>());
+            mSearchBar.clearSuggestions();
             return;
         }
         mSearchBar.showProgress();

@@ -20,9 +20,6 @@ public class SearchContract {
         List<Spanned> getExplain(String word)
                 throws IOException, ExplainNotFoundException;
 
-        List<Spanned> getChineseExplain(String word)
-                throws IOException, ExplainNotFoundException;
-
         List<String> getComplete(String key, int num) throws IOException;
 
         boolean wordExisted(String word);
@@ -33,15 +30,11 @@ public class SearchContract {
     interface View extends BaseView<Presenter> {
         void showExplain(List<Spanned> explains);
 
-        void showChineseExplain(List<Spanned> explains);
-
         void showSuggestion(List<String> suggestions);
 
         void showNetworkError();
 
         void showNotFoundWordError();
-
-        void showChineseExplainNotFoundError();
 
         void showWordInfo(String info);
 
@@ -52,8 +45,6 @@ public class SearchContract {
 
     interface Presenter extends BasePresenter {
         void loadExplain(String word);
-
-        void loadChineseExplain(String word);
 
         void loadAutoComplete(String key, int num);
 
