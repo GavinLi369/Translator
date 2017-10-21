@@ -1,18 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="80dp">
 
     <TextView
         android:id="@+id/tv_word"
-        android:layout_width="wrap_content"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="40dp"
         android:layout_gravity="center_vertical"
         android:textStyle="bold"
-        android:textSize="20sp"
+        android:textSize="22sp"
+        tools:text="Girl"
         android:textColor="@color/colorDefine"/>
+
+    <TextView
+        android:id="@+id/tv_summary"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        android:singleLine="true"
+        android:layout_marginStart="50dp"
+        android:layout_gravity="center_vertical"
+        android:layout_width="200dp"
+        tools:text="She is very beautiful!"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

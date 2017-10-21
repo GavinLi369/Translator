@@ -1,11 +1,11 @@
 package gavinli.translator.search;
 
 import android.content.Context;
-import android.text.Spanned;
 
 import java.io.IOException;
 import java.util.List;
 
+import gavinli.translator.data.Explain;
 import gavinli.translator.data.source.datebase.WordbookDb;
 import gavinli.translator.data.source.remote.CambirdgeSource;
 import gavinli.translator.util.ExplainLoader;
@@ -26,7 +26,7 @@ public class SearchModel implements SearchContract.Model {
     }
 
     @Override
-    public List<Spanned> getExplain(String word)
+    public Explain getExplain(String word)
             throws IOException, ExplainNotFoundException {
         return ExplainLoader
                 .with(mContext)
@@ -40,12 +40,12 @@ public class SearchModel implements SearchContract.Model {
     }
 
     @Override
-    public boolean wordExisted(String word) {
-        return mWordbookDb.wordExisted(word);
-    }
-
-    @Override
-    public void saveWord(String word) {
-        mWordbookDb.saveWord(word);
+    public boolean saveWord(Explain explain) {
+        if (!mWordbookDb.wordExisted(explain.getKey())) {
+            mWordbookDb.saveWord(explain.getKey(), explain.getSummary());
+            return true;
+        } else {
+            return false;
+        }
     }
 }

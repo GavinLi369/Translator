@@ -4,6 +4,7 @@ import java.util.List;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
+import gavinli.translator.data.Explain;
 
 /**
  * Created by GavinLi
@@ -14,13 +15,13 @@ public class WordbookContract {
     interface Presenter extends BasePresenter {
         void loadWords();
 
-        void removeWord(String word);
+        void removeWord(Explain word);
 
         void restoreWord();
     }
 
     interface View extends BaseView<Presenter> {
-        void showWords(List<String> words);
+        void showWords(List<Explain> words);
 
         void showBackground();
 
@@ -28,10 +29,10 @@ public class WordbookContract {
     }
 
     interface Model {
-        List<String> getWords();
+        List<Explain> getWords();
 
-        void removeWord(String word);
+        void removeWord(Explain explain);
 
-        void saveWord(String word);
+        void saveWord(Explain explain);
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import java.util.List;
 
+import gavinli.translator.data.Explain;
 import gavinli.translator.data.source.datebase.WordbookDb;
 
 /**
@@ -19,17 +20,17 @@ public class WordbookModel implements WordbookContract.Model {
     }
 
     @Override
-    public List<String> getWords() {
+    public List<Explain> getWords() {
         return mWordbookDb.getWords();
     }
 
     @Override
-    public void removeWord(String word) {
-        mWordbookDb.removeWord(word);
+    public void removeWord(Explain explain) {
+        mWordbookDb.removeWord(explain.getKey());
     }
 
     @Override
-    public void saveWord(String word) {
-        mWordbookDb.saveWord(word);
+    public void saveWord(Explain explain) {
+        mWordbookDb.saveWord(explain.getKey(), explain.getSummary());
     }
 }

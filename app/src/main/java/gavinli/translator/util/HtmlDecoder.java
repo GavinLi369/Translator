@@ -24,8 +24,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.data.Explain;
 
 /**
  * Created by GavinLi
@@ -36,14 +38,17 @@ public class HtmlDecoder {
     private String mHtml;
     private Context mContext;
 
-    private ArrayList<Spanned> mSpanneds = new ArrayList<>();
+    private Explain mExplain;
+
+    private List<CharSequence> mSpanneds = new ArrayList<>();
 
     public HtmlDecoder(String html, Context context) {
         mHtml = html;
         mContext = context;
+        mExplain = new Explain();
     }
 
-    public ArrayList<Spanned> decode() throws ExplainNotFoundException {
+    public Explain decode() throws ExplainNotFoundException {
         Document document = Jsoup.parse(mHtml);
         //只显示英国翻译
         Elements entries = document.getElementsByClass("entry-body");
@@ -63,7 +68,9 @@ public class HtmlDecoder {
             }
         }
 
-        return mSpanneds;
+        // 设置Explain的翻译信息
+        mExplain.setSource(mSpanneds);
+        return mExplain;
     }
 
     private void buildPositionHeader(Element posHeader) {
@@ -79,6 +86,9 @@ public class HtmlDecoder {
                 0, positionHeader.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mSpanneds.add(posHeaderSpanned);
+
+        // 设置Explain所对应的单词
+        mExplain.setKey(positionHeader);
 
         SpannableStringBuilder regionBuilder = new SpannableStringBuilder();
 
@@ -126,6 +136,13 @@ public class HtmlDecoder {
         }
     }
 
+    /**
+     * 解析音标信息
+     *
+     * @param pronInfo 音标元素
+     *
+     * @return 音标信息
+     */
     private SpannableStringBuilder buildPronInfo(Element pronInfo) {
         SpannableStringBuilder resultBuilder = new SpannableStringBuilder();
         //有可能有多个音标，此时region为空
@@ -301,6 +318,11 @@ public class HtmlDecoder {
         defineSpanned.setSpan(new StyleSpan(Typeface.BOLD),
                 0, defineText.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        // 设置Explain的概览
+        if (mExplain.getSummary() == null) {
+            mExplain.setSummary(defineText);
+        }
         return defineBuilder.append(defineSpanned);
     }
 

@@ -21,6 +21,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.data.Explain;
 import gavinli.translator.util.UiTool;
 import gavinli.translator.worddetail.WordDetailActivity;
 
@@ -65,8 +66,8 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
     }
 
     @Override
-    public void showWords(List<String> words) {
-        mAdapter = new WordListAdapter(words);
+    public void showWords(List<Explain> explains) {
+        mAdapter = new WordListAdapter(explains);
         mAdapter.setOnItemClickListener(view -> {
             TextView textView = view.findViewById(R.id.tv_word);
             Intent intent = new Intent(getActivity(), WordDetailActivity.class);
@@ -98,15 +99,15 @@ public class WordbookFragment extends Fragment implements WordbookContract.View 
 
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-            String word = ((WordListAdapter.ViewHolder) viewHolder)
-                    .mTextView.getText().toString();
-            mPresenter.removeWord(word);
+            Explain explain = ((WordListAdapter.ViewHolder) viewHolder)
+                    .mExplain;
+            mPresenter.removeWord(explain);
             if(getView() != null) {
                 Snackbar.make(getView(), "单词已移除",
                         Snackbar.LENGTH_LONG)
                         .setAction("UNDO", v -> {
                             mPresenter.restoreWord();
-                            mAdapter.addItem(word);
+                            mAdapter.addItem(explain);
                             Snackbar.make(getView(), "单词已恢复",
                                     Snackbar.LENGTH_SHORT).show();
                         }).show();

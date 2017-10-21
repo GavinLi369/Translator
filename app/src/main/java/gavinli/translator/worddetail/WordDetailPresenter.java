@@ -28,9 +28,9 @@ public class WordDetailPresenter implements WordDetailContract.Presenter {
     @Override
     public void loadWordExplain(String word) {
         Observable
-                .create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+                .create((Observable.OnSubscribe<List<CharSequence>>) subscriber -> {
                     try {
-                        List<Spanned> spanneds = mModel.getExplain(word.replace(" ", "-"));
+                        List<CharSequence> spanneds = mModel.getExplain(word.replace(" ", "-"));
                         subscriber.onNext(spanneds);
                     } catch (ExplainNotFoundException | IOException e) {
                         e.printStackTrace();

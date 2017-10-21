@@ -16,7 +16,6 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.view.ContextThemeWrapper;
-import android.text.Spanned;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -26,12 +25,12 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import gavinli.translator.MainActivity;
 import gavinli.translator.R;
+import gavinli.translator.data.Explain;
 import gavinli.translator.data.source.datebase.WordbookDb;
 import gavinli.translator.data.source.remote.CambirdgeSource;
 import gavinli.translator.util.ExplainLoader;
@@ -60,7 +59,7 @@ public class ClipboardMonitor extends Service
     private String mPreviousText = "";
     private int mScreenWidth;
     private int mScreenHeight;
-    private String mCurrentText = "";
+    private Explain mCurrentExplain;
 
     @Override
     public void onCreate() {
@@ -223,9 +222,9 @@ public class ClipboardMonitor extends Service
 
     private void showExplain(String word, String dictionary) {
         Observable
-                .create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+                .create((Observable.OnSubscribe<Explain>) subscriber -> {
                     try {
-                        List<Spanned> explain;
+                        Explain explain;
                         if(dictionary.isEmpty()) {
                             explain = ExplainLoader.with(ClipboardMonitor.this)
                                     .search(word).load();
@@ -242,8 +241,8 @@ public class ClipboardMonitor extends Service
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(explain -> {
-                    mCurrentText = explain.get(0).toString();
-                    mFloatWindow.setExplain(explain);
+                    mCurrentExplain = explain;
+                    mFloatWindow.setExplain(explain.getSource());
                 }, throwable -> {
                     if(throwable instanceof IOException) {
                         Snackbar.make(mFloatWindow, "网络连接失败",
@@ -277,13 +276,13 @@ public class ClipboardMonitor extends Service
 
         @Override
         public void onStar() {
-            if(mCurrentText != null && !mCurrentText.isEmpty()) {
+            if(mCurrentExplain != null) {
                 WordbookDb wordbookDb = new WordbookDb(ClipboardMonitor.this);
-                if (wordbookDb.wordExisted(mCurrentText)) {
+                if (wordbookDb.wordExisted(mCurrentExplain.getKey())) {
                     Snackbar.make(mFloatWindow, "单词已存在",
                             Snackbar.LENGTH_SHORT).show();
                 } else {
-                    wordbookDb.saveWord(mCurrentText);
+                    wordbookDb.saveWord(mCurrentExplain.getKey(), mCurrentExplain.getSummary());
                     Snackbar.make(mFloatWindow, "单词已保存至单词本",
                             Snackbar.LENGTH_SHORT).show();
                 }

@@ -1,7 +1,6 @@
 package gavinli.translator.worddetail;
 
 import android.content.Context;
-import android.text.Spanned;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,11 +21,11 @@ public class WordDetailModel implements WordDetailContract.Model {
     }
 
     @Override
-    public List<Spanned> getExplain(String word)
+    public List<CharSequence> getExplain(String word)
             throws IOException, ExplainNotFoundException {
         return ExplainLoader
                 .with(mContext)
                 .search(word)
-                .load();
+                .load().getSource();
     }
 }

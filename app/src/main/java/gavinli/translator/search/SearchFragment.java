@@ -7,7 +7,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,13 +19,14 @@ import android.widget.TextView;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.SearchSuggestionsAdapter;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
-import com.github.clans.fab.FloatingActionMenu;
 import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.data.Explain;
 import gavinli.translator.imagelink.ImageActivity;
 
 /**
@@ -90,12 +90,12 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     }
 
     @Override
-    public void showExplain(List<Spanned> explains) {
+    public void showExplain(Explain explain) {
         mExplainShowed = true;
         mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
-        for (Spanned spanned : explains) {
+        for (CharSequence spanned : explain.getSource()) {
             mExplainView.append(spanned);
             mExplainView.append("\n\n");
         }

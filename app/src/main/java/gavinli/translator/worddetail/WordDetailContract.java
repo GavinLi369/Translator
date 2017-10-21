@@ -1,7 +1,5 @@
 package gavinli.translator.worddetail;
 
-import android.text.Spanned;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -16,12 +14,12 @@ import gavinli.translator.util.ExplainNotFoundException;
 
 public class WordDetailContract {
     interface Model {
-        List<Spanned> getExplain(String word)
+        List<CharSequence> getExplain(String word)
                 throws IOException, ExplainNotFoundException;
     }
 
     interface View extends BaseView<Presenter> {
-        void showWordExplain(List<Spanned> spanneds);
+        void showWordExplain(List<CharSequence> spanneds);
 
         void showNetworkError();
 

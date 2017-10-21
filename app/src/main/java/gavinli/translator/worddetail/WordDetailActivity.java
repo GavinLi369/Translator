@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -53,9 +52,9 @@ public class WordDetailActivity extends AppCompatActivity
     }
 
     @Override
-    public void showWordExplain(List<Spanned> spanneds) {
+    public void showWordExplain(List<CharSequence> spanneds) {
         mProgressBar.setVisibility(View.GONE);
-        for(Spanned spanned : spanneds) {
+        for(CharSequence spanned : spanneds) {
             mWordDefine.append(spanned);
             mWordDefine.append("\n\n");
         }

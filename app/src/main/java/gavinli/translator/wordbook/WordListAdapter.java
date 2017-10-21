@@ -9,6 +9,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.data.Explain;
 
 /**
  * Created by GavinLi
@@ -16,10 +17,10 @@ import gavinli.translator.R;
  */
 
 public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHolder> {
-    private List<String> mWords;
+    private List<Explain> mWords;
     private OnItemClickListener mItemClickListener;
 
-    public WordListAdapter(List<String> words) {
+    public WordListAdapter(List<Explain> words) {
         mWords = words;
     }
 
@@ -31,7 +32,9 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(WordListAdapter.ViewHolder holder, int position) {
-        holder.mTextView.setText(mWords.get(position));
+        holder.mExplain = mWords.get(position);
+        holder.mKeyView.setText(mWords.get(position).getKey());
+        holder.mSummaryView.setText(mWords.get(position).getSummary());
     }
 
     @Override
@@ -45,17 +48,20 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.ViewHo
         return mWords.size();
     }
 
-    public void addItem(String word) {
+    public void addItem(Explain word) {
         mWords.add(word);
         notifyItemInserted(mWords.size() - 1);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView mTextView;
+        Explain mExplain;
+        TextView mKeyView;
+        TextView mSummaryView;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            mTextView = (TextView) itemView.findViewById(R.id.tv_word);
+            mKeyView = itemView.findViewById(R.id.tv_word);
+            mSummaryView = itemView.findViewById(R.id.tv_summary);
             itemView.setOnClickListener(view -> mItemClickListener.onItemClick(itemView));
         }
     }

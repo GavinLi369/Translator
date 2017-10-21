@@ -126,9 +126,9 @@ public class FloatWindow extends CoordinatorLayout {
         addView(scrollView);
     }
 
-    public void setExplain(List<Spanned> spanneds) {
+    public void setExplain(List<CharSequence> spanneds) {
         removeView(mProgressBar);
-        for(Spanned spanned : spanneds) {
+        for(CharSequence spanned : spanneds) {
             mTextView.append(spanned);
             mTextView.append("\n\n");
         }

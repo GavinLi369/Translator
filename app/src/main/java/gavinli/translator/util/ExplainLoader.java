@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.text.Spanned;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 
@@ -16,9 +15,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.data.Explain;
 import gavinli.translator.data.source.remote.CambirdgeSource;
 
 /**
@@ -59,13 +58,13 @@ public class ExplainLoader {
         return this;
     }
 
-    public List<Spanned> load() throws IOException, ExplainNotFoundException {
+    public Explain load() throws IOException, ExplainNotFoundException {
         if(mWord == null) throw new RuntimeException("必须设置查询单词");
 
-        //从缓存中获取
         String key = caculateMd5(mWord + mDictionary);
-        List<Spanned> explains = getExplainFromDisk(key);
-        if(explains != null) return explains;
+        //从缓存中获取
+        Explain explain = getExplainFromDisk(key);
+        if (explain != null) return explain;
 
         //缓存文件未找到，从网络获取翻译
         String source = getExplainFromNetwork();
@@ -82,8 +81,17 @@ public class ExplainLoader {
         return CambirdgeSource.getExplainSource(mWord, mDictionary);
     }
 
+    /**
+     * 从磁盘获取翻译信息
+     *
+     * @param key 单词或短语
+     *
+     * @return 如果有缓存则返回Explain,如果没有缓存则返回null。
+     *
+     * @throws IOException IO操作出错
+     */
     @Nullable
-    private List<Spanned> getExplainFromDisk(String key) throws IOException, ExplainNotFoundException {
+    private Explain getExplainFromDisk(String key) throws IOException {
         DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
         if(snapshot == null) return null;
         BufferedReader reader = new BufferedReader(
@@ -93,7 +101,12 @@ public class ExplainLoader {
         while((temp = reader.readLine()) != null) {
             builder.append(temp).append("\n");
         }
-        return new HtmlDecoder(builder.toString(), mContext).decode();
+        try {
+            return new HtmlDecoder(builder.toString(), mContext).decode();
+        } catch (ExplainNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void cacheExplainToDisk(String key, String source) throws IOException {

@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
+import gavinli.translator.data.source.datebase.WordbookDb.WordbookEntry;
+
 /**
  * Created by GavinLi
  * on 16-11-16.
@@ -16,7 +18,8 @@ public class TranslatorDbHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + WordbookEntry.TABLE_NAME + " ("
             + WordbookEntry._ID + " INTEGER PRIMARY KEY" + COMMA_SEP
-            + WordbookEntry.COLUMN_NAME_WORD + TEXT_TYPE + " )";
+            + WordbookEntry.COLUMN_NAME_WORD + TEXT_TYPE + COMMA_SEP
+            + WordbookEntry.COLUMN_NAME_SUMMARY + TEXT_TYPE + " )";
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + WordbookEntry.TABLE_NAME;
 
@@ -29,7 +32,7 @@ public class TranslatorDbHelper extends SQLiteOpenHelper {
     private static final String DELETE_ACCOUNT_TABLE =
             "DROP TABLE IF EXISTS " + AccountEntry.TABLE_NAME;
 
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "translator.db";
 
     public TranslatorDbHelper(Context context) {
@@ -47,11 +50,6 @@ public class TranslatorDbHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(SQL_DELETE_ENTRIES);
         sqLiteDatabase.execSQL(DELETE_ACCOUNT_TABLE);
         onCreate(sqLiteDatabase);
-    }
-
-    public static class WordbookEntry implements BaseColumns {
-        public static final String TABLE_NAME = "wordbook";
-        public static final String COLUMN_NAME_WORD = "word";
     }
 
     public static class AccountEntry implements BaseColumns {

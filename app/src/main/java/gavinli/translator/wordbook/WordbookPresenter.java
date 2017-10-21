@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import java.lang.ref.SoftReference;
 import java.util.List;
 
+import gavinli.translator.data.Explain;
+
 /**
  * Created by GavinLi
  * on 16-11-16.
@@ -14,7 +16,10 @@ public class WordbookPresenter implements WordbookContract.Presenter {
     private WordbookContract.View mView;
     private WordbookContract.Model mModel;
 
-    private String mPreWord;
+    /**
+     * 最后一个被删除的单词，用于UNDO操作。
+     */
+    private Explain mPreExplain;
 
     public WordbookPresenter(WordbookContract.View view, WordbookContract.Model model) {
         mView = view;
@@ -27,7 +32,7 @@ public class WordbookPresenter implements WordbookContract.Presenter {
         new LoadWordsTask(mModel, mView).execute();
     }
 
-    static class LoadWordsTask extends AsyncTask<Void, Void, List<String>> {
+    static class LoadWordsTask extends AsyncTask<Void, Void, List<Explain>> {
         private SoftReference<WordbookContract.Model> mModelSoftReference;
         private SoftReference<WordbookContract.View> mViewSoftReference;
 
@@ -37,12 +42,12 @@ public class WordbookPresenter implements WordbookContract.Presenter {
         }
 
         @Override
-        protected List<String> doInBackground(Void... voids) {
+        protected List<Explain> doInBackground(Void... voids) {
             return mModelSoftReference.get().getWords();
         }
 
         @Override
-        protected void onPostExecute(List<String> words) {
+        protected void onPostExecute(List<Explain> words) {
             if(words.size() == 0) {
                 mViewSoftReference.get().showBackground();
             } else {
@@ -53,13 +58,15 @@ public class WordbookPresenter implements WordbookContract.Presenter {
     }
 
     @Override
-    public void removeWord(String word) {
-        mPreWord = word;
+    public void removeWord(Explain word) {
+        mPreExplain = word;
         new Thread(() -> mModel.removeWord(word)).start();
     }
 
     @Override
     public void restoreWord() {
-        mModel.saveWord(mPreWord);
+        if (mPreExplain != null) {
+            mModel.saveWord(mPreExplain);
+        }
     }
 }

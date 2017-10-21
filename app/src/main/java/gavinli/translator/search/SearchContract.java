@@ -1,14 +1,12 @@
 package gavinli.translator.search;
 
-import android.text.Spanned;
-
 import java.io.IOException;
 import java.util.List;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
+import gavinli.translator.data.Explain;
 import gavinli.translator.util.ExplainNotFoundException;
-import gavinli.translator.util.HtmlDecoder;
 
 /**
  * Created by GavinLi
@@ -17,18 +15,16 @@ import gavinli.translator.util.HtmlDecoder;
 
 public class SearchContract {
     interface Model {
-        List<Spanned> getExplain(String word)
+        Explain getExplain(String word)
                 throws IOException, ExplainNotFoundException;
 
         List<String> getComplete(String key, int num) throws IOException;
 
-        boolean wordExisted(String word);
-
-        void saveWord(String word);
+        boolean saveWord(Explain explain);
     }
 
     interface View extends BaseView<Presenter> {
-        void showExplain(List<Spanned> explains);
+        void showExplain(Explain explain);
 
         void showSuggestion(List<String> suggestions);
 

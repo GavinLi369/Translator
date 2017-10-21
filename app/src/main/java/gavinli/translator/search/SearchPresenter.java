@@ -1,7 +1,6 @@
 package gavinli.translator.search;
 
 import android.os.AsyncTask;
-import android.text.Spanned;
 
 import java.io.IOException;
 import java.lang.ref.SoftReference;
@@ -11,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import gavinli.translator.data.Explain;
 import gavinli.translator.util.ExplainNotFoundException;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -24,7 +24,11 @@ import rx.schedulers.Schedulers;
 public class SearchPresenter implements SearchContract.Presenter {
     private SearchContract.View mView;
     private SearchContract.Model mModel;
-    private String mCurrentWord = "";
+
+    /**
+     * 当前正在展示的单词
+     */
+    private Explain mCurrentExplain;
 
     /**
      * 单词提示定时器，在用户输入单词500ms后再尝试加载提示信息，
@@ -54,7 +58,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     public void loadExplain(String word) {
         cancelAutoCompleteIfCompleting();
 
-        Observable.create((Observable.OnSubscribe<List<Spanned>>) subscriber -> {
+        Observable.create((Observable.OnSubscribe<Explain>) subscriber -> {
             try {
                 subscriber.onNext(mModel.getExplain(word.replace(" ", "-")));
             } catch (IOException | ExplainNotFoundException e) {
@@ -63,16 +67,16 @@ public class SearchPresenter implements SearchContract.Presenter {
             }
         }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(spanneds -> {
+                .subscribe(explain -> {
+                    mCurrentExplain = explain;
                     mView.hideBackground();
-                    mView.showExplain(spanneds);
-                    mCurrentWord = spanneds.get(0).toString();
+                    mView.showExplain(explain);
                 }, e -> {
                     if(e instanceof IOException) {
                         mView.showNetworkError();
                     } else if (e instanceof ExplainNotFoundException) {
                         mView.showNotFoundWordError();
-                        mCurrentWord = "";
+                        mCurrentExplain = null;
                     }
                 });
     }
@@ -114,10 +118,10 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public void saveWord() {
-        if(!mCurrentWord.equals("")) new SaveWordTask(mModel, mView).execute(mCurrentWord);
+        if(mCurrentExplain != null) new SaveWordTask(mModel, mView).execute(mCurrentExplain);
     }
 
-    static class SaveWordTask extends AsyncTask<String, Void, String> {
+    static class SaveWordTask extends AsyncTask<Explain, Void, String> {
         private SoftReference<SearchContract.Model> mModelSoftReference;
         private SoftReference<SearchContract.View> mViewSoftReference;
 
@@ -127,9 +131,8 @@ public class SearchPresenter implements SearchContract.Presenter {
         }
 
         @Override
-        protected String doInBackground(String... strings) {
-            if(!mModelSoftReference.get().wordExisted(strings[0])) {
-                mModelSoftReference.get().saveWord(strings[0]);
+        protected String doInBackground(Explain... explains) {
+            if(mModelSoftReference.get().saveWord(explains[0])) {
                 return "单词已保存至单词本";
             } else {
                 return "单词已存在";
@@ -144,6 +147,6 @@ public class SearchPresenter implements SearchContract.Presenter {
 
     @Override
     public String getCurrentWord() {
-        return mCurrentWord;
+        return mCurrentExplain.getKey();
     }
 }
