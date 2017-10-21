@@ -1,4 +1,4 @@
-package gavinli.translator.datebase;
+package gavinli.translator.data.source.datebase;
 
 import android.content.ContentValues;
 import android.content.Context;

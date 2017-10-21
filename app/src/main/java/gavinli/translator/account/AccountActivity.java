@@ -1,6 +1,5 @@
 package gavinli.translator.account;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -22,9 +21,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import gavinli.translator.R;
-import gavinli.translator.datebase.AccountData;
-import gavinli.translator.datebase.AccountDatebase;
-import gavinli.translator.util.network.AccountServer;
+import gavinli.translator.data.Account;
+import gavinli.translator.data.source.datebase.AccountDb;
+import gavinli.translator.data.source.remote.AccountServer;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -43,8 +42,8 @@ public class AccountActivity extends Activity {
     private TextView mNameText;
     private Button mLogOutButton;
 
-    private AccountDatebase mAccountDatebase;
-    private AccountData mAccountData;
+    private AccountDb mAccountDb;
+    private Account mAccount;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,12 +57,12 @@ public class AccountActivity extends Activity {
         mFaceImage.setOnClickListener(view -> routeToGallery());
         mLogOutButton.setOnClickListener(view -> logOut());
 
-        mAccountDatebase = new AccountDatebase(this);
-        mAccountData = mAccountDatebase.getAccountData();
-        if(mAccountData != null) {
-            mAccountText.setText(mAccountData.id);
-            mNameText.setText(mAccountData.name);
-            mFaceImage.setImageBitmap(mAccountData.face);
+        mAccountDb = new AccountDb(this);
+        mAccount = mAccountDb.getAccountData();
+        if(mAccount != null) {
+            mAccountText.setText(mAccount.id);
+            mNameText.setText(mAccount.name);
+            mFaceImage.setImageBitmap(mAccount.face);
         } else {
             Intent intent = new Intent(this, LogInActivity.class);
             startActivityForResult(intent, LOG_IN_REQUSET_CODE);
@@ -75,12 +74,12 @@ public class AccountActivity extends Activity {
         switch (requestCode) {
             case LOG_IN_REQUSET_CODE:
                 if(resultCode == RESULT_OK) {
-                    AccountDatebase accountDatebase = new AccountDatebase(this);
-                    AccountData accountData = accountDatebase.getAccountData();
-                    if(accountData == null) return;
-                    mAccountText.setText(accountData.id);
-                    mNameText.setText(accountData.name);
-                    mFaceImage.setImageBitmap(accountData.face);
+                    AccountDb accountDb = new AccountDb(this);
+                    Account account = accountDb.getAccountData();
+                    if(account == null) return;
+                    mAccountText.setText(account.id);
+                    mNameText.setText(account.name);
+                    mFaceImage.setImageBitmap(account.face);
                 } else {
                     finish();
                 }
@@ -98,15 +97,15 @@ public class AccountActivity extends Activity {
                 if(bundle != null) {
                     Bitmap face = bundle.getParcelable("data");
                     mFaceImage.setImageBitmap(face);
-                    if(mAccountData == null) {
-                        mAccountData = mAccountDatebase.getAccountData();
+                    if(mAccount == null) {
+                        mAccount = mAccountDb.getAccountData();
                     }
-                    String id = mAccountData.id;
-                    String name = mAccountData.name;
-                    String password = mAccountData.password;
-                    mAccountData = new AccountData(id, name, password, face);
-                    updateInfo(mAccountData);
-                    mAccountDatebase.updateAccountData(mAccountData);
+                    String id = mAccount.id;
+                    String name = mAccount.name;
+                    String password = mAccount.password;
+                    mAccount = new Account(id, name, password, face);
+                    updateInfo(mAccount);
+                    mAccountDb.updateAccountData(mAccount);
                 }
                 break;
             default:
@@ -184,14 +183,14 @@ public class AccountActivity extends Activity {
         startActivityForResult(intent, CROP_REQUEST_CODE);
     }
 
-    private void updateInfo(AccountData data) {
+    private void updateInfo(Account data) {
         Observable<Boolean> observable = AccountServer.performUpdateInfo(data);
         observable.observeOn(AndroidSchedulers.mainThread()).subscribe(success -> {});
     }
 
     private void logOut() {
-        AccountDatebase accountDatebase = new AccountDatebase(this);
-        accountDatebase.deleteAccountData();
+        AccountDb accountDb = new AccountDb(this);
+        accountDb.deleteAccountData();
         finish();
     }
 

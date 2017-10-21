@@ -11,9 +11,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import gavinli.translator.R;
-import gavinli.translator.datebase.AccountData;
-import gavinli.translator.datebase.AccountDatebase;
-import gavinli.translator.util.network.AccountServer;
+import gavinli.translator.data.Account;
+import gavinli.translator.data.source.datebase.AccountDb;
+import gavinli.translator.data.source.remote.AccountServer;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -60,11 +60,11 @@ public class LogInActivity extends Activity {
         dialog.show();
         String account = mAccountEdit.getText().toString();
         String password = mPasswordEdit.getText().toString();
-        AccountData accountData = new AccountData(account, null, password, null);
-        Observable<AccountData> observable = AccountServer.performLogIn(accountData);
+        Account accountData = new Account(account, null, password, null);
+        Observable<Account> observable = AccountServer.performLogIn(accountData);
         observable.map(data -> {
             if(data != null) {
-                AccountDatebase datebase = new AccountDatebase(LogInActivity.this);
+                AccountDb datebase = new AccountDb(LogInActivity.this);
                 datebase.insertAccountData(data);
             }
             return data;

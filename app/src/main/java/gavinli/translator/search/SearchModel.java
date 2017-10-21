@@ -6,8 +6,8 @@ import android.text.Spanned;
 import java.io.IOException;
 import java.util.List;
 
-import gavinli.translator.datebase.WordbookDb;
-import gavinli.translator.util.CambirdgeApi;
+import gavinli.translator.data.source.datebase.WordbookDb;
+import gavinli.translator.data.source.remote.CambirdgeSource;
 import gavinli.translator.util.ExplainLoader;
 import gavinli.translator.util.ExplainNotFoundException;
 
@@ -36,7 +36,7 @@ public class SearchModel implements SearchContract.Model {
 
     @Override
     public List<String> getComplete(String key, int num) throws IOException {
-        return CambirdgeApi.getComplete(mContext, key, num);
+        return CambirdgeSource.getComplete(mContext, key, num);
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.data.source.remote.CambirdgeSource;
 
 /**
  * Created by GavinLi
@@ -43,7 +44,7 @@ public class ExplainLoader {
                 .getDefaultSharedPreferences(mContext)
                 .getString(mContext.getString(R.string.key_dictionary), "0");
         mDictionary = Integer.parseInt(dictionaryNum) == 0 ?
-                CambirdgeApi.DICTIONARY_ENGLISH_URL : CambirdgeApi.DICTIONARY_CHINESE_URL;
+                CambirdgeSource.DICTIONARY_ENGLISH_URL : CambirdgeSource.DICTIONARY_CHINESE_URL;
         File dir = CreateCacheDirIfAbsent();
         mDiskLruCache = DiskLruCache.open(dir, 1, 1, CACHE_SIZE);
     }
@@ -78,7 +79,7 @@ public class ExplainLoader {
     private String getExplainFromNetwork() throws IOException {
         if(Looper.myLooper() == Looper.getMainLooper())
             throw new RuntimeException("不能在主线程执行网络操作");
-        return CambirdgeApi.getExplainSource(mWord, mDictionary);
+        return CambirdgeSource.getExplainSource(mWord, mDictionary);
     }
 
     @Nullable

@@ -12,9 +12,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import gavinli.translator.R;
-import gavinli.translator.datebase.AccountData;
-import gavinli.translator.datebase.AccountDatebase;
-import gavinli.translator.util.network.AccountServer;
+import gavinli.translator.data.Account;
+import gavinli.translator.data.source.datebase.AccountDb;
+import gavinli.translator.data.source.remote.AccountServer;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -72,11 +72,11 @@ public class SignUpActivity extends Activity {
         dialog.setMessage(getString(R.string.progress_message));
         dialog.show();
 
-        AccountData accountData = new AccountData(account, name, password, mFace);
+        Account accountData = new Account(account, name, password, mFace);
         Observable<Boolean> observable = AccountServer.performSignUp(accountData);
         observable.map(success -> {
             if(!success) return false;
-            AccountDatebase datebase = new AccountDatebase(SignUpActivity.this);
+            AccountDb datebase = new AccountDb(SignUpActivity.this);
             datebase.insertAccountData(accountData);
             return true;
         }).observeOn(AndroidSchedulers.mainThread()).subscribe(success -> {

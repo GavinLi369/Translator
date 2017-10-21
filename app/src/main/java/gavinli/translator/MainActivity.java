@@ -23,8 +23,8 @@ import java.io.InputStreamReader;
 
 import gavinli.translator.account.AccountActivity;
 import gavinli.translator.clipboard.ClipboardMonitor;
-import gavinli.translator.datebase.AccountData;
-import gavinli.translator.datebase.AccountDatebase;
+import gavinli.translator.data.Account;
+import gavinli.translator.data.source.datebase.AccountDb;
 import gavinli.translator.search.SearchFragment;
 import gavinli.translator.search.SearchModel;
 import gavinli.translator.search.SearchPresenter;
@@ -65,11 +65,11 @@ public class MainActivity extends AppCompatActivity implements
             startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
         });
         mNameText = mNavigationView.getHeaderView(0).findViewById(R.id.tv_name);
-        AccountDatebase accountDatebase = new AccountDatebase(this);
-        AccountData accountData = accountDatebase.getAccountData();
-        if(accountData != null) {
-            mAccountImage.setImageBitmap(accountData.face);
-            mNameText.setText(accountData.name);
+        AccountDb accountDb = new AccountDb(this);
+        Account account = accountDb.getAccountData();
+        if(account != null) {
+            mAccountImage.setImageBitmap(account.face);
+            mNameText.setText(account.name);
         }
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -88,11 +88,11 @@ public class MainActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == ACCOUNT_REQUEST_CODE) {
-            AccountDatebase accountDatebase = new AccountDatebase(this);
-            AccountData accountData = accountDatebase.getAccountData();
-            if(accountData != null) {
-                mAccountImage.setImageBitmap(accountData.face);
-                mNameText.setText(accountData.name);
+            AccountDb accountDb = new AccountDb(this);
+            Account account = accountDb.getAccountData();
+            if(account != null) {
+                mAccountImage.setImageBitmap(account.face);
+                mNameText.setText(account.name);
             } else {
                 mAccountImage.setImageResource(R.drawable.img_default_face);
                 mNameText.setText("");

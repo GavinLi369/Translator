@@ -4,7 +4,7 @@ import android.content.Context;
 
 import java.util.List;
 
-import gavinli.translator.datebase.WordbookDb;
+import gavinli.translator.data.source.datebase.WordbookDb;
 
 /**
  * Created by GavinLi

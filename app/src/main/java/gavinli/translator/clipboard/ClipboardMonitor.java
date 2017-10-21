@@ -32,8 +32,8 @@ import java.util.TimerTask;
 
 import gavinli.translator.MainActivity;
 import gavinli.translator.R;
-import gavinli.translator.datebase.WordbookDb;
-import gavinli.translator.util.CambirdgeApi;
+import gavinli.translator.data.source.datebase.WordbookDb;
+import gavinli.translator.data.source.remote.CambirdgeSource;
 import gavinli.translator.util.ExplainLoader;
 import gavinli.translator.util.ExplainNotFoundException;
 import rx.Observable;
@@ -272,7 +272,7 @@ public class ClipboardMonitor extends Service
         @Override
         public void onChangeExplain() {
             mFloatWindow.showLoading();
-            showExplain(mWord, CambirdgeApi.DICTIONARY_CHINESE_URL);
+            showExplain(mWord, CambirdgeSource.DICTIONARY_CHINESE_URL);
         }
 
         @Override

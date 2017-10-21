@@ -1,4 +1,4 @@
-package gavinli.translator.datebase;
+package gavinli.translator.data.source.datebase;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

@@ -1,4 +1,4 @@
-package gavinli.translator.util.network;
+package gavinli.translator.data.source.remote;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import gavinli.translator.App;
-import gavinli.translator.datebase.AccountData;
+import gavinli.translator.data.Account;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,14 +29,14 @@ import rx.schedulers.Schedulers;
 public class AccountServer {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    public static Observable<Boolean> performSignUp(AccountData accountData) {
+    public static Observable<Boolean> performSignUp(Account account) {
         return Observable.create((Observable.OnSubscribe<Boolean>) subscriber -> {
             Map<String, String> infoes = new HashMap<>();
-            infoes.put("id", accountData.id);
-            infoes.put("name", accountData.name);
-            infoes.put("password", accountData.password);
+            infoes.put("id", account.id);
+            infoes.put("name", account.name);
+            infoes.put("password", account.password);
             ByteArrayOutputStream faceOut = new ByteArrayOutputStream();
-            accountData.face.compress(Bitmap.CompressFormat.JPEG, 100, faceOut);
+            account.face.compress(Bitmap.CompressFormat.JPEG, 100, faceOut);
             String faceBase64 = Base64.encodeToString(faceOut.toByteArray(), Base64.DEFAULT);
             infoes.put("face", faceBase64);
             JSONObject jsonObject = new JSONObject(infoes);
@@ -57,8 +57,8 @@ public class AccountServer {
         }).subscribeOn(Schedulers.io());
     }
 
-    public static Observable<AccountData> performLogIn(AccountData accountData) {
-        return Observable.create((Observable.OnSubscribe<AccountData>) subscriber -> {
+    public static Observable<Account> performLogIn(Account accountData) {
+        return Observable.create((Observable.OnSubscribe<Account>) subscriber -> {
             Request request = new Request.Builder()
                     .url(App.HOST + "/account/" + accountData.id)
                     .build();
@@ -82,7 +82,7 @@ public class AccountServer {
                 String faceBase64 = result.getString("face");
                 byte[] faceData = Base64.decode(faceBase64, Base64.DEFAULT);
                 Bitmap face = BitmapFactory.decodeByteArray(faceData, 0, faceData.length);
-                AccountData data = new AccountData(account, name, password, face);
+                Account data = new Account(account, name, password, face);
                 subscriber.onNext(data);
             } catch (JSONException e) {
                 subscriber.onError(e);
@@ -90,19 +90,19 @@ public class AccountServer {
         }).subscribeOn(Schedulers.io());
     }
 
-    public static Observable<Boolean> performUpdateInfo(AccountData accountData) {
+    public static Observable<Boolean> performUpdateInfo(Account account) {
         return Observable.create((Observable.OnSubscribe<Boolean>) subscriber -> {
             Map<String, String> infoes = new HashMap<>();
-            infoes.put("id", accountData.id);
-            infoes.put("name", accountData.name);
-            infoes.put("password", accountData.password);
+            infoes.put("id", account.id);
+            infoes.put("name", account.name);
+            infoes.put("password", account.password);
             ByteArrayOutputStream faceOut = new ByteArrayOutputStream();
-            accountData.face.compress(Bitmap.CompressFormat.JPEG, 100, faceOut);
+            account.face.compress(Bitmap.CompressFormat.JPEG, 100, faceOut);
             String faceBase64 = Base64.encodeToString(faceOut.toByteArray(), Base64.DEFAULT);
             infoes.put("face", faceBase64);
             JSONObject jsonObject = new JSONObject(infoes);
             Request request = new Request.Builder()
-                    .url(App.HOST + "/account/" + accountData.id)
+                    .url(App.HOST + "/account/" + account.id)
                     .put(RequestBody.create(JSON, jsonObject.toString()))
                     .build();
             try {

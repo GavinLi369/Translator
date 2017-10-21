@@ -1,4 +1,4 @@
-package gavinli.translator.datebase;
+package gavinli.translator.data;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;
@@ -8,13 +8,13 @@ import android.os.Parcelable;
  * Created by gavin on 9/17/17.
  */
 
-public class AccountData implements Parcelable {
+public class Account implements Parcelable {
     public final String id;
     public final String name;
     public final String password;
     public final Bitmap face;
 
-    public AccountData(String id, String name, String password, Bitmap face) {
+    public Account(String id, String name, String password, Bitmap face) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -34,19 +34,19 @@ public class AccountData implements Parcelable {
         parcel.writeParcelable(face, i);
     }
 
-    public static Parcelable.Creator<AccountData> CREATOR = new Parcelable.Creator<AccountData>() {
+    public static Parcelable.Creator<Account> CREATOR = new Parcelable.Creator<Account>() {
         @Override
-        public AccountData createFromParcel(Parcel parcel) {
+        public Account createFromParcel(Parcel parcel) {
             String id = parcel.readString();
             String name = parcel.readString();
             String password = parcel.readString();
             Bitmap bitmap = parcel.readParcelable(Bitmap.class.getClassLoader());
-            return new AccountData(id, name, password, bitmap);
+            return new Account(id, name, password, bitmap);
         }
 
         @Override
-        public AccountData[] newArray(int i) {
-            return new AccountData[i];
+        public Account[] newArray(int i) {
+            return new Account[i];
         }
     };
 }

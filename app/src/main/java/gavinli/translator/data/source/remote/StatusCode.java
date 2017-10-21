@@ -1,4 +1,4 @@
-package gavinli.translator.util.network;
+package gavinli.translator.data.source.remote;
 
 /**
  * Created by gavin on 9/28/17.

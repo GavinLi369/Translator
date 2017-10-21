@@ -1,4 +1,4 @@
-package gavinli.translator.datebase;
+package gavinli.translator.data.source.datebase;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,21 +11,23 @@ import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 
-import gavinli.translator.datebase.TranslatorDbHelper.AccountEntry;
+import gavinli.translator.data.Account;
+import gavinli.translator.data.source.datebase.TranslatorDbHelper.AccountEntry;
 
 /**
  * Created by gavin on 9/17/17.
  */
 
-public class AccountDatebase {
+public class AccountDb {
     private TranslatorDbHelper mDbHelper;
 
-    public AccountDatebase(Context context) {
+    public AccountDb(Context context) {
         mDbHelper = new TranslatorDbHelper(context);
     }
 
-    public @Nullable AccountData getAccountData() {
-        AccountData accountData = null;
+    public @Nullable
+    Account getAccountData() {
+        Account account = null;
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
         String[] columns = {
                 AccountEntry._ID,
@@ -42,20 +44,20 @@ public class AccountDatebase {
             String face = cursor.getString(cursor.getColumnIndexOrThrow(AccountEntry.COLUNM_FACE));
             byte[] faceData = Base64.decode(face, Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(faceData, 0, faceData.length);
-            accountData = new AccountData(id, name, password, bitmap);
+            account = new Account(id, name, password, bitmap);
         }
         cursor.close();
-        return accountData;
+        return account;
     }
 
-    public void insertAccountData(AccountData accountData) {
+    public void insertAccountData(Account account) {
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
         ContentValues values = new ContentValues();
-        values.put(AccountEntry._ID, accountData.id);
-        values.put(AccountEntry.COLUMN_NAME, accountData.name);
-        values.put(AccountEntry.COLUMN_PASSWORD, accountData.password);
+        values.put(AccountEntry._ID, account.id);
+        values.put(AccountEntry.COLUMN_NAME, account.name);
+        values.put(AccountEntry.COLUMN_PASSWORD, account.password);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        accountData.face.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        account.face.compress(Bitmap.CompressFormat.JPEG, 100, out);
         String faceBase64 = Base64.encodeToString(out.toByteArray(), Base64.DEFAULT);
         values.put(AccountEntry.COLUNM_FACE, faceBase64);
         database.insert(AccountEntry.TABLE_NAME, null, values);
@@ -74,16 +76,16 @@ public class AccountDatebase {
         cursor.close();
     }
 
-    public void updateAccountData(AccountData accountData) {
+    public void updateAccountData(Account account) {
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
         ContentValues values = new ContentValues();
-        values.put(AccountEntry.COLUMN_NAME, accountData.name);
-        values.put(AccountEntry.COLUMN_PASSWORD, accountData.password);
+        values.put(AccountEntry.COLUMN_NAME, account.name);
+        values.put(AccountEntry.COLUMN_PASSWORD, account.password);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        accountData.face.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        account.face.compress(Bitmap.CompressFormat.JPEG, 100, out);
         String faceBase64 = Base64.encodeToString(out.toByteArray(), Base64.DEFAULT);
         values.put(AccountEntry.COLUNM_FACE, faceBase64);
         database.update(AccountEntry.TABLE_NAME, values,
-                AccountEntry._ID + " = ?", new String[]{accountData.id});
+                AccountEntry._ID + " = ?", new String[]{account.id});
     }
 }

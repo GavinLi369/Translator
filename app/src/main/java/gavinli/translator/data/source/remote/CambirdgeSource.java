@@ -1,4 +1,4 @@
-package gavinli.translator.util;
+package gavinli.translator.data.source.remote;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
@@ -21,7 +21,7 @@ import okhttp3.Response;
  * on 17-1-1.
  */
 
-public class CambirdgeApi {
+public class CambirdgeSource {
     public static final String DICTIONARY_ENGLISH_URL = "http://dictionary.cambridge.org/search/english/direct/?q=";
     public static final String DICTIONARY_CHINESE_URL = "http://dictionary.cambridge.org/search/english-chinese-simplified/direct/?q=";
     private static final String EN_AUTO_COMPLETE_URL = "http://dictionary.cambridge.org/autocomplete/english/?q=";
