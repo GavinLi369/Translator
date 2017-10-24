@@ -143,6 +143,9 @@ public class Dispatcher {
     }
 
     private void performComplete(ImageRequestor requestor) {
+        // 内存缓存
+        mMemoryCache.put(requestor.getKey(), requestor.getResult());
+
         if (requestor.isCanceled()) return;
 
         LoaderTask loaderTask = requestor.getLoaderTask();

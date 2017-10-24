@@ -17,6 +17,7 @@ public class ImageRequestor implements Runnable {
     private LoaderTask mLoaderTask;
     private NetworkLoader mNetworkLoader;
 
+    private String mKey;
     private volatile Bitmap mResult;
 
 
@@ -25,8 +26,9 @@ public class ImageRequestor implements Runnable {
     public ImageRequestor(Dispatcher dispatcher, DiskCache diskCache, LoaderTask loaderTask) {
         mDispatcher = dispatcher;
         mDiskCache = diskCache;
-        mLoaderTask = loaderTask;
         mNetworkLoader = new NetworkLoader();
+        mLoaderTask = loaderTask;
+        mKey = loaderTask.getKey();
     }
 
     @Override
@@ -66,6 +68,10 @@ public class ImageRequestor implements Runnable {
 
     public LoaderTask getLoaderTask() {
         return mLoaderTask;
+    }
+
+    public String getKey() {
+        return mKey;
     }
 
     public Bitmap getResult() {
