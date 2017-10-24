@@ -49,7 +49,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
     public static final String INTENT_KEY = "key";
 
     /**
-     * 翻译已成功显示
+     * 翻译已成功显示或将要显示，用于清除自动补全
      */
     private boolean mExplainShowed = false;
 
@@ -91,7 +91,6 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void showExplain(Explain explain) {
-        mExplainShowed = true;
         mSearchBar.hideProgress();
         mExplainView.setText("");
         mScrollView.scrollTo(0, 0);
@@ -154,6 +153,7 @@ public class SearchFragment extends Fragment implements SearchContract.View, Flo
 
     @Override
     public void onSearchAction(String currentQuery) {
+        mExplainShowed = true;
         mSearchBar.showProgress();
         mPresenter.loadExplain(currentQuery);
     }

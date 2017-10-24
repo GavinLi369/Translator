@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -59,6 +60,16 @@ public class MainActivity extends AppCompatActivity implements
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mNavigationView.setNavigationItemSelectedListener(this);
+        // 设置Fragment回退栈监听，当Fragment改变时，
+        // 同时改变NavigationView的选择状态。
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            Fragment currentFrament = getCurrentFragment();
+            if (currentFrament instanceof SearchFragment) {
+                mNavigationView.setCheckedItem(R.id.drawer_search);
+            } else if (currentFrament instanceof WordbookFragment) {
+                mNavigationView.setCheckedItem(R.id.drawer_wordbook);
+            }
+        });
         mAccountImage = mNavigationView.getHeaderView(0).findViewById(R.id.img_account);
         mAccountImage.setOnClickListener(view -> {
             Intent intent = new Intent(this, AccountActivity.class);
@@ -102,32 +113,37 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Fragment currentFragment = getCurrentFragment();
         if(item.getItemId() == R.id.drawer_search) {
-            if(!(getSupportFragmentManager().getFragments().get(0) instanceof SearchFragment)) {
-                mSearchFragment = new SearchFragment();
-                mSearchFragment.attachNavigationDrawerToMenuButton(mDrawerLayout);
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.include_layout, mSearchFragment);
-                transaction.commit();
-                new SearchPresenter(mSearchFragment, new SearchModel(this));
+            if(!(currentFragment instanceof SearchFragment)) {
+                // 此时处于其他Fragment界面，直接弹出当前Fragment。
+                getSupportFragmentManager().popBackStackImmediate();
             }
-            mDrawerLayout.closeDrawer(mNavigationView);
         } else if(item.getItemId() == R.id.drawer_wordbook) {
-            if(!(getSupportFragmentManager().getFragments().get(0) instanceof WordbookFragment)) {
-                mSearchFragment = null;
+            if(!(currentFragment instanceof WordbookFragment)) {
                 WordbookFragment wordbookFragment = new WordbookFragment();
                 wordbookFragment.attachNavigationDrawerToToolbar(mDrawerLayout);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.include_layout, wordbookFragment);
+                transaction.hide(mSearchFragment);
+                transaction.add(R.id.include_layout, wordbookFragment);
+                transaction.addToBackStack(null);
                 transaction.commit();
                 new WordbookPresenter(wordbookFragment, new WordbookModel(this));
             }
-            mDrawerLayout.closeDrawer(mNavigationView);
         } else if(item.getItemId() == R.id.drawer_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
-            mDrawerLayout.closeDrawer(mNavigationView);
         }
+        mDrawerLayout.closeDrawer(mNavigationView);
         return true;
+    }
+
+    /**
+     * 获取当前正在显示的Fragment
+     *
+     * @return 当前正在显示的Fragment
+     */
+    private Fragment getCurrentFragment() {
+        return getSupportFragmentManager().findFragmentById(R.id.include_layout);
     }
 
     private void uploadErrorLogIfExist() {
