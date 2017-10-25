@@ -32,7 +32,6 @@ import gavinli.translator.MainActivity;
 import gavinli.translator.R;
 import gavinli.translator.data.Explain;
 import gavinli.translator.data.source.datebase.WordbookDb;
-import gavinli.translator.data.source.remote.CambirdgeSource;
 import gavinli.translator.util.ExplainLoader;
 import gavinli.translator.util.ExplainNotFoundException;
 import rx.Observable;
@@ -48,18 +47,20 @@ import static android.os.Build.VERSION.SDK_INT;
 
 public class ClipboardMonitor extends Service
         implements ClipboardManager.OnPrimaryClipChangedListener {
-    private static final int FLOAT_WINDOW_TIME = 4000;
+    /**
+     * 指示器持续时间(ms)
+     */
+    private static final int FLOATING_INDICATOR_TIME = 4500;
 
     private ClipboardManager mClipboardManager;
     private WindowManager mWindowManager;
     private View mFloatButton;
-    private FloatWindow mFloatWindow;
+    private FloatingExplainView mFloatingExplainView;
     private ContainLayout mContainLayout;
 
     private String mPreviousText = "";
     private int mScreenWidth;
     private int mScreenHeight;
-    private Explain mCurrentExplain;
 
     @Override
     public void onCreate() {
@@ -94,7 +95,7 @@ public class ClipboardMonitor extends Service
                 .setContentTitle("Tap to Translate")
                 .setContentText("Tap to translate is running");
         if(SDK_INT >= 19) notificationBuilder.setSmallIcon(R.drawable.ic_launcher_alpha);
-        else notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
+        else notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
         startForeground(1001, notificationBuilder.build());
         return super.onStartCommand(intent, flags, startId);
     }
@@ -111,14 +112,14 @@ public class ClipboardMonitor extends Service
                     (text.equals(mPreviousText) && mFloatButton != null)) return;
             if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
                 if(Settings.canDrawOverlays(this)) {
-                    showFloatButton(text.trim());
+                    showFloatingIndicator(text.trim());
                     TimerTask hideFloatWindowTask = new TimerTask() {
                         @Override
                         public void run() {
                             hideFloatButton();
                         }
                     };
-                    new Timer().schedule(hideFloatWindowTask, FLOAT_WINDOW_TIME);
+                    new Timer().schedule(hideFloatWindowTask, FLOATING_INDICATOR_TIME);
                 } else {
                     String message = "Translator: " +
                             "Please permit drawing over other apps in Settings";
@@ -126,26 +127,26 @@ public class ClipboardMonitor extends Service
                             Toast.LENGTH_LONG).show();
                 }
             } else {
-                showFloatButton(text.trim());
+                showFloatingIndicator(text.trim());
                 TimerTask hideFloatWindowTask = new TimerTask() {
                     @Override
                     public void run() {
                         hideFloatButton();
                     }
                 };
-                new Timer().schedule(hideFloatWindowTask, FLOAT_WINDOW_TIME);
+                new Timer().schedule(hideFloatWindowTask, FLOATING_INDICATOR_TIME);
             }
             mPreviousText = text;
         }
     }
 
-    private void showFloatButton(String word) {
+    private void showFloatingIndicator(String word) {
         if(mFloatButton != null) {
             hideFloatButton();
         }
         mScreenWidth = getResources().getDisplayMetrics().widthPixels;
         mScreenHeight = getResources().getDisplayMetrics().heightPixels;
-        mFloatButton = new FloatButton(this);
+        mFloatButton = new FloatingIndicator(this);
         //点击悬浮球显示解释
         mFloatButton.setOnClickListener(view -> showFloatWindow(word));
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
@@ -154,9 +155,9 @@ public class ClipboardMonitor extends Service
         params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         params.gravity = Gravity.START | Gravity.TOP;
-        params.width = (int) (mScreenWidth / 4.5);
-        params.height = (int) (mScreenHeight / 4.5);
-        params.x = mScreenWidth + 100;
+        params.width = mFloatButton.getWidth();
+        params.height = mFloatButton.getHeight();
+        params.x = mScreenWidth;
         params.y = mScreenHeight / 5;
         mWindowManager.addView(mFloatButton, params);
     }
@@ -175,7 +176,7 @@ public class ClipboardMonitor extends Service
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     Rect rect = new Rect();
-                    mFloatWindow.getGlobalVisibleRect(rect);
+                    mFloatingExplainView.getGlobalVisibleRect(rect);
                     if(!rect.contains((int) event.getX(), (int) event.getY())) {
                         mWindowManager.removeView(mContainLayout);
                         mContainLayout = null;
@@ -192,8 +193,8 @@ public class ClipboardMonitor extends Service
         });
 
         ContextThemeWrapper wrapper = new ContextThemeWrapper(ClipboardMonitor.this, R.style.Theme_AppCompat);
-        mFloatWindow = new FloatWindow(wrapper);
-        mFloatWindow.setFloatWindowListener(new FloatWindowListenerImpl(word.toLowerCase()));
+        mFloatingExplainView = new FloatingExplainView(wrapper);
+        mFloatingExplainView.setFloatingExplainListener(new FloatWindowListenerImpl());
 
         int height = mScreenHeight * 2 / 3;
         int top = mScreenHeight / 6;
@@ -203,8 +204,8 @@ public class ClipboardMonitor extends Service
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
         layoutParams.setMargins(left, top, 0, 0);
-        mFloatWindow.setLayoutParams(layoutParams);
-        mContainLayout.addView(mFloatWindow);
+        mFloatingExplainView.setLayoutParams(layoutParams);
+        mContainLayout.addView(mFloatingExplainView);
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_PHONE;
@@ -217,21 +218,14 @@ public class ClipboardMonitor extends Service
         params.x = 0;
         params.y = 0;
         mWindowManager.addView(mContainLayout, params);
-        showExplain(word, "");
+        showExplain(word);
     }
 
-    private void showExplain(String word, String dictionary) {
-        Observable
-                .create((Observable.OnSubscribe<Explain>) subscriber -> {
+    private void showExplain(String word) {
+        Observable.create((Observable.OnSubscribe<Explain>) subscriber -> {
                     try {
-                        Explain explain;
-                        if(dictionary.isEmpty()) {
-                            explain = ExplainLoader.with(ClipboardMonitor.this)
+                        Explain explain = ExplainLoader.with(ClipboardMonitor.this)
                                     .search(word).load();
-                        } else {
-                            explain = ExplainLoader.with(ClipboardMonitor.this)
-                                    .search(word).dictionary(dictionary).load();
-                        }
                         subscriber.onNext(explain);
                     } catch (IOException | ExplainNotFoundException e) {
                         e.printStackTrace();
@@ -241,14 +235,13 @@ public class ClipboardMonitor extends Service
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(explain -> {
-                    mCurrentExplain = explain;
-                    mFloatWindow.setExplain(explain.getSource());
+                    mFloatingExplainView.setExplain(explain);
                 }, throwable -> {
                     if(throwable instanceof IOException) {
-                        Snackbar.make(mFloatWindow, "网络连接失败",
+                        Snackbar.make(mFloatingExplainView, "网络连接失败",
                                 Snackbar.LENGTH_SHORT).show();
                     } else if(throwable instanceof ExplainNotFoundException) {
-                        Snackbar.make(mFloatWindow, "未找到翻译",
+                        Snackbar.make(mFloatingExplainView, "未找到翻译",
                                 Snackbar.LENGTH_SHORT).show();
                     }
                 });
@@ -261,29 +254,17 @@ public class ClipboardMonitor extends Service
         }
     }
 
-    private class FloatWindowListenerImpl implements FloatWindow.FloatWindowListener {
-        private String mWord;
-
-        public FloatWindowListenerImpl(String word) {
-            mWord = word;
-        }
-
+    private class FloatWindowListenerImpl implements FloatingExplainListener {
         @Override
-        public void onChangeExplain() {
-            mFloatWindow.showLoading();
-            showExplain(mWord, CambirdgeSource.DICTIONARY_CHINESE_URL);
-        }
-
-        @Override
-        public void onStar() {
-            if(mCurrentExplain != null) {
+        public void onStar(Explain explain) {
+            if(explain != null) {
                 WordbookDb wordbookDb = new WordbookDb(ClipboardMonitor.this);
-                if (wordbookDb.wordExisted(mCurrentExplain.getKey())) {
-                    Snackbar.make(mFloatWindow, "单词已存在",
+                if (wordbookDb.wordExisted(explain.getKey())) {
+                    Snackbar.make(mFloatingExplainView, "单词已存在",
                             Snackbar.LENGTH_SHORT).show();
                 } else {
-                    wordbookDb.saveWord(mCurrentExplain.getKey(), mCurrentExplain.getSummary());
-                    Snackbar.make(mFloatWindow, "单词已保存至单词本",
+                    wordbookDb.saveWord(explain.getKey(), explain.getSummary());
+                    Snackbar.make(mFloatingExplainView, "单词已保存至单词本",
                             Snackbar.LENGTH_SHORT).show();
                 }
             }

@@ -3,7 +3,6 @@ package gavinli.translator.clipboard;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.design.widget.CoordinatorLayout;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -14,27 +13,31 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.util.List;
-
 import gavinli.translator.R;
+import gavinli.translator.data.Explain;
 
 /**
  * Created by GavinLi
  * on 17-1-1.
  */
 
-public class FloatWindow extends CoordinatorLayout {
+public class FloatingExplainView extends CoordinatorLayout {
     private TextView mTextView;
     private ProgressBar mProgressBar;
 
-    private FloatWindowListener mListener;
+    private FloatingExplainListener mListener;
 
-    public FloatWindow(Context context) {
+    /**
+     * 当前正在显示的翻译
+     */
+    private Explain mExplain;
+
+    public FloatingExplainView(Context context) {
         super(context);
         init();
     }
 
-    public FloatWindow(Context context, AttributeSet attrs) {
+    public FloatingExplainView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
@@ -66,20 +69,6 @@ public class FloatWindow extends CoordinatorLayout {
         title.setTextSize(20);
         topLayout.addView(title);
 
-        ImageButton chinese = new ImageButton(getContext());
-        RelativeLayout.LayoutParams chineseParams = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT);
-        int chineseTop = screenWidth / 180;
-        int chineseRight = (int) (screenWidth / 3.7);
-        chineseParams.setMargins(0, chineseTop, chineseRight, 0);
-        chineseParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        chinese.setLayoutParams(chineseParams);
-        chinese.setBackgroundResource(R.color.colorChineseBg);
-        chinese.setImageResource(R.drawable.ic_chinese);
-        chinese.setOnClickListener(view -> mListener.onChangeExplain());
-        topLayout.addView(chinese);
-
         ImageButton star = new ImageButton(getContext());
         RelativeLayout.LayoutParams starParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -90,7 +79,7 @@ public class FloatWindow extends CoordinatorLayout {
         star.setLayoutParams(starParams);
         star.setBackgroundResource(R.color.colorStarBg);
         star.setImageResource(R.drawable.ic_star);
-        star.setOnClickListener(view -> mListener.onStar());
+        star.setOnClickListener(view -> mListener.onStar(mExplain));
         topLayout.addView(star);
 
 
@@ -126,9 +115,10 @@ public class FloatWindow extends CoordinatorLayout {
         addView(scrollView);
     }
 
-    public void setExplain(List<CharSequence> spanneds) {
+    public void setExplain(Explain explain) {
+        mExplain = explain;
         removeView(mProgressBar);
-        for(CharSequence spanned : spanneds) {
+        for(CharSequence spanned : mExplain.getSource()) {
             mTextView.append(spanned);
             mTextView.append("\n\n");
         }
@@ -145,15 +135,7 @@ public class FloatWindow extends CoordinatorLayout {
         addView(mProgressBar);
     }
 
-    public void setFloatWindowListener(FloatWindowListener listener) {
+    public void setFloatingExplainListener(FloatingExplainListener listener) {
         mListener = listener;
-    }
-
-    public interface FloatWindowListener {
-        void onChangeExplain();
-
-        void onStar();
-
-        void onClose();
     }
 }
