@@ -50,8 +50,10 @@ public class NetworkLoader {
             BitmapFactory.decodeByteArray(bitmapData,
                     0, bitmapData.length, options);
             options.inJustDecodeBounds = false;
-            options.inSampleSize = cancaulateSampleSize(options.outWidth, options.outHeight,
-                    reqWidth, reqHeight);
+            if (loaderTask.shouldResize()) {
+                options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight,
+                        reqWidth, reqHeight);
+            }
             return BitmapFactory.decodeByteArray(bitmapData,
                     0, bitmapData.length, options);
         } finally {
@@ -79,7 +81,7 @@ public class NetworkLoader {
      *
      * @return 图片缩放系数
      */
-    private int cancaulateSampleSize(int width, int height, int reqWidth, int reqHeight) {
+    private int calculateSampleSize(int width, int height, int reqWidth, int reqHeight) {
         int sampleSize = 1;
         while(width > reqWidth || height > reqHeight) {
             sampleSize *= 2;

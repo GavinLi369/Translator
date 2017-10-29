@@ -29,14 +29,20 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private Context mContext;
 
-    private boolean hasFooter = false;
-    private static final int TYPE_FOOTER = -1;
+    /**
+     * 所有图片资源已加载完成
+     */
+    private boolean mNoMore = false;
 
-    private int mLessThanWidth;
+    /**
+     * 底部View类型
+     *
+     * @see #getItemViewType(int)
+     */
+    private static final int TYPE_FOOTER = -1;
 
     public ImageAdapter(Context context) {
         mContext = context;
-        mLessThanWidth = mContext.getResources().getDisplayMetrics().widthPixels / 2;
     }
 
     @Override
@@ -52,7 +58,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public int getItemViewType(int position) {
-        if(hasFooter && position ==  mImageLinks.size()) {
+        if(position ==  mImageLinks.size()) {
             return TYPE_FOOTER;
         } else {
             return super.getItemViewType(position);
@@ -61,7 +67,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if(!hasFooter || holder instanceof ImageViewHolder) {
+        if(holder instanceof ImageViewHolder) {
             ImageViewHolder imageViewHolder = (ImageViewHolder) holder;
             NetworkImage networkImage  = mImageLinks.get(position);
             GradientDrawable placeholder = (GradientDrawable) mContext.getResources()
@@ -77,14 +83,19 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             });
         } else {
             LoadingFooterHolder loadingFooterHolder = (LoadingFooterHolder) holder;
-            loadingFooterHolder.mProgressBar.setVisibility(View.GONE);
-            loadingFooterHolder.mInfoTextView.setVisibility(View.VISIBLE);
+            if (mNoMore) {
+                loadingFooterHolder.mProgressBar.setVisibility(View.GONE);
+                loadingFooterHolder.mInfoTextView.setVisibility(View.VISIBLE);
+            } else {
+                loadingFooterHolder.mProgressBar.setVisibility(View.VISIBLE);
+                loadingFooterHolder.mInfoTextView.setVisibility(View.GONE);
+            }
         }
     }
 
     @Override
     public int getItemCount() {
-        return hasFooter ? mImageLinks.size() + 1 : mImageLinks.size();
+        return mImageLinks.isEmpty() ? 0 : mImageLinks.size() + 1;
     }
 
     public void addImageLinks(NetworkImage link) {
@@ -95,10 +106,8 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
      * 在{@link RecyclerView}底部显示信息，表示无更多图片。
      */
     public void showNotMoreImages() {
-        if (!hasFooter) {
-            hasFooter = true;
-            notifyItemInserted(mImageLinks.size());
-        }
+        mNoMore = true;
+        notifyItemChanged(mImageLinks.size());
     }
 
     public List<NetworkImage> getImageLinks() {
@@ -133,16 +142,16 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     /**
      * 设置Item点击监听
      *
-     * @param linstener Item点击监听器
+     * @param listener Item点击监听器
      */
-    public void setOnItemClickLinstener(OnItemClickListener linstener) {
-        mListener = linstener;
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mListener = listener;
     }
 
     /**
      * Item点击监听接口
      */
     public interface OnItemClickListener {
-        void onClick(View view, int postion);
+        void onClick(View view, int position);
     }
 }

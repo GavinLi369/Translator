@@ -31,6 +31,11 @@ public final class LoaderTask {
     private ImageView mImageView;
 
     /**
+     * 是否需要被缩放
+     */
+    private boolean mShouldResize;
+
+    /**
      * 图片宽度，用来缩放图片。
      */
     private int mTargetWidth;
@@ -49,6 +54,7 @@ public final class LoaderTask {
         mKey = key;
         mUrl = url;
         mImageView = imageView;
+        mShouldResize = false;
         mTargetWidth = targetWidth;
         mTargetHeight = targetHeight;
     }
@@ -71,6 +77,14 @@ public final class LoaderTask {
 
     public String getUrl() {
         return mUrl;
+    }
+
+    public boolean shouldResize() {
+        return mShouldResize;
+    }
+
+    public void setShouldResize(boolean shouldResize) {
+        mShouldResize = shouldResize;
     }
 
     public int getTargetWidth() {

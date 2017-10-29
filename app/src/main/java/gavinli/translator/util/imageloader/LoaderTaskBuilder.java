@@ -64,6 +64,10 @@ public class LoaderTaskBuilder {
      * @param height 图片高度
      */
     public LoaderTaskBuilder resize(int width, int height) {
+        if (width <= 0 || height <= 0) {
+            return this;
+        }
+        mLoaderTask.setShouldResize(true);
         mLoaderTask.setTargetWidth(width);
         mLoaderTask.setTargetHeight(height);
         return this;

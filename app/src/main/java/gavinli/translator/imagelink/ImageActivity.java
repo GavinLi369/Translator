@@ -73,16 +73,16 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         mLayoutManager.setAlignItems(AlignItems.STRETCH);
         imageRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new ImageAdapter(this);
-        mAdapter.setOnItemClickLinstener(this::onItemClick);
+        mAdapter.setOnItemClickListener(this::onItemClick);
         imageRecyclerView.setAdapter(mAdapter);
         imageRecyclerView.addOnScrollListener(new ScrollRefreshListener());
     }
 
-    private void onItemClick(View view, int postion) {
+    private void onItemClick(View view, int position) {
         new Thread(() -> {
             try {
                 Bitmap image = ImageLoader.with(this)
-                        .load(mAdapter.getImageLinks().get(postion).getUrl())
+                        .load(mAdapter.getImageLinks().get(position).getUrl())
                         .get();
                 this.runOnUiThread(() -> zoomImageFromThumb(view, image));
             } catch (IOException e) {
@@ -155,17 +155,7 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
                     mLastVisibleItem + 1 == mAdapter.getItemCount()) {
                 Observable<NetworkImage> observable = mPresenter.loadImages(LOAD_NUM);
                 observable.collect((Func0<List<NetworkImage>>) ArrayList::new, List::add)
-                    .subscribe(links -> {
-                    if (!links.isEmpty()) {
-                        for (NetworkImage link : links) {
-                            mAdapter.addImageLinks(link);
-                        }
-                        mAdapter.notifyItemRangeChanged(mAdapter.getItemCount(), links.size());
-                    } else {
-                        mNoMore = true;
-                        mAdapter.showNotMoreImages();
-                    }
-                }, Throwable::printStackTrace);
+                    .subscribe(ImageActivity.this::handleImageLoaded, Throwable::printStackTrace);
             }
         }
 
@@ -187,20 +177,27 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
         progressDialog.show();
         Observable<NetworkImage> observable = mPresenter.loadImages(LOAD_NUM);
         observable.collect((Func0<List<NetworkImage>>) ArrayList::new, List::add)
-                .subscribe(links -> {
-            progressDialog.cancel();
-            if(!links.isEmpty()) {
-                for (NetworkImage link : links) {
-                    mAdapter.addImageLinks(link);
-                }
-                mAdapter.notifyItemRangeChanged(mAdapter.getItemCount(), links.size());
-            } else {
-                mNoMore = true;
-                mAdapter.showNotMoreImages();
+                .subscribe(this::handleImageLoaded, throwable -> {
+                    showNetworkError();
+                    progressDialog.cancel();
+                }, progressDialog::cancel);
+    }
+
+    /**
+     * 处理加载完成的网络图片数据
+     *
+     * @param images 网络图片数据
+     */
+    private void handleImageLoaded(List<NetworkImage> images) {
+        if(!images.isEmpty()) {
+            for (NetworkImage link : images) {
+                mAdapter.addImageLinks(link);
             }
-        }, throwable -> {
-            showNetworkError();
-            progressDialog.cancel();
-        });
+            int index = mAdapter.getItemCount() - 1;
+            mAdapter.notifyItemRangeInserted(index, images.size());
+        } else {
+            mNoMore = true;
+            mAdapter.showNotMoreImages();
+        }
     }
 }

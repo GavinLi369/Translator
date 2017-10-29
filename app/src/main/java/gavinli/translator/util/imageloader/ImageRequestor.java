@@ -77,9 +77,13 @@ public class ImageRequestor implements Runnable {
      * @return 转换后的图片
      */
     private Bitmap transform(Bitmap target) {
-        int reqWidth = mLoaderTask.getTargetWidth();
-        int reqHeight = mLoaderTask.getTargetHeight();
-        return Bitmap.createScaledBitmap(target, reqWidth, reqHeight, false);
+        if (mLoaderTask.shouldResize()) {
+            int reqWidth = mLoaderTask.getTargetWidth();
+            int reqHeight = mLoaderTask.getTargetHeight();
+            return Bitmap.createScaledBitmap(target, reqWidth, reqHeight, false);
+        } else {
+            return target;
+        }
     }
 
     public boolean isCanceled() {

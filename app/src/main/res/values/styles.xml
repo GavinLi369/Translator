@@ -35,4 +35,11 @@
         <item name="fab_colorPressed">@color/colorFabChinesePressed</item>
     </style>
 
+    <style name="ImageProgressBarStyle" parent="Base.Widget.AppCompat.ProgressBar">
+        <item name="android:maxHeight">32dp</item>
+        <item name="android:maxWidth">32dp</item>
+        <item name="android:minHeight">32dp</item>
+        <item name="android:minWidth">32dp</item>
+    </style>
+
 </resources>
