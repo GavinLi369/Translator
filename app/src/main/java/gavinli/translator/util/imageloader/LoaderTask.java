@@ -15,6 +15,8 @@ import gavinli.translator.util.imageloader.drawable.FadeDrawable;
 public final class LoaderTask {
     private ImageLoader mImageLoader;
 
+    private static final int DEFAULT_IMAGE_SIZE = Integer.MAX_VALUE;
+
     /**
      * 任务标示符
      */
@@ -47,16 +49,13 @@ public final class LoaderTask {
 
     public LoaderTask(ImageLoader imageLoader,
                       String key,
-                      String url,
-                      ImageView imageView,
-                      int targetWidth, int targetHeight) {
+                      String url) {
         mImageLoader = imageLoader;
         mKey = key;
         mUrl = url;
-        mImageView = imageView;
         mShouldResize = false;
-        mTargetWidth = targetWidth;
-        mTargetHeight = targetHeight;
+        mTargetWidth = DEFAULT_IMAGE_SIZE;
+        mTargetHeight = DEFAULT_IMAGE_SIZE;
     }
 
     /**

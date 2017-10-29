@@ -17,11 +17,6 @@ import gavinli.translator.util.imageloader.LoaderTask;
 
 public class NetworkLoader {
     /**
-     * 取消加载
-     */
-    private volatile boolean mCanceled = false;
-
-    /**
      * 从网络获取图片
      *
      * @param loaderTask 图片加载任务
@@ -40,7 +35,6 @@ public class NetworkLoader {
             byte[] temp = new byte[1024];
             int length;
             while((length = in.read(temp)) > -1) {
-                if (mCanceled) return null;
                 out.write(temp, 0, length);
             }
             out.flush();
@@ -59,13 +53,6 @@ public class NetworkLoader {
         } finally {
             connection.disconnect();
         }
-    }
-
-    /**
-     * 取消加载，直接返回null。
-     */
-    public void cancel() {
-        mCanceled = true;
     }
 
     /**

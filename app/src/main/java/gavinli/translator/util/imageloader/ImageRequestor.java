@@ -12,6 +12,7 @@ import gavinli.translator.util.imageloader.load.NetworkLoader;
  */
 
 public class ImageRequestor implements Runnable {
+    private ImageLoader mImageLoader;
     private Dispatcher mDispatcher;
     private DiskCache mDiskCache;
     private LoaderTask mLoaderTask;
@@ -23,7 +24,8 @@ public class ImageRequestor implements Runnable {
 
     private volatile boolean mCanceled = false;
 
-    public ImageRequestor(Dispatcher dispatcher, DiskCache diskCache, LoaderTask loaderTask) {
+    public ImageRequestor(ImageLoader imageLoader, Dispatcher dispatcher, DiskCache diskCache, LoaderTask loaderTask) {
+        mImageLoader = imageLoader;
         mDispatcher = dispatcher;
         mDiskCache = diskCache;
         mNetworkLoader = new NetworkLoader();
@@ -33,6 +35,18 @@ public class ImageRequestor implements Runnable {
 
     @Override
     public void run() {
+        if (mImageLoader.isPaused()) {
+            try {
+                synchronized (mImageLoader.getPausedObject()) {
+                    mImageLoader.getPausedObject().wait();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        if (mCanceled) return;
+
         try {
             mResult = request();
             mDispatcher.dispatchComplete(this);
@@ -66,7 +80,6 @@ public class ImageRequestor implements Runnable {
      */
     public void cancel() {
         mCanceled = true;
-        mNetworkLoader.cancel();
     }
 
     /**

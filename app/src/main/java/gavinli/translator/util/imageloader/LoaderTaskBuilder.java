@@ -49,10 +49,9 @@ public class LoaderTaskBuilder {
         mImageLoader = imageLoader;
         mMemoryCache = memoryCache;
         mExecutor = executor;
-        mKey = canculateMd5(url);
-        mLoaderTask = new LoaderTask(imageLoader, mKey, url, null,
-                ImageLoader.DEFAULT_IMAGE_SIZE, ImageLoader.DEFAULT_IMAGE_SIZE);
-        mRequestor = new ImageRequestor(dispatcher, diskCache, mLoaderTask);
+        mKey = calculateMd5(url);
+        mLoaderTask = new LoaderTask(imageLoader, mKey, url);
+        mRequestor = new ImageRequestor(imageLoader, dispatcher, diskCache, mLoaderTask);
         mRequestorMap = requestorMap;
     }
 
@@ -135,7 +134,7 @@ public class LoaderTaskBuilder {
      *
      * @param target 目标字符串
      */
-    private String canculateMd5(String target) {
+    private String calculateMd5(String target) {
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");

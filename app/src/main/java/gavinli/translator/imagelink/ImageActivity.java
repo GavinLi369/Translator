@@ -157,6 +157,12 @@ public class ImageActivity extends AppCompatActivity implements ImageContract.Vi
                 observable.collect((Func0<List<NetworkImage>>) ArrayList::new, List::add)
                     .subscribe(ImageActivity.this::handleImageLoaded, Throwable::printStackTrace);
             }
+            // 在RecyclerView滚动期间停止加载图片
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                ImageLoader.resume();
+            } else {
+                ImageLoader.pause();
+            }
         }
 
         @Override
