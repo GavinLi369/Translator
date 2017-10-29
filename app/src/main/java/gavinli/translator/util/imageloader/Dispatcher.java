@@ -109,18 +109,17 @@ public class Dispatcher {
      * @param imageView 目标ImageView
      */
     public void into(ImageView imageView) {
+        // 处理异步图片加载错位
+        ImageRequestor oldRequestor = mRequestorMap.get(imageView);
+        if (oldRequestor != null) {
+            oldRequestor.cancel();
+        }
         Bitmap image = mMemoryCache.get(mKey);
         if (image != null) {
             imageView.setImageBitmap(image);
         } else {
             mDispatcherHandler = new DispatcherHandler(this);
-            // 处理异步图片加载错位
-            ImageRequestor oldRequestor = mRequestorMap.get(imageView);
-            if (oldRequestor != null) {
-                oldRequestor.cancel();
-            }
             mRequestorMap.put(imageView, mRequestor);
-
             imageView.setImageDrawable(mPlaceholder);
             mLoaderTask.setImageView(imageView);
             mExecutor.execute(mRequestor);
