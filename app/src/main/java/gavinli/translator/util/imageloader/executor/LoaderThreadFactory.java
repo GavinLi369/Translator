@@ -1,4 +1,4 @@
-package gavinli.translator.util.imageloader;
+package gavinli.translator.util.imageloader.executor;
 
 import android.support.annotation.NonNull;
 

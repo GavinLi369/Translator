@@ -1,4 +1,4 @@
-package gavinli.translator.util.imageloader;
+package gavinli.translator.util.imageloader.executor;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

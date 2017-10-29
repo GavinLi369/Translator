@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 
+import gavinli.translator.util.imageloader.executor.LoaderExecutor;
 import gavinli.translator.util.imageloader.load.DiskCache;
 import gavinli.translator.util.imageloader.load.MemoryCache;
 
@@ -43,6 +44,7 @@ public class ImageLoader {
     private final MemoryCache mMemoryCache;
     private final DiskCache mDiskCache;
     private final Executor mExecutor;
+    private final Dispatcher mDispatcher;
 
     /**
      * 避免瀑布流异步加载图片乱序
@@ -56,6 +58,7 @@ public class ImageLoader {
         mDiskCache = new DiskCache(context);
         mExecutor = new LoaderExecutor();
         mRequestorMap = new WeakHashMap<>();
+        mDispatcher = new Dispatcher(mMemoryCache, mRequestorMap);
     }
 
     public static ImageLoader with(Context context) {
@@ -69,8 +72,9 @@ public class ImageLoader {
         return mSingleton;
     }
 
-    public Dispatcher load(String url) {
-        return new Dispatcher(this, url, mMemoryCache, mDiskCache, mExecutor, mRequestorMap);
+    public LoaderTaskBuilder load(String url) {
+        return new LoaderTaskBuilder(this, url, mMemoryCache, mDiskCache,
+                mExecutor, mRequestorMap, mDispatcher);
     }
 
     public Context getContext() {

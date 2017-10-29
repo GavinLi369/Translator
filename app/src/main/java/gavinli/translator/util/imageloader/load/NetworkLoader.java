@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import gavinli.translator.util.imageloader.LoaderTask;
+
 /**
  * Created by gavin on 17-8-16.
  */
@@ -22,15 +24,15 @@ public class NetworkLoader {
     /**
      * 从网络获取图片
      *
-     * @param url 图片url
-     *
-     * @param reqWidth 图片最大宽度，用来缩放图片。
-     *
-     * @param reqHeight 图片最大高度，用来缩放图片。
+     * @param loaderTask 图片加载任务
      *
      * @throws IOException 网络连接错误
      */
-    public Bitmap fetchBitmap(String url, int reqWidth, int reqHeight) throws IOException {
+    public Bitmap fetchBitmap(LoaderTask loaderTask) throws IOException {
+        String url = loaderTask.getUrl();
+        int reqWidth = loaderTask.getTargetWidth();
+        int reqHeight = loaderTask.getTargetHeight();
+
         URL realUrl = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
         try(InputStream in = connection.getInputStream();

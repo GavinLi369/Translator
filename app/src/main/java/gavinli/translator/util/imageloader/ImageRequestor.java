@@ -35,23 +35,30 @@ public class ImageRequestor implements Runnable {
     public void run() {
         try {
             mResult = request();
-            mDispatcher.dipatchComplete(this);
+            mDispatcher.dispatchComplete(this);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * 同步请求图片数据
+     *
+     * @return Bitmap图片
+     *
+     * @throws IOException 网络连接出错，图片解析出错或磁盘I/O出错
+     */
     public Bitmap request() throws IOException {
         //从磁盘获取
         Bitmap image = mDiskCache.get(mLoaderTask.getKey());
         if (image == null) {
             //从网络获取
-            image = mNetworkLoader.fetchBitmap(mLoaderTask.getUrl(),
-                    mLoaderTask.getMaxWidth(), mLoaderTask.getMaxHeight());
+            image = mNetworkLoader.fetchBitmap(mLoaderTask);
             if (image == null) throw new IOException("网络图片解析出错");
             mDiskCache.put(mLoaderTask.getKey(), image);
         }
-        return image;
+        // 返回转换后的图片
+        return transform(image);
     }
 
     /**
@@ -60,6 +67,19 @@ public class ImageRequestor implements Runnable {
     public void cancel() {
         mCanceled = true;
         mNetworkLoader.cancel();
+    }
+
+    /**
+     * 将图片进行转换，这里只是将图片缩放为指定大小
+     *
+     * @param target 原始图片
+     *
+     * @return 转换后的图片
+     */
+    private Bitmap transform(Bitmap target) {
+        int reqWidth = mLoaderTask.getTargetWidth();
+        int reqHeight = mLoaderTask.getTargetHeight();
+        return Bitmap.createScaledBitmap(target, reqWidth, reqHeight, false);
     }
 
     public boolean isCanceled() {

@@ -25,7 +25,7 @@ import gavinli.translator.util.imageloader.ImageLoader;
 
 public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<NetworkImage> mImageLinks = new ArrayList<>();
-    private OnItemClickLinstener mLinstener;
+    private OnItemClickListener mListener;
 
     private Context mContext;
 
@@ -69,11 +69,11 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             placeholder.setSize(networkImage.getWidth(), networkImage.getHeight());
             ImageLoader.with(mContext)
                     .load(networkImage.getUrl())
-//                    .lessThan(mLessThanWidth, ImageLoader.DEFAULT_IMAGE_SIZE)
+//                    .resize(networkImage.getWidth(), networkImage.getHeight())
                     .placeholder(placeholder)
                     .into(imageViewHolder.mImageView);
             imageViewHolder.mImageView.setOnClickListener(view -> {
-                if (mLinstener != null) mLinstener.onClick(imageViewHolder.mImageView, position);
+                if (mListener != null) mListener.onClick(imageViewHolder.mImageView, position);
             });
         } else {
             LoadingFooterHolder loadingFooterHolder = (LoadingFooterHolder) holder;
@@ -92,7 +92,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     /**
-     * 在RercylerView底部显示信息，表示无更多图片。
+     * 在{@link RecyclerView}底部显示信息，表示无更多图片。
      */
     public void showNotMoreImages() {
         if (!hasFooter) {
@@ -135,14 +135,14 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
      *
      * @param linstener Item点击监听器
      */
-    public void setOnItemClickLinstener(OnItemClickLinstener linstener) {
-        mLinstener = linstener;
+    public void setOnItemClickLinstener(OnItemClickListener linstener) {
+        mListener = linstener;
     }
 
     /**
      * Item点击监听接口
      */
-    public interface OnItemClickLinstener {
+    public interface OnItemClickListener {
         void onClick(View view, int postion);
     }
 }

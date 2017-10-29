@@ -31,26 +31,26 @@ public final class LoaderTask {
     private ImageView mImageView;
 
     /**
-     * 图片最大宽度，用来缩放图片。
+     * 图片宽度，用来缩放图片。
      */
-    private int mMaxWidth;
+    private int mTargetWidth;
 
     /**
-     * 图片最大高度，用来缩放图片。
+     * 图片高度，用来缩放图片。
      */
-    private int mMaxHeight;
+    private int mTargetHeight;
 
     public LoaderTask(ImageLoader imageLoader,
                       String key,
                       String url,
                       ImageView imageView,
-                      int maxWidth, int maxHeight) {
+                      int targetWidth, int targetHeight) {
         mImageLoader = imageLoader;
         mKey = key;
         mUrl = url;
         mImageView = imageView;
-        mMaxWidth = maxWidth;
-        mMaxHeight = maxHeight;
+        mTargetWidth = targetWidth;
+        mTargetHeight = targetHeight;
     }
 
     /**
@@ -73,20 +73,20 @@ public final class LoaderTask {
         return mUrl;
     }
 
-    public int getMaxWidth() {
-        return mMaxWidth;
+    public int getTargetWidth() {
+        return mTargetWidth;
     }
 
-    public int getMaxHeight() {
-        return mMaxHeight;
+    public int getTargetHeight() {
+        return mTargetHeight;
     }
 
-    public void setMaxWidth(int maxWidth) {
-        mMaxWidth = maxWidth;
+    public void setTargetWidth(int targetWidth) {
+        mTargetWidth = targetWidth;
     }
 
-    public void setMaxHeight(int maxHeight) {
-        mMaxHeight = maxHeight;
+    public void setTargetHeight(int targetHeight) {
+        mTargetHeight = targetHeight;
     }
 
     public void setImageView(ImageView imageView) {
