@@ -6,7 +6,7 @@ import java.util.List;
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
 import gavinli.translator.data.Explain;
-import gavinli.translator.util.ExplainNotFoundException;
+import gavinli.translator.data.ExplainNotFoundException;
 
 /**
  * Created by GavinLi

@@ -1,4 +1,4 @@
-package gavinli.translator.util;
+package gavinli.translator.data.source.remote;
 
 import android.content.Context;
 import android.os.Looper;
@@ -18,7 +18,8 @@ import java.security.NoSuchAlgorithmException;
 
 import gavinli.translator.R;
 import gavinli.translator.data.Explain;
-import gavinli.translator.data.source.remote.CambirdgeSource;
+import gavinli.translator.data.ExplainNotFoundException;
+import gavinli.translator.util.HtmlDecoder;
 
 /**
  * Created by GavinLi

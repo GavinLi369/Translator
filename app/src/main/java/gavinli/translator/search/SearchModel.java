@@ -8,8 +8,8 @@ import java.util.List;
 import gavinli.translator.data.Explain;
 import gavinli.translator.data.source.datebase.WordbookDb;
 import gavinli.translator.data.source.remote.CambirdgeSource;
-import gavinli.translator.util.ExplainLoader;
-import gavinli.translator.util.ExplainNotFoundException;
+import gavinli.translator.data.source.remote.ExplainLoader;
+import gavinli.translator.data.ExplainNotFoundException;
 
 /**
  * Created by GavinLi

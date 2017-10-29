@@ -23,7 +23,6 @@ import java.util.List;
 import gavinli.translator.R;
 import gavinli.translator.data.Explain;
 import gavinli.translator.util.UiTool;
-import gavinli.translator.worddetail.WordDetailActivity;
 
 /**
  * Created by GavinLi

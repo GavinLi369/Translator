@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import gavinli.translator.data.Explain;
-import gavinli.translator.util.ExplainNotFoundException;
+import gavinli.translator.data.ExplainNotFoundException;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;

@@ -27,7 +27,7 @@
 
         <activity android:name=".setting.SettingsActivity"/>
 
-        <activity android:name=".worddetail.WordDetailActivity"/>
+        <activity android:name=".wordbook.WordDetailActivity"/>
 
         <activity android:name=".imagelink.ImageActivity"/>
 

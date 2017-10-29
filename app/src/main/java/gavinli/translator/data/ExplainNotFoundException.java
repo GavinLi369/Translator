@@ -1,4 +1,4 @@
-package gavinli.translator.util;
+package gavinli.translator.data;
 
 /**
  * Created by GavinLi
