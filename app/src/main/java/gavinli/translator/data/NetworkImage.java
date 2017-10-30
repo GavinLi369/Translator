@@ -1,4 +1,4 @@
-package gavinli.translator.imagelink;
+package gavinli.translator.data;
 
 /**
  * Created by gavin on 10/16/17.

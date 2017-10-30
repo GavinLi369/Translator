@@ -2,6 +2,7 @@ package gavinli.translator.imagelink;
 
 import java.io.IOException;
 
+import gavinli.translator.data.NetworkImage;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;

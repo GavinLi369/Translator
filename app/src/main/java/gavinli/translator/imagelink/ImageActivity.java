@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gavinli.translator.R;
+import gavinli.translator.data.NetworkImage;
 import gavinli.translator.search.SearchFragment;
 import gavinli.translator.util.imageloader.ImageLoader;
 import rx.Observable;

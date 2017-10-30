@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import gavinli.translator.BasePresenter;
 import gavinli.translator.BaseView;
+import gavinli.translator.data.NetworkImage;
 import rx.Observable;
 
 /**

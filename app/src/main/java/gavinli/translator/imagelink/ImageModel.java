@@ -6,18 +6,21 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import gavinli.translator.data.NetworkImage;
+import gavinli.translator.data.source.remote.ImageSource;
+
 /**
  * Created by GavinLi
  * on 17-3-12.
  */
 
 public class ImageModel implements ImageContract.Model {
-    private PexelsImageUtil mImageUtil;
+    private ImageSource mImageUtil;
     private Queue<NetworkImage> mImageLinks;
 
 
     public ImageModel(String key) {
-        mImageUtil = new PexelsImageUtil(key);
+        mImageUtil = new ImageSource(key);
         mImageLinks = new LinkedList<>();
     }
 
