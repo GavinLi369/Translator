@@ -46,16 +46,8 @@ public class ErrorLogger {
      */
     private static final MediaType PLAIN = MediaType.parse("text/plain; charset=utf-8");
 
-    private static volatile ErrorLogger mSingleton;
-
-    /**
-     * 注册全局异常处理，只能被调用一次
-     */
     public synchronized static void handleGlobalException(Activity activity) {
-        if (mSingleton != null) {
-            throw new RuntimeException("ErrorLogger被调用一次");
-        }
-        mSingleton = new ErrorLogger(activity);
+        new ErrorLogger(activity);
     }
 
     private ErrorLogger(Activity activity) {

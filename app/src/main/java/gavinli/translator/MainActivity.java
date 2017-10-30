@@ -50,10 +50,10 @@ public class MainActivity extends AppCompatActivity implements
         // 设置Fragment回退栈监听，当Fragment改变时，
         // 同时改变NavigationView的选择状态。
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            Fragment currentFrament = getCurrentFragment();
-            if (currentFrament instanceof SearchFragment) {
+            Fragment currentFragment = getCurrentFragment();
+            if (currentFragment instanceof SearchFragment) {
                 mNavigationView.setCheckedItem(R.id.drawer_search);
-            } else if (currentFrament instanceof WordbookFragment) {
+            } else if (currentFragment instanceof WordbookFragment) {
                 mNavigationView.setCheckedItem(R.id.drawer_wordbook);
             }
         });
